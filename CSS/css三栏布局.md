@@ -2,7 +2,7 @@
 ![image](https://github.com/bear-new/picture/blob/master/mardown/cssLayout.PNG?raw=true)
 ##### 1.用margin和float实现
 __css__:
-```
+```css
 <style>
     * {
         margin: 0;
@@ -26,7 +26,7 @@ __css__:
 </style>
 ```
 __html__
-```
+```html
 <div class="container">
     <div class="left">left</div>
     <div class="right">right</div>
@@ -35,7 +35,7 @@ __html__
 ```
 ##### 2.用float，margin负值实现
 __css__
-```
+```css
 <style>
     * {
         margin: 0;
@@ -62,7 +62,7 @@ __css__
 </style>
 ```
 __html__
-```
+```html
 <div class="container">
     <div class="center">center</div>
     <div class="left">left</div>
@@ -71,7 +71,7 @@ __html__
 ```
 ##### 3.用flex实现
 __css__
-```
+```css
 <style>
     * {
         margin: 0;
@@ -96,7 +96,7 @@ __css__
 </style>
 ```
 __html__
-```
+```html
 <div class="container">
     <div class="left">left</div>
     <div class="center">center</div>
@@ -107,7 +107,7 @@ __html__
 ![image](https://github.com/bear-new/picture/blob/master/mardown/cssLayout2.PNG?raw=true)
 ##### 1. 用margin和float实现
 __css__
-```
+```css
 <style>
     * {
         margin: 0;
@@ -137,7 +137,7 @@ __css__
 </style>
 ```
 __html__
-```
+```html
 <div class="container">
     <div class="left">left</div>
     <div class="center">center</div>
@@ -146,7 +146,7 @@ __html__
 ```
 ##### 2. 用flex实现
 __css__
-```
+```css
 <style>
     * {
         margin: 0;
@@ -171,7 +171,7 @@ __css__
 </style>
 ```
 __html__
-```
+```html
 <div class="container">
     <div class="left">left</div>
     <div class="center">center</div>

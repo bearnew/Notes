@@ -1,4 +1,4 @@
-```
+```javascript
 var Ajax = function() {
 	var that = this;
 	// 创建异步请求对象方法

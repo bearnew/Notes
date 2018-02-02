@@ -9,7 +9,7 @@
 > 包含这个属性的数据值，默认值为undefined
 
 ## 定义属性
-```
+```javascript
 var person = {} 
 Object.defineProperty{person, "name", {
     writable: false,
@@ -25,7 +25,7 @@ Object.defineProperty{person, "name", {
 * Get
 * Set
 
-```
+```javascript
 var book = {
     _year: 2004,
     edition: 1
@@ -50,7 +50,7 @@ alert(book.edition); // 2
 
 ### 工厂模式
 
-```
+```javascript
 function createPerson(name, age, job){
     var o = new Object();
     o.name = name;
@@ -66,7 +66,7 @@ var person1 = createPerson("Nicholas", 29, "Software Engineer");
 var person2 = createPerson("Greg", 27, "Doctor");
 ```
 ### 构造函数模式
-```
+```javascript
 function Person(name, age, job){
     this.name = name;
     this.age = age;
@@ -91,12 +91,12 @@ alert(person2.constructor == Person) // true
 
 > instanceof 操作符用于标识对象类型
 
-```
+```javascript
 alert(person1 instanceof Object); // true
 alert(person1 instaceof Person); // true
 ```
 ## 原型模式
-```
+```javascript
 function Person () {}
 Person.prototype.name = 'Nicholas';
 Person.prototype.age = 29;
@@ -112,24 +112,24 @@ var person2 = new Person();
 Person2.sayName(); // 'Nicholas'
 ```
 可以通过isPrototypeOf()方法来确定对象之间的关系
-```
+```javascript
 alert(Person.prototype.isPrototypeOf(person1)) // true
 alert(Person.prototype.isPrototypeOf(person2)) // true
 ```
 可以通过Object.getPrototypeOf()方法返回[[prototype]]的值
-```
+```javascript
 alert(Object.getPrototypeOf(person1) == Person.prototype) // true
 alert(Object.getPrototypeOf(person1).name) // true
 ```
 通过hasOwnProperty()方法检测属性是否存在实例中
-```
+```javascript
 person1.name = 'Greg';
 alert(person1.hasOwnProperty("name")) // true
 delete(person1.name)
 alert(person1.hasOwnProperty("name")) // false
 ```
 in操作符，通过对象能够访问到给定属性时返回true
-```
+```javascript
 alert(person1.hasOwnProperty("name")) // false
 alert("name" in person1) // true
 ```

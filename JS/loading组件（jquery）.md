@@ -1,5 +1,5 @@
 ### js
-```
+```javascript
 $.loading = {
 	start: function (options) {
 

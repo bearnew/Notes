@@ -9,15 +9,15 @@
 * 部署简单方便
 
 #### 启动mongodb
-```
+```js
 MongoDB/bin/mongod --dbpath MongoDB/data/db
 ```
 #### mongodb服务器上守护进程
 > 创建一个conf配置文件,然后运行命令:
-```
+```js
 ./bin/mongod --config mydb.conf
 ```
-```
+```js
 复制代码
 # mongodb.conf
 
@@ -124,25 +124,25 @@ journal=true
 #### 本地数据库导入到服务器Mongodb中
 1. 备份本地数据库
 > git切换到mongodb/data,输入：
-```
+```js
 ../bin/mongodump -h 127.0.0.1:27017 -d databaseName -o ../data/backup
 ```
 2. git打包数据库
-```
+```js
 tar zcvf backup.tar.gz backup
 ```
 3. 上传到服务器
-```
+```js
 scp -P 3999 /D/MongoDB/data/backup.tar.gz root@120.78.177.221:/usr/local/mongodb/data
 ```
 ***
 剩余步骤在服务器操作
 4. ssh登陆服务器后，解压数据库
-```
+```js
 cd /usr/local/mongodb/data
 tar xvf backup.tar.gz
 ```
 5. 将数据导入到服务器的mongodb中(需要先启动Mongodb)
-```
+```js
 mongorestore --host 127.0.0.1:27017 -d databaseName ../data/backup
 ```

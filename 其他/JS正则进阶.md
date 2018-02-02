@@ -2,12 +2,12 @@
 [regexper.com](https://regexper.com/)
 #### 1. 正则分组
 通过分组$1,$2...取得()里面的匹配的内容
-```
+```javascript
 var str = 'http://img.mukewang.com/57ab14aa0001bc9706000338-240-135.jpg';
 var result = str.replace(/http:(\/\/.+\.jpg)/, '$1');
 console.log(result);    // //img.mukewang.com/57ab14aa0001bc9706000338-240-135.jpg
 ```
-```
+```javascript
 var str = '2018/1-21';
 var result = str.replace(/^(\d{4})[/-](\d{2})[/-](\d{2})$/, '$2-$3-$1');
 console.log(result);    // 01-21-2018
@@ -16,7 +16,7 @@ console.log(result);    // 01-21-2018
 * **g**: global全文搜索
 * **i**: ignore case不区分大小写
 * **m**: multiple lines多行搜索
-```
+```javascript
 var reg = /\bis\b/g;
 var reg = new RegExp('\\bis\\b', 'g');
 ```
@@ -29,31 +29,31 @@ var reg = new RegExp('\\bis\\b', 'g');
 + **{n,}** 至少出现n次
 #### 4. 非贪婪模式(尽可能匹配少的次数)
 量词后面加上?号
-```
+```javascript
 '12345678'.replace(/\d{3,6}?/g, 'X'); // 'XX78'
 ```
 #### 5. 忽略分组
 不希望捕获分组，只需要在分组内加上?:就可以
-```
+```javascript
 var str = 'Byronabvdok';
 var result = str.replace(/(?:Byron).*(ok)/i, '$1');
 console.log(result); // ok
 ```
 #### 6. 前瞻
-```
+```javascript
 'a2*34v8'.replace(/\w(?=\d)/g, 'X');    // X2*X4X8
 'a2*34vV'.replace(/\w(?!\d)/g, 'X');    // aX*3XXX
 ```
 #### 7. 正则对象方法
 * __test__
 存在匹配正则表达式的字符，返回true，否则返回false
-```
+```javascript
 var reg = /\w/g;
 reg.test('ab'); true
 ```
 * __exec__
 如果没有匹配的文本返回null，否则返回一个结果数组
-```
+```javascript
 var reg1 = /\d(\w)\d/;
 var reg2 =/\d(\w)\d/g;
 var str = '$1a2b3c4';
@@ -68,13 +68,13 @@ console.log(match1[2])	// undefined
 #### 8. 字符串对象方法
 * __search__
 返回第一个匹配结果的Index,查找不到返回-1
-```
+```javascript
 var reg = /\w/g;
 'ab'.search(reg);  // 0
 ```
 * __match__
 如果没有匹配的文本返回null，否则返回一个结果数组
-```
+```javascript
 var reg = /\d(\w)\d/;
 var str = '$1a2b3c4';
 var match = str.match(reg);
@@ -90,7 +90,7 @@ function有4个参数
 2. 正则分组内容，没有分组则没有该参数
 3. 匹配项在字符串中的index
 4. 原字符串
-```
+```javascript
 var reg = /(\d)(\w)(\d)/g;
 var str = 'a1b2c3d4f5';
 str.replace(reg, function(match, group1, group2, group3, index, origin) {

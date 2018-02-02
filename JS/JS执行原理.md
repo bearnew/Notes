@@ -3,14 +3,14 @@
 > 连续的存储空间，类似数据结构中的栈，用于存放数值，字符，内存地址等小数据。
 
 > 基本类型数据的值被保存在栈内存中。
-```
+```javascript
 Number,String,Boolean,Null,Undefined
 ```
 + __堆内存__
 > 散列的存储空间，类似于数据结构中的链表，存放动态变化的大数据。
 
 > 引用类型的值被保存在堆内存中，栈内存中仅保存堆内存的地址。
-```
+```javascript
 Object,Array,Function
 ```
 #### 2. 变量作用域
@@ -30,7 +30,7 @@ Object,Array,Function
 | 第三步 | 将实参值传递给形参，即赋值给AO对象对应属性名 |
 | 第四步 | 将函数声明为AO对象的方法名，值为函数体 |
 3. __解释执行：解释一行，执行一行。__
-```
+```javascript
 function test(a){ 
   var b=1; function c(){}  
 }

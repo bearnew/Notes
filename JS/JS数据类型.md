@@ -1,7 +1,7 @@
  JS数据类型
 ====
 数据类型
-```
+```javascript
 Undefined Null Boolean Number String  // 简单数据类型
 Object // 复杂数据类型
 ```
@@ -14,7 +14,7 @@ Null
 ----
 空对象指针
 
-```
+```javascript
 typeof null === object  // true
 null == undefined // true
 ```
@@ -24,7 +24,7 @@ Boolean
 
  - Boolean()能转换成true的值
 
-```
+```javascript
 true
 任何非空字符串
 任何非零数字（包括无穷大）
@@ -34,7 +34,7 @@ n/a、N/A(不适用)
 
  - Boolean()能转换成false的值
 
-```
+```javascript
 false
 " "（空字符串）
 0、NaN
@@ -45,7 +45,7 @@ undefined
 Number
 ----
 isNaN()检测不是数值，并且不能被转换成数值
-```
+```javascript
 typeof NaN  // number
 
 isNaN(NaN) // true
@@ -60,7 +60,7 @@ String
 ====
 toString()
 null和undefined没有toString()方法，在不确定值是否为null或者undefined的情况下用String()方法，String()能够将任何类型的值转换成字符串
-```
+```javascript
 var num = 10;
 num.toString();        // "10'
 num.toString(2);        // "1010"
