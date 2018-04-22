@@ -1,6 +1,6 @@
 ## 1.手动代理
 * ### PC下载filder,配置如下:
-    ![filder2](https://github.com/bear-new/picture/blob/master/mardown/2018-04-22/filder2.jpg?raw=true)
+    ![filder2](https://github.com/bear-new/picture/blob/master/mardown/2018-04-22/filder2.jpg?raw=true =200*200)
 * ### 手机与PC连接同一局域网，在手机wifi里面设置手动代理
     ![proxy](https://github.com/bear-new/picture/blob/master/mardown/2018-04-22/proxy.jpg?raw=true)
 ## 2.配置hosts
