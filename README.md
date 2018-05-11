@@ -3,6 +3,7 @@ bear-new的博客
 
 ## JS
 + 2018
+    + [2018-05-11]  [Js惰性函数]()
     + [2018-03-28]	[(a == 1 && a == 2 && a == 3)为true背后不为人知的秘密](https://github.com/bear-new/blog/blob/master/JS/(a%20%3D%3D%201%20%26%26%20a%20%3D%3D%202%20%26%26%20a%20%3D%3D%203)%E4%B8%BAtrue%E8%83%8C%E5%90%8E%E4%B8%8D%E4%B8%BA%E4%BA%BA%E7%9F%A5%E7%9A%84%E7%A7%98%E5%AF%86.md)
     + [2018-01-28]	[JS执行原理](https://github.com/bear-new/blog/blob/master/JS/JS%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86.md)
 + 2017
