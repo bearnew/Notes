@@ -4,6 +4,7 @@
 > 第二次输入: i'm the best
 
 > 第三次输入: stop
+
 ![image](https://github.com/bear-new/picture/blob/master/mardown/2018-05-26/tcpSocket.PNG?raw=true)
 #### 服务端
 ```js
