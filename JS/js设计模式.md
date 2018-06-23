@@ -151,3 +151,69 @@ alert(a === b); // true
 a.bang = "123";
 alert(b.bang); // 123
 ```
+* #### 2. 策略模式
+---
+###### 模式作用
+1. 减少大量的if语句
+2. 复用性好
+###### example:
+* __方法1__
+```js
+const strategy = {
+  'S': function(salary) {
+    return salary * 4
+  },
+  'A': function(salary) {
+    return salary * 3
+  },
+  'B': function(salary) {
+    return salary * 2
+  }
+}
+
+const calculateBonus = function(level, salary) {
+  return strategy[level](salary)
+}
+
+calculateBonus('A', 10000) // 30000
+```
+* __方法2__
+```js
+const S = function(salary) {
+  return salary * 4
+}
+
+const A = function(salary) {
+  return salary * 3
+}
+
+const B = function(salary) {
+  return salary * 2
+}
+
+const calculateBonus = function(func, salary) {
+  return func(salary)
+}
+
+calculateBonus(A, 10000) // 30000
+```
+* #### 3. 构造函数模式
+---
+###### 模式作用
+1. 用于创建特定类型的对象
+2. 第一次声明的时候给对象赋值
+3. 自己赋值构造函数，赋予属性和方法
+###### example:
+* __方法1__
+```js
+function Door(lock, style) {
+    this._lock = lock || 'normal';
+    this._style = style || 'normal';
+    this.create = function() {
+        return 'lock is ' + this._lock + ', style is ' + this._style;
+    }
+}
+
+var door = new Door('fingerprint lock', 'pure color');
+alert(door.create());
+```
