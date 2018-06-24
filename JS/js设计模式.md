@@ -217,3 +217,85 @@ function Door(lock, style) {
 var door = new Door('fingerprint lock', 'pure color');
 alert(door.create());
 ```
+* #### 4. 建造者模式
+---
+###### 模式作用
+1. 分步创建一个复杂对象
+2. 解耦封装过程和具体创建的组件
+3. 无需关心组件如何封装
+###### example:
+* __方法1__
+```js
+//1.产出东西是房子
+//2.包工头调用工人进行开工 而且他要很清楚工人们具体的某一个大项
+//3.工人是盖房子的 工人可以建卧室 建客厅 建厨房
+//4.包工头只是一个接口而已 他不干活 他只对外说我能建房子
+function Fangzi(){//Fangzi可以理解为单例模式
+    if(!(this instanceof Fangzi)){
+        return new Fangzi();
+    }
+    this.woshi = "";
+    this.keting = "";
+    this.chufang = "";
+}
+function Baogongtou(){
+    if(!(this instanceof Baogongtou)){
+        return new Baogongtou();
+    }
+    this.jianfangzi = function(gongren){
+        gongren.jian_chufang();
+        gongren.jian_keting();
+        gongren.jian_woshi();
+    }
+}
+function Gongren(){
+    if(!(this instanceof Gongren)){
+        return new Gongren();
+    }
+    this.jian_woshi = function(){
+        console.log("建卧室");
+    }
+    this.jian_keting = function(){
+        console.log("建客厅");
+    }
+    this.jian_chufang = function(){
+        console.log("建厨房");
+    }
+    this.jiaofang = function(){
+        var _fangzi = new Fangzi();
+        _fangzi.woshi = "ok";
+        _fangzi.keting = "ok";
+        _fangzi.chufang = "ok";
+        return _fangzi;
+    }
+}
+var gongren = new Gongren();
+var baogongtou = new Baogongtou();
+baogongtou.jianfangzi(gongren);
+var myfangzi = gongren.jiaofang();
+console.log(myfangzi);
+```
+* #### 5. 工厂模式
+---
+###### 模式作用
+1. 对象的构建十分复杂
+2. 需要依赖具体的环境创建不同的实例
+3. 处理大量具有相同属性的小对象
+###### example:
+* __方法1__
+```js
+function createObject(name,age,profession){//集中实例化的函数
+    var obj = new Object();
+    obj.name = name;
+    obj.age = age;
+    obj.profession = profession;
+    obj.move = function () {
+        return this.name + ' at ' + this.age + ' engaged in ' + this.profession;
+    };
+    return obj;
+}
+var test1 = createObject('trigkit4',22,'programmer');//第一个实例
+var test2 = createObject('mike',25,'engineer');//第二个实例
+alert(test1.move());
+alert(test2.move());
+```
