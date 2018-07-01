@@ -299,3 +299,131 @@ var test2 = createObject('mike',25,'engineer');//第二个实例
 alert(test1.move());
 alert(test2.move());
 ```
+* #### 6. 代理模式
+---
+###### 模式作用
+1. 远程代理（一个对象将不同空间的对象进行局部代理）
+2. 虚拟代理（根据需要创建开销很大的对象如渲染网页暂时用占位代替真图）
+3. 安全代理（控制真实对象的访问权限）
+4. 智能指引（调用对象代理处理另外一些事情，如垃圾回收）
+###### example:
+* __方法1__
+```js
+var Flower = function(){};
+
+var Pursuit = {
+    sendFlower:function(target){
+        var flower = new Flower();
+        target.receiveFlower(flower);
+    }
+};
+
+var Proxy = {
+    sendFlower:function(target){
+        Pursuit.sendFlower(target);
+    }
+};
+
+var SchoolGirl = {
+    receiveFlower:function(flower){
+        console.log('收到花' + flower);
+    }
+};
+
+//调用：
+Proxy.sendFlower(SchoolGirl);
+```
+* __方法2__
+```js
+var myImage = (function(){
+    var imgNode = document.createElement("img");
+    document.body.appendChild(imgNode);
+    return function(src){
+        imgNode.src = src; 
+    }
+})();
+// 代理模式
+var ProxyImage = (function(){
+    var img = new Image();
+    img.onload = function(){
+        myImage(this.src);
+    };
+    return function(src) {
+                // 占位图片loading
+                myImage("http://img.lanrentuku.com/img/allimg/1212/5-121204193Q9-50.gif");
+        img.src = src;
+    }
+})();
+// 调用方式
+
+ProxyImage("https://img.alicdn.com/tps/i4/TB1b_neLXXXXXcoXFXXc8PZ9XXX-130-200.png"); // 真实要展示的图片
+```
+* #### 7. 命令模式
+---
+###### 模式作用
+1. 将函数的封装，调用，请求结合为一体
+2. 调用具体的函数解耦命令对象与接收对象
+3. 提高程序模块化的灵活性
+###### example:
+* __方法1__
+```js
+var CarManager = {
+
+    // 请求信息
+    requestInfo: function (model, id) {
+        return 'The information for ' + model +
+    ' with ID ' + id + ' is foobar';
+    },
+
+    // 购买汽车
+    buyVehicle: function (model, id) {
+        return 'You have successfully purchased Item '
+    + id + ', a ' + model;
+    },
+
+    // 组织view
+    arrangeViewing: function (model, id) {
+        return 'You have successfully booked a viewing of '
+    + model + ' ( ' + id + ' ) ';
+    }
+};
+
+CarManager.execute = function (command) {
+    return CarManager[command.request](command.model, command.carID);
+};
+
+console.log(CarManager.execute({ request: "arrangeViewing", model: 'Ferrari', carID: '145523' }));
+console.log(CarManager.execute({ request: "requestInfo", model: 'Ford Mondeo', carID: '543434' }));
+console.log(CarManager.execute({ request: "buyVehicle", model: 'Ford Escort', carID: '543434' }));
+```
+* __方法2__
+```js
+var CarManager = {
+
+    // 请求信息
+    requestInfo: function (model, id) {
+        return 'The information for ' + model +
+    ' with ID ' + id + ' is foobar';
+    },
+
+    // 购买汽车
+    buyVehicle: function (model, id) {
+        return 'You have successfully purchased Item '
+    + id + ', a ' + model;
+    },
+
+    // 组织view
+    arrangeViewing: function (model, id) {
+        return 'You have successfully booked a viewing of '
+    + model + ' ( ' + id + ' ) ';
+    }
+};
+
+CarManager.execute = function ( name ) {
+    return CarManager[name] && CarManager[name].apply(CarManager, [].slice.call(arguments, 1));
+};
+
+console.log(CarManager.execute( "arrangeViewing", "Ferrari", "14523" ));
+console.log(CarManager.execute( "requestInfo", "Ford Mondeo", "54323" ));
+console.log(CarManager.execute( "buyVehicle", "Ford Escort", "34232" ));
+```
