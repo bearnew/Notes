@@ -1,12 +1,12 @@
 #### 中间自适应，两边固定
-![image](https://github.com/bear-new/picture/blob/master/mardown/cssLayout.PNG?raw=true)
+![image](https://github.com/bear-new/picture/blob/master/mardown/2018-05-26/layout1.PNG?raw=true)
 ##### 1.用margin和float实现
 __css__:
 ```css
 <style>
-    * {
-        margin: 0;
-        padding: 0;
+    .container div {
+        height: 200px;
+        line-height: 200px;
         text-align: center;
     }
     .left {
@@ -37,12 +37,10 @@ __html__
 __css__
 ```css
 <style>
-    * {
-        margin: 0;
-        padding: 0;
+    .container div {
+        height: 200px;
+        line-height: 200px;
         text-align: center;
-    }
-    .left, .right, .center {
         float: left;
     }
     .left {
@@ -73,13 +71,13 @@ __html__
 __css__
 ```css
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        text-align: center;
-    }
     .container {
         display: flex;
+    }
+    .container div {
+        height: 200px;
+        line-height: 200px;
+        text-align: center;
     }
     .left {
         width: 100px;
@@ -104,7 +102,7 @@ __html__
 </div>
 ```
 #### 中间固定，两边自适应
-![image](https://github.com/bear-new/picture/blob/master/mardown/cssLayout2.PNG?raw=true)
+![image](https://github.com/bear-new/picture/blob/master/mardown/2018-05-26/layout2.PNG?raw=true)
 ##### 1. 用margin和float实现
 __css__
 ```css
