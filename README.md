@@ -3,10 +3,8 @@ bear-new的博客
 
 ## JS
 + 2018
-<<<<<<< HEAD
-=======
+    + [2018-07-09]  [JS防抖和截流](https://github.com/bear-new/blog/blob/master/JS/js%E9%98%B2%E6%8A%96%26%E6%88%AA%E6%B5%81.md)
     + [2018-06-20]  [Js设计模式](https://github.com/bear-new/blog/blob/master/JS/js%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F.md)
->>>>>>> 88eb5654f7de6ae2bac06a2074655c45ddb293bf
     + [2018-05-11]  [Js惰性函数](https://github.com/bear-new/blog/blob/master/JS/Js%E6%83%B0%E6%80%A7%E5%87%BD%E6%95%B0.md)
     + [2018-03-28]	[(a == 1 && a == 2 && a == 3)为true背后不为人知的秘密](https://github.com/bear-new/blog/blob/master/JS/(a%20%3D%3D%201%20%26%26%20a%20%3D%3D%202%20%26%26%20a%20%3D%3D%203)%E4%B8%BAtrue%E8%83%8C%E5%90%8E%E4%B8%8D%E4%B8%BA%E4%BA%BA%E7%9F%A5%E7%9A%84%E7%A7%98%E5%AF%86.md)
     + [2018-01-28]	[JS执行原理](https://github.com/bear-new/blog/blob/master/JS/JS%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86.md)
@@ -35,6 +33,8 @@ bear-new的博客
     + [2017-11-09]	[浏览器内核](https://github.com/bear-new/blog/blob/master/%E6%B5%8F%E8%A7%88%E5%99%A8%E6%9C%BA%E5%88%B6/%E6%B5%8F%E8%A7%88%E5%99%A8%E5%86%85%E6%A0%B8.md)
 ## 其他
 + 2018
+    + [2018-07-21]  [搭建一个webpack脚手架,发布到npm仓库](https://github.com/bear-new/blog/blob/master/%E5%85%B6%E4%BB%96/%E6%90%AD%E5%BB%BA%E4%B8%80%E4%B8%AAwebpack%E8%84%9A%E6%89%8B%E6%9E%B6%EF%BC%8C%E5%8F%91%E5%B8%83%E5%88%B0npm%E4%BB%93%E5%BA%93.md)
+    + [2018-06-16]  [数据结构](https://github.com/bear-new/blog/blob/master/%E5%85%B6%E4%BB%96/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.md)
     + [2018-04-22]  [nginx反向代理，手机访问PC本地项目](https://github.com/bear-new/blog/blob/master/%E5%85%B6%E4%BB%96/nginx%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%EF%BC%8C%E6%89%8B%E6%9C%BA%E8%AE%BF%E9%97%AEPC%E6%9C%AC%E5%9C%B0%E9%A1%B9%E7%9B%AE.md)
     + [2018-01-21]	[js正则进阶](https://github.com/bear-new/blog/blob/master/%E5%85%B6%E4%BB%96/JS%E6%AD%A3%E5%88%99%E8%BF%9B%E9%98%B6.md)
 + 2017
