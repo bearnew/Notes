@@ -4,7 +4,7 @@
 > v-on中的函数名可以识别upload_voice不能识别uploadVoice
 ### watch
 > 监听属性
-```
+```js
 watch: {
     firstName: function (val) {
       this.fullName = val + ' ' + this.lastName
@@ -15,7 +15,7 @@ watch: {
 }
 ```
 ### 计算属性的setter
-```
+```js
 computed: {
   fullName: {
     // getter
@@ -32,23 +32,23 @@ computed: {
 }
 ```
 ### class的写法
-```
+```js
 <div class="static"
      v-bind:class="{ active: isActive, 'text-danger': hasError }">
 </div>
 ```
 
-```
+```js
 <div v-bind:class="[isActive ? activeClass : '', errorClass]"></div>
 ```
 ### v-for3个参数
-```
+```js
 <div v-for="(value, key, index) in object">
   {{ index }}. {{ key }}: {{ value }}
 </div>
 ```
 ### 事件修饰符
-```
+```js
 <!-- 阻止单击事件继续传播 -->
 <a v-on:click.stop="doThis"></a>
 <!-- 提交事件不再重载页面 -->
@@ -67,7 +67,7 @@ computed: {
 <a v-on:click.once="doThis"></a>
 ```
 ### 按键修饰符
-```
+```js
 <!-- 缩写语法 -->
 <input @keyup.enter="submit">
  <!-- 即使 Alt 或 Shift 被一同按下时也会触发 -->
@@ -81,7 +81,7 @@ computed: {
 <div @click.ctrl="doSomething">Do something</div>
 ```
 ### 非父子组件通信
-```
+```js
 // 触发组件 A 中的事件
 bus.$emit('id-selected', 1)
 
@@ -93,7 +93,7 @@ bus.$on('id-selected', function (id) {
 ### slot插槽
 * 单个插槽
 > 子组件
-```
+```js
 <div>
   <h2>我是子组件的标题</h2>
   <slot>
@@ -102,7 +102,7 @@ bus.$on('id-selected', function (id) {
 </div>
 ```
 > 父组件
-```
+```js
 <div>
   <h1>我是父组件的标题</h1>
   <my-component>
@@ -112,7 +112,7 @@ bus.$on('id-selected', function (id) {
 </div>
 ```
 > 渲染结果
-```
+```js
 <div>
   <h1>我是父组件的标题</h1>
   <div>
@@ -124,7 +124,7 @@ bus.$on('id-selected', function (id) {
 ```
 * 具名插槽
 > 子组件
-```
+```js
 <div class="container">
   <header>
     <slot name="header"></slot>
@@ -138,7 +138,7 @@ bus.$on('id-selected', function (id) {
 </div>
 ```
 > 父组件
-```
+```js
 <app-layout>
   <h1 slot="header">这里可能是一个页面标题</h1>
   <p>主要内容的一个段落。</p>
@@ -147,7 +147,7 @@ bus.$on('id-selected', function (id) {
 </app-layout>
 ```
 > 渲染结果
-```
+```js
 <div class="container">
   <header>
     <h1>这里可能是一个页面标题</h1>
@@ -162,7 +162,7 @@ bus.$on('id-selected', function (id) {
 </div>
 ```
 ### 自定义指令
-```
+```js
 directives: {
   focus: {
     // 指令的定义
@@ -176,7 +176,7 @@ directives: {
 <input v-focus>
 ```
 ### 自定义过滤器
-```
+```js
 Vue.filter('toDou', function(n,a,b){
     alert(a+','+b);
     return n<10 ? '0'+n::' ' +n 
@@ -192,10 +192,10 @@ filters: {
 {{ msg | toDou(12,5) }}
 ```
 ### vue-router
-```
+```js
 <router-link :to="{ name: 'user', params: { userId: 123 }}">User</router-link>
 ```
-```
+```js
 // 字符串
 router.push('home')
 
@@ -208,7 +208,7 @@ router.push({ name: 'user', params: { userId: 123 }})
 // 带查询参数，变成 /register?plan=private
 router.push({ path: 'register', query: { plan: 'private' }})
 ```
-```
+```js
 // 在浏览器记录中前进一步，等同于 history.forward()
 router.go(1)
 
