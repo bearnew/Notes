@@ -32,7 +32,7 @@ computed: {
 }
 ```
 ### class的写法
-```js
+```html
 <div class="static"
      v-bind:class="{ active: isActive, 'text-danger': hasError }">
 </div>
@@ -42,13 +42,13 @@ computed: {
 <div v-bind:class="[isActive ? activeClass : '', errorClass]"></div>
 ```
 ### v-for3个参数
-```js
+```html
 <div v-for="(value, key, index) in object">
   {{ index }}. {{ key }}: {{ value }}
 </div>
 ```
 ### 事件修饰符
-```js
+```html
 <!-- 阻止单击事件继续传播 -->
 <a v-on:click.stop="doThis"></a>
 <!-- 提交事件不再重载页面 -->
@@ -67,7 +67,7 @@ computed: {
 <a v-on:click.once="doThis"></a>
 ```
 ### 按键修饰符
-```js
+```html
 <!-- 缩写语法 -->
 <input @keyup.enter="submit">
  <!-- 即使 Alt 或 Shift 被一同按下时也会触发 -->
@@ -93,7 +93,7 @@ bus.$on('id-selected', function (id) {
 ### slot插槽
 * 单个插槽
 > 子组件
-```js
+```html
 <div>
   <h2>我是子组件的标题</h2>
   <slot>
@@ -102,7 +102,7 @@ bus.$on('id-selected', function (id) {
 </div>
 ```
 > 父组件
-```js
+```html
 <div>
   <h1>我是父组件的标题</h1>
   <my-component>
@@ -112,7 +112,7 @@ bus.$on('id-selected', function (id) {
 </div>
 ```
 > 渲染结果
-```js
+```html
 <div>
   <h1>我是父组件的标题</h1>
   <div>
@@ -124,7 +124,7 @@ bus.$on('id-selected', function (id) {
 ```
 * 具名插槽
 > 子组件
-```js
+```html
 <div class="container">
   <header>
     <slot name="header"></slot>
@@ -138,7 +138,7 @@ bus.$on('id-selected', function (id) {
 </div>
 ```
 > 父组件
-```js
+```html
 <app-layout>
   <h1 slot="header">这里可能是一个页面标题</h1>
   <p>主要内容的一个段落。</p>
@@ -147,7 +147,7 @@ bus.$on('id-selected', function (id) {
 </app-layout>
 ```
 > 渲染结果
-```js
+```html
 <div class="container">
   <header>
     <h1>这里可能是一个页面标题</h1>
@@ -192,7 +192,7 @@ filters: {
 {{ msg | toDou(12,5) }}
 ```
 ### vue-router
-```js
+```html
 <router-link :to="{ name: 'user', params: { userId: 123 }}">User</router-link>
 ```
 ```js
