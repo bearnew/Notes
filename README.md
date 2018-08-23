@@ -3,6 +3,7 @@ bear-new的博客
 
 ## JS
 + 2018
+    + [2018-08-23]  [Js函数柯里化](https://github.com/bear-new/blog/blob/master/JS/JS%E5%87%BD%E6%95%B0%E6%9F%AF%E9%87%8C%E5%8C%96.md)
     + [2018-07-09]  [JS防抖和截流](https://github.com/bear-new/blog/blob/master/JS/js%E9%98%B2%E6%8A%96%26%E6%88%AA%E6%B5%81.md)
     + [2018-06-20]  [Js设计模式](https://github.com/bear-new/blog/blob/master/JS/js%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F.md)
     + [2018-05-11]  [Js惰性函数](https://github.com/bear-new/blog/blob/master/JS/Js%E6%83%B0%E6%80%A7%E5%87%BD%E6%95%B0.md)
