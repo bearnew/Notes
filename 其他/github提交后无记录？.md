@@ -31,6 +31,11 @@ fi
 ' --tag-name-filter cat -- --branches --tags
 
 ```
+如果报错```Cannot create a new backup```
+需要移除原始backup
+```
+git update-ref -d refs/original/refs/heads/master
+```
 ![base](https://github.com/bear-new/picture/blob/master/mardown/2018-07-28%20revert-gihub-commit/edit_name_email.PNG?raw=true)
 ###### 2.重新提交
 ```
