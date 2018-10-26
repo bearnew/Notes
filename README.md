@@ -27,6 +27,9 @@ bear-new的博客
     + [2017-11-20]  [css单词截断](https://github.com/bear-new/blog/blob/master/CSS/css%E5%8D%95%E8%AF%8D%E6%88%AA%E6%96%AD.md)
     + [2017-11-20]	[flex属性完整归纳](https://github.com/bear-new/blog/blob/master/CSS/flex%E5%AE%8C%E6%95%B4%E5%BD%92%E7%BA%B3.md)
 ## React
++ 2018
+    + [2018-10-26]  [性能优化](https://github.com/bearnew/blog/blob/master/React/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96.md)
+    + [2018-08-12]  [减少react不必要的渲染](https://github.com/bearnew/blog/blob/master/React/%E5%87%8F%E5%B0%91react%E4%B8%8D%E5%BF%85%E8%A6%81%E7%9A%84%E6%B8%B2%E6%9F%93.md)
 ## React Native
 + 2017
     + [2017-04-21]	[windows下react native环境搭建(图文并茂)](https://github.com/bear-new/blog/blob/master/React%20Native/windows%E4%B8%8Breact%20native%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA(%E5%9B%BE%E6%96%87%E5%B9%B6%E8%8C%82).md)
