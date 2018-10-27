@@ -1,6 +1,6 @@
-## 减少react不必要的渲染
+## 减少react组件无效的渲染
 #### 原因
-某个子组件用到的数据在父组件得到更新，其他所有子组件（包括未用到更新数据的子组件）都将会进行重新render
+父组件数据发生变化，他的所有子组件（包括未用到变化数据的子组件）都将会进行重新render
 
 ![组件render](https://github.com/bear-new/picture/blob/master/mardown/2018-07-27%20pureRender/render.jpg?raw=true)
 
@@ -31,7 +31,7 @@ constructor(props) {
     this.state = {};
 }
 ```
-* __copy__
+* __copy源码__
 
 ```js
 var ReactComponentWithPureRenderMixin = {

@@ -1,5 +1,4 @@
 ##### github提交后无记录？
-辛勤耕种后，想在github打个卡，什么？push后无记录？
 
 ##### 原因
 commit的用户名和邮箱非github注册的邮箱
@@ -32,6 +31,11 @@ fi
 ' --tag-name-filter cat -- --branches --tags
 
 ```
+如果报错```Cannot create a new backup```
+需要移除原始backup
+```
+git update-ref -d refs/original/refs/heads/master
+```
 ![base](https://github.com/bear-new/picture/blob/master/mardown/2018-07-28%20revert-gihub-commit/edit_name_email.PNG?raw=true)
 ###### 2.重新提交
 ```
@@ -51,6 +55,6 @@ git pull origin master --allow-unrelated-histories
 
 ![after](https://github.com/bear-new/picture/blob/master/mardown/2018-07-28%20revert-gihub-commit/fix_after.png?raw=true)
 
-hah，多了5个用公司电脑提交的commit，心情很好,skr skr
+hah，多了5个用公司电脑提交的commit，心情很好。
 
 参考链接: https://www.jianshu.com/p/e6b5e960aa56

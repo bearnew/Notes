@@ -3,6 +3,9 @@ bear-new的博客
 
 ## JS
 + 2018
+    + [2018-09-26]  [async await使用总结](https://github.com/bearnew/blog/blob/master/JS/async%EF%BC%8Cawait%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93.md)
+    + [2018-08-29]  [javascript冷知识](https://github.com/bearnew/blog/blob/master/JS/javascript%E5%86%B7%E7%9F%A5%E8%AF%86.md)
+    + [2018-08-23]  [Js函数柯里化](https://github.com/bear-new/blog/blob/master/JS/JS%E5%87%BD%E6%95%B0%E6%9F%AF%E9%87%8C%E5%8C%96.md)
     + [2018-07-09]  [JS防抖和截流](https://github.com/bear-new/blog/blob/master/JS/js%E9%98%B2%E6%8A%96%26%E6%88%AA%E6%B5%81.md)
     + [2018-06-20]  [Js设计模式](https://github.com/bear-new/blog/blob/master/JS/js%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F.md)
     + [2018-05-11]  [Js惰性函数](https://github.com/bear-new/blog/blob/master/JS/Js%E6%83%B0%E6%80%A7%E5%87%BD%E6%95%B0.md)
@@ -17,6 +20,7 @@ bear-new的博客
     + [2016-07-17]	[原生js封装ajax](https://github.com/bear-new/blog/blob/master/JS/%E5%8E%9F%E7%94%9Fjs%E5%B0%81%E8%A3%85ajax.md)
 ## CSS
 + 2018
+    + [2018-08-30]  [css工程化](https://github.com/bearnew/blog/blob/master/CSS/css%E5%B7%A5%E7%A8%8B%E5%8C%96.md)
     + [2018-05-11]  [css虚线间距](https://github.com/bear-new/blog/blob/master/CSS/css%E8%99%9A%E7%BA%BF%E9%97%B4%E8%B7%9D.md)
     + [2018-02-01]	[css三栏布局](https://github.com/bear-new/blog/blob/master/CSS/css%E4%B8%89%E6%A0%8F%E5%B8%83%E5%B1%80.md)
 + 2017
@@ -39,7 +43,7 @@ bear-new的博客
     + [2017-11-09]	[浏览器内核](https://github.com/bear-new/blog/blob/master/%E6%B5%8F%E8%A7%88%E5%99%A8%E6%9C%BA%E5%88%B6/%E6%B5%8F%E8%A7%88%E5%99%A8%E5%86%85%E6%A0%B8.md)
 ## 其他
 + 2018
-    + [2018-07-28]  [github提交后无记录?](https://github.com/bear-new/blog/blob/master/%E5%85%B6%E4%BB%96/github%E6%8F%90%E4%BA%A4%E5%90%8E%E6%97%A0%E8%AE%B0%E5%BD%95%EF%BC%9F.md)
+    + [2018-08-23]  [github提交后无记录?](https://github.com/bear-new/blog/blob/master/%E5%85%B6%E4%BB%96/github%E6%8F%90%E4%BA%A4%E5%90%8E%E6%97%A0%E8%AE%B0%E5%BD%95%EF%BC%9F.md)
     + [2018-07-21]  [搭建一个webpack脚手架,发布到npm仓库](https://github.com/bear-new/blog/blob/master/%E5%85%B6%E4%BB%96/%E6%90%AD%E5%BB%BA%E4%B8%80%E4%B8%AAwebpack%E8%84%9A%E6%89%8B%E6%9E%B6%EF%BC%8C%E5%8F%91%E5%B8%83%E5%88%B0npm%E4%BB%93%E5%BA%93.md)
     + [2018-06-16]  [数据结构](https://github.com/bear-new/blog/blob/master/%E5%85%B6%E4%BB%96/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.md)
     + [2018-04-22]  [nginx反向代理，手机访问PC本地项目](https://github.com/bear-new/blog/blob/master/%E5%85%B6%E4%BB%96/nginx%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%EF%BC%8C%E6%89%8B%E6%9C%BA%E8%AE%BF%E9%97%AEPC%E6%9C%AC%E5%9C%B0%E9%A1%B9%E7%9B%AE.md)
