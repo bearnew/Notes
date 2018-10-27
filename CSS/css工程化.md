@@ -47,6 +47,8 @@ plugins: [
       "at-rule-no-unknown": null,
       "selector-pseudo-class-no-unknown": null,
       "function-comma-space-after": null,
+      "declaration-block-no-duplicate-properties": null,
+      "no-descending-specificity": null,
       "order/order": [
         "declarations",
         "custom-properties",
