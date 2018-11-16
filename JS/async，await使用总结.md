@@ -30,3 +30,72 @@ test();
 ```
 ### 3.await必须在async函数的上下文中
 ### 4.async会将其后函数的返回值封装成一个Promise对象，await会等待这个Promise完成，并将其resolve的结果返回出来
+
+### 5.async串行与并行执行
+```js
+function getUserProfile(id) {
+    console.log('1111111111')
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (typeof id === 'string') {
+                resolve(id)
+            } else {
+                reject(id)
+            }
+        }, 2000)
+    })
+}
+
+function getUserRepo(id) {
+    console.log('2222222222222')
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (typeof id === 'string') {
+                resolve(id + 10)
+            } else {
+                reject(id)
+            }
+        }, 100)
+    })
+}
+
+// 串行执行会阻塞
+async function getUserInfo(id) {
+    const profile = await getUserProfile(id);
+    const repo = await getUserRepo(id)
+    console.log(profile)
+    console.log(repo)
+
+    return { profile, repo }
+}
+
+// 并行执行不会阻塞
+async function getUserInfo(id) {
+    const profilePromise = getUserProfile(id);
+    const repoPromise = getUserRepo(id)
+
+    const profile = await profilePromise;
+    const repo = await repoPromise;
+
+    console.log(profile)
+    console.log(repo)
+    return { profile, repo }
+}
+
+// 并行执行不会阻塞
+async function getUserInfo(id) {
+    const [profile, repo] = await Promise.all([
+        getUserProfile(id),
+        getUserRepo(id)
+    ])
+    console.log(profile)
+    console.log(repo)
+    return { profile, repo }
+}
+
+getUserInfo('1').then(data => {
+    console.log(data)
+}).catch(err => {
+    console.error(err);
+})
+```
