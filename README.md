@@ -3,6 +3,7 @@ bear-new的博客
 
 ## JS
 + 2018
+    + [2018-11-21]  [event Loop](https://github.com/bearnew/blog/blob/master/JS/Event%20Loop.md)
     + [2018-09-26]  [async await使用总结](https://github.com/bearnew/blog/blob/master/JS/async%EF%BC%8Cawait%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93.md)
     + [2018-08-29]  [javascript冷知识](https://github.com/bearnew/blog/blob/master/JS/javascript%E5%86%B7%E7%9F%A5%E8%AF%86.md)
     + [2018-08-23]  [Js函数柯里化](https://github.com/bear-new/blog/blob/master/JS/JS%E5%87%BD%E6%95%B0%E6%9F%AF%E9%87%8C%E5%8C%96.md)
