@@ -78,3 +78,27 @@ __优点__:
 
 __缺点__:
 不适用于判断条件可变的函数调用
+
+### 方法3
+static单例模式
+```js
+var instance = null;
+class Storage {
+  static getInstance() {
+    if (!instance) {
+      instance = new Storage();
+    }
+    return instance;
+  }
+  setItem(key, value) {
+    localStorage.setItem(key, value)
+  }
+  getItem(key) {
+    return localStorage.getItem(key)
+  }
+}
+
+const x = Storage.getInstance()
+x.setItem('test', 123);
+console.log(x.getItem('test'))
+```

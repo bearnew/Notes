@@ -5,6 +5,7 @@ bear-new的博客
 + 2018
     + [2018-11-01]  [typescript学习记录](https://github.com/bearnew/blog/blob/master/JS/typescript%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95.md)
     + [2018-10-27]  [underscore源码精髓](https://github.com/bearnew/blog/blob/master/JS/underscore%E6%BA%90%E7%A0%81%E7%B2%BE%E9%AB%93.md)
+    + [2018-11-21]  [event Loop](https://github.com/bearnew/blog/blob/master/JS/Event%20Loop.md)
     + [2018-09-26]  [async await使用总结](https://github.com/bearnew/blog/blob/master/JS/async%EF%BC%8Cawait%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93.md)
     + [2018-08-29]  [javascript冷知识](https://github.com/bearnew/blog/blob/master/JS/javascript%E5%86%B7%E7%9F%A5%E8%AF%86.md)
     + [2018-08-23]  [Js函数柯里化](https://github.com/bear-new/blog/blob/master/JS/JS%E5%87%BD%E6%95%B0%E6%9F%AF%E9%87%8C%E5%8C%96.md)
@@ -22,7 +23,11 @@ bear-new的博客
     + [2016-07-17]	[原生js封装ajax](https://github.com/bear-new/blog/blob/master/JS/%E5%8E%9F%E7%94%9Fjs%E5%B0%81%E8%A3%85ajax.md)
 ## CSS
 + 2018
+<<<<<<< HEAD
     + [2018-09-27]  [《css世界》读后感](https://github.com/bearnew/blog/blob/master/CSS/css%E4%B8%96%E7%95%8C%E8%AF%BB%E5%90%8E%E6%84%9F.md)
+=======
+    + [2018-11-21]  [css水平垂直居中](https://github.com/bearnew/blog/blob/master/CSS/css%E6%B0%B4%E5%B9%B3%E5%9E%82%E7%9B%B4%E5%B1%85%E4%B8%AD.md)
+>>>>>>> beb7d219478f7850afb41f9f9bc04c78c7f2f0d9
     + [2018-08-30]  [css工程化](https://github.com/bearnew/blog/blob/master/CSS/css%E5%B7%A5%E7%A8%8B%E5%8C%96.md)
     + [2018-05-11]  [css虚线间距](https://github.com/bear-new/blog/blob/master/CSS/css%E8%99%9A%E7%BA%BF%E9%97%B4%E8%B7%9D.md)
     + [2018-02-01]	[css三栏布局](https://github.com/bear-new/blog/blob/master/CSS/css%E4%B8%89%E6%A0%8F%E5%B8%83%E5%B1%80.md)
