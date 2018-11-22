@@ -23,11 +23,8 @@ bear-new的博客
     + [2016-07-17]	[原生js封装ajax](https://github.com/bear-new/blog/blob/master/JS/%E5%8E%9F%E7%94%9Fjs%E5%B0%81%E8%A3%85ajax.md)
 ## CSS
 + 2018
-<<<<<<< HEAD
     + [2018-09-27]  [《css世界》读后感](https://github.com/bearnew/blog/blob/master/CSS/css%E4%B8%96%E7%95%8C%E8%AF%BB%E5%90%8E%E6%84%9F.md)
-=======
     + [2018-11-21]  [css水平垂直居中](https://github.com/bearnew/blog/blob/master/CSS/css%E6%B0%B4%E5%B9%B3%E5%9E%82%E7%9B%B4%E5%B1%85%E4%B8%AD.md)
->>>>>>> beb7d219478f7850afb41f9f9bc04c78c7f2f0d9
     + [2018-08-30]  [css工程化](https://github.com/bearnew/blog/blob/master/CSS/css%E5%B7%A5%E7%A8%8B%E5%8C%96.md)
     + [2018-05-11]  [css虚线间距](https://github.com/bear-new/blog/blob/master/CSS/css%E8%99%9A%E7%BA%BF%E9%97%B4%E8%B7%9D.md)
     + [2018-02-01]	[css三栏布局](https://github.com/bear-new/blog/blob/master/CSS/css%E4%B8%89%E6%A0%8F%E5%B8%83%E5%B1%80.md)
