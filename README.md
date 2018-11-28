@@ -3,6 +3,7 @@ bear-new的博客
 
 ## JS
 + 2018
+    + [2018-11-28]  [JS对象继承](https://github.com/bearnew/blog/blob/master/JS/JS%E5%AF%B9%E8%B1%A1%E7%BB%A7%E6%89%BF.md)
     + [2018-11-01]  [typescript学习记录](https://github.com/bearnew/blog/blob/master/JS/typescript%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95.md)
     + [2018-10-27]  [underscore源码精髓](https://github.com/bearnew/blog/blob/master/JS/underscore%E6%BA%90%E7%A0%81%E7%B2%BE%E9%AB%93.md)
     + [2018-11-21]  [event Loop](https://github.com/bearnew/blog/blob/master/JS/Event%20Loop.md)
