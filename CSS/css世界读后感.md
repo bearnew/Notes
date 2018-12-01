@@ -30,3 +30,38 @@
     }
 }
 ```
+### 4.超越!important，超越最大
+* img的最后宽度为256px
+```js
+<img src="1.jpg" style="width: 480px !important;">
+img { max-width: 256px }
+```
+* container的最后宽度为140px
+```css
+.container {
+    min-width: 140px;
+    max-width: 120px;
+}
+```
+### 5.任意高度元素展开收起动画技术
+* max-height太大，展开/收起的动画时间为```实际高度/max-height * transitionTime```, 并且收起会有动画延迟
+```html
+<input id="check" type="checkbox">
+<div class="element">
+    <p>display:table-cell其他一些应用，例如，两栏自适应布局，垂直居中效果等等都是可以通过其他技术手段模拟出来的，但是，根据列表个数自动等宽的效果，其他CSS是很难模拟的，尤其当需要兼容IE8浏览器的时候。</p>
+</div>
+<label for="check" class="check-in">更多↓/收起↑</label>
+```
+```css
+.element {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 2s;
+}
+input {
+    display: none;
+}
+input:checked ~ .element {
+    max-height: 666px;
+}
+```
