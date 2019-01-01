@@ -24,5 +24,22 @@
 > 用来处理连接网络的硬件部分
 > 包括控制操作系统、硬件的设备驱动、NIC（Network Interface Card，网络适配器，即网卡），及光纤等物理可见部分（还包括连接器等一切传输媒介）。硬件上的范畴均在链路层的作用范围之内。
 
-mark 21
+### 2.IP、TCP、DNS
+#### 1.IP（网络层）
+1. IP地址指节点被分配到的地址
+2. MAC地址指网卡所属的固定地址
+3. IP间依赖MAC地址采用ARP协议通信
+4. ARP是一种解析地址的协议，根据通信的IP地址可以反查出对应的MAC地址
+#### 2.TCP（传输层）
+1. tcp提供可靠的字节流服务
+2. tcp将大块数据分割成以报文段为单位的数据包进行管理
+3. tcp3次握手（保证通信的可靠性）
+
+![three way handshaking](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/tcp_%20three_way_handshaking.png?raw=true)
+#### 3.DNS（和HHTP一样属于应用层协议）
+1. DNS提供域名到IP地址之间的解析服务
+#### 4.各种协议与HTTP协议的关系
+
+![communication](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/http_protocol.png?raw=true)
+
 
