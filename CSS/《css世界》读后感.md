@@ -65,4 +65,16 @@ input:checked ~ .element {
     max-height: 666px;
 }
 ```
+### 6.异步加载图片小技巧
+```html
+<img>
+```
+```css
+img {
+    visibility: hidden;
+}
+img[src] {
+    visibility: visible;
+}
+```
 阅读到 章节 3.4 页码 42
