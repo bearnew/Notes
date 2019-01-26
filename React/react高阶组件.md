@@ -152,7 +152,7 @@ class B extends Component {
         )
     }
 }
-export default A('提示)(B);
+export default A('提示')(B);
 ```
 ### 4.继承方式的高阶组件
 * 操纵props
