@@ -160,8 +160,12 @@ export default A('提示')(B);
 组件A
 ```js
 export default A = WrappedComponent => class NewComponent extends WrappedComponent {
+    static displayName = `NewComponent(${this.getDisplayName(WrappedComponent)})`
     ComponentWillMount() {
         alert('我是修改后的生命周期') // 会覆盖B组件的生命周期
+    }
+    getDisplayName(WrappedComponent) {
+        return WrappedComponent.displayName || WrappedComponent.name || 'Component'
     }
     render() {
         const element = super.render();
