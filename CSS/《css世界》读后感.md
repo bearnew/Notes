@@ -77,4 +77,124 @@ img[src] {
     visibility: visible;
 }
 ```
-阅读到 章节 3.4 页码 42
+### 7.幽灵空白节点
+inline-block元素的所有解析和渲染就如同每个行框盒子的前面有一个“空白节点”一样
+```html
+<div>
+    <span></span>
+</div>
+```
+```css
+div {
+    background: red;
+}
+span {
+    display: inline-block;
+}
+```
+### 8.替换元素
+* 1.<img>,<object>,<video>,<iframe>,<textarea>,<input>都是典型的替换元素
+* 2.替换元素，内容的外观不受css的影响
+* 3.有自己的尺寸
+* 4.在很多css上都有自己的一套表现规则
+* 4.vertical-align的默认值baseline被定义为x的下边缘,替换元素的基线被定义为元素的下边缘
+### 9.图片加载
+```html
+<img>
+```
+```css
+img:not([src]) {
+    content: url(1.jpg);
+}
+```
+### 10通过hover将图片变成另一张图片
+```html
+<img src="laugh.png">
+```
+```css
+img:hover {
+    content: url(laugh-tear.png)
+}
+```
+### 11.通过content实现背景图片
+```css
+h1 {
+    content: url(logo.png);
+}
+```
+### 12.清除浮动
+```css
+.clear:after {
+    content: '';
+    display: table;
+    clear: both;
+}
+```
+### 13.兼容所有浏览器的两端对齐
+```html
+<div class="box">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+</div>
+```
+```css
+.box {
+    width: 256px;
+    height: 256px;
+    text-align: justify;
+}
+.box:before {
+    content: '';
+    display: inline-block;
+    height: 100%;
+}
+.box:after {
+    content: '';
+    display: inline-block;
+    height: 100%;
+}
+.bar {
+    display: inline-block;
+    width: 20px;
+}
+```
+### 14.css实现加载中效果
+\A,\D实现换行效果
+
+```html
+<dot></dot>
+```
+```css
+dot {
+    display: inline-block;
+    height: 1em;
+    line-height: 1em;
+    overflow: hidden;
+}
+dot::before {
+    display: block;
+    content: '...\A..\A.';
+    white-space: pre-wrap; // 换行
+    animation: dot 3s infinite step-start both;
+}
+@keyframes dot {
+    33% {
+        transform: translateY(-2em);
+    }
+    66% {
+        transform: translateY(-1em);
+    }
+}
+```
+### 15.content attr属性值内容审查
+```css
+img:after {
+    content: attr(alt);
+}
+.icon:before {
+    content: attr(data-title);
+}
+```
+

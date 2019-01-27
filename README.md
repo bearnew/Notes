@@ -50,6 +50,9 @@ bear-new的博客
 ## 浏览器机制
 + 2017
     + [2017-11-09]	[浏览器内核](https://github.com/bear-new/blog/blob/master/%E6%B5%8F%E8%A7%88%E5%99%A8%E6%9C%BA%E5%88%B6/%E6%B5%8F%E8%A7%88%E5%99%A8%E5%86%85%E6%A0%B8.md)
+## 网络
++ 2019
+    + [2018-12-01]  [图解HTTP读后感]()
 ## 其他
 + 2018
     + [2018-11-06]  [常见的代码优化](https://github.com/bearnew/blog/blob/master/%E5%85%B6%E4%BB%96/%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96.md)
