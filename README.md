@@ -52,7 +52,10 @@ bear-new的博客
     + [2017-11-09]	[浏览器内核](https://github.com/bear-new/blog/blob/master/%E6%B5%8F%E8%A7%88%E5%99%A8%E6%9C%BA%E5%88%B6/%E6%B5%8F%E8%A7%88%E5%99%A8%E5%86%85%E6%A0%B8.md)
 ## 网络
 + 2019
-    + [2018-12-01]  [图解HTTP读后感]()
+    + [2019-01-28]  [XSS原理与防御](https://github.com/bearnew/blog/blob/master/%E7%BD%91%E7%BB%9C/XSS%E5%8E%9F%E7%90%86%E4%B8%8E%E9%98%B2%E5%BE%A1.md)
+    + [2019-01-28]  [CSRF原理与防御](https://github.com/bearnew/blog/blob/master/%E7%BD%91%E7%BB%9C/CSRF%E5%8E%9F%E7%90%86%E4%B8%8E%E9%98%B2%E5%BE%A1.md)
++ 2018
+    + [2018-12-01]  [图解HTTP读后感](https://github.com/bearnew/blog/blob/master/%E7%BD%91%E7%BB%9C/%E3%80%8A%E5%9B%BE%E8%A7%A3HTTP%E3%80%8B%E8%AF%BB%E5%90%8E%E6%84%9F.md)
 ## 其他
 + 2018
     + [2018-11-06]  [常见的代码优化](https://github.com/bearnew/blog/blob/master/%E5%85%B6%E4%BB%96/%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96.md)
