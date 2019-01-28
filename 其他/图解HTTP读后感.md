@@ -76,4 +76,32 @@ OPTIONS * HTTP/1.1
 #### 5.HTTP方法
 1. GET: 获取资源
 2. POST: 传输实体主体
+3. PUT: 传输文件
+    * 像FTP协议的文件上传一样
+    * http/1.1的PUT方法自身不带验证机制，任何人都可以上传文件，存在安全性问题
+    * 响应返回状态码204 No Content（比如： 该html已存在于服务器上）
+4. HEAD: 获得报文首部
+    * 和GET方法一样，不返回报文主体部分
+    * 用于确认URL的有效性及资源更新的日期时间
+    * 响应返回Index.html有关的响应首部
+5. DELETE: 删除文件
+    * 请求url删除指定资源
+    * 响应返回状态码 204 No Content（比如 ：该 html 已从该服务器上删除）
+6. OPTIONS: 询问支持的方法
+    * OPTIONS方法用来查询针对请求URL指定的资源支持的方法
+
+    | 请求 | OPTIONS * http/1.1<br/> Host: www.hackr.jp |
+    | :--- | :---- |
+    | 响应 | HTTP/1.1 200OK<br/>Allow:GET,POST,HEAD,OPTIONS(返回服务器支持的方法) |
+7. TRACE: 追踪路径
+    * 让web服务器端将之前的请求通信环回给客户端的方法
+    * 容易引发XST（cross-site tracing, 跨站追踪）攻击
+    * 在Max-Forwards首部字段中填入数值
+    * 每经过一个服务器端就将该数字减1，减到0时，就停止继续传输
+    * 最后接收到请求的服务器端则返回状态码200OK的响应
+
+    | 请求 | TRACE / HTTP/1.1<br/> Host: hackr.jp<br/>Max-Forwards:2 |
+    | :--- | :---- |
+    | 响应 | HTTP/1.1 200OK<br/>Content-Type:message/http<br/>Content-Length: 1024<br/>TRACE / HTTP/1.1<br/>Host:hackr.jp<br/>Max-Forwards: 2(返回响应包含请求内容) |
+8.CONNECT: 要求用隧道协议连接代理
 
