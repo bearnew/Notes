@@ -33,8 +33,10 @@ bear-new的博客
     + [2017-11-20]  [css单词截断](https://github.com/bear-new/blog/blob/master/CSS/css%E5%8D%95%E8%AF%8D%E6%88%AA%E6%96%AD.md)
     + [2017-11-20]	[flex属性完整归纳](https://github.com/bear-new/blog/blob/master/CSS/flex%E5%AE%8C%E6%95%B4%E5%BD%92%E7%BA%B3.md)
 ## React
++ 2019
+    + [2019-01-26]  [react高阶组件](https://github.com/bearnew/blog/blob/master/React/react%E9%AB%98%E9%98%B6%E7%BB%84%E4%BB%B6.md)
 + 2018
-    + [2018-10-26]  [性能优化](https://github.com/bearnew/blog/blob/master/React/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96.md)
+    + [2018-10-26]  [react性能优化](https://github.com/bearnew/blog/blob/master/React/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96.md)
     + [2018-08-12]  [减少react不必要的渲染](https://github.com/bearnew/blog/blob/master/React/%E5%87%8F%E5%B0%91react%E4%B8%8D%E5%BF%85%E8%A6%81%E7%9A%84%E6%B8%B2%E6%9F%93.md)
 ## React Native
 + 2017
@@ -48,6 +50,9 @@ bear-new的博客
 ## 浏览器机制
 + 2017
     + [2017-11-09]	[浏览器内核](https://github.com/bear-new/blog/blob/master/%E6%B5%8F%E8%A7%88%E5%99%A8%E6%9C%BA%E5%88%B6/%E6%B5%8F%E8%A7%88%E5%99%A8%E5%86%85%E6%A0%B8.md)
+## 网络
++ 2019
+    + [2018-12-01]  [图解HTTP读后感]()
 ## 其他
 + 2018
     + [2018-11-06]  [常见的代码优化](https://github.com/bearnew/blog/blob/master/%E5%85%B6%E4%BB%96/%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96.md)
