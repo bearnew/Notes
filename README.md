@@ -52,6 +52,8 @@ bear-new的博客
     + [2017-11-09]	[浏览器内核](https://github.com/bear-new/blog/blob/master/%E6%B5%8F%E8%A7%88%E5%99%A8%E6%9C%BA%E5%88%B6/%E6%B5%8F%E8%A7%88%E5%99%A8%E5%86%85%E6%A0%B8.md)
 ## 网络
 + 2019
+    + [2019-01-29]  [跨域](https://github.com/bearnew/blog/blob/master/%E7%BD%91%E7%BB%9C/%E8%B7%A8%E5%9F%9F.md)
+    + [2019-01-29]  [chrome本地跨域解决方案](https://github.com/bearnew/blog/blob/master/%E7%BD%91%E7%BB%9C/chrome%E6%9C%AC%E5%9C%B0%E8%B7%A8%E5%9F%9F%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88.md)
     + [2019-01-28]  [XSS原理与防御](https://github.com/bearnew/blog/blob/master/%E7%BD%91%E7%BB%9C/XSS%E5%8E%9F%E7%90%86%E4%B8%8E%E9%98%B2%E5%BE%A1.md)
     + [2019-01-28]  [CSRF原理与防御](https://github.com/bearnew/blog/blob/master/%E7%BD%91%E7%BB%9C/CSRF%E5%8E%9F%E7%90%86%E4%B8%8E%E9%98%B2%E5%BE%A1.md)
 + 2018
