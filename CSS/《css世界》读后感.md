@@ -197,5 +197,81 @@ img:after {
     content: attr(data-title);
 }
 ```
-阅读至65页
-
+### 16.CSS counter计数器
+> 遇见counter-increment一次，变化一次
+```html
+<p class="counter">
+    <p class="inner"></p>
+</p>
+```
+```css
+.counter {
+    counter-reset: wangxiaoer 12;
+    counter-increment: wangxiaoer;
+}
+.inner::before {
+    content: counter(wangxiaoer); // 14
+    counter-increment: wangxiaoer;
+}
+```
+### 17.左右padding之和大于content时
+```html
+<!-- 实际宽度变成了100px -->
+<p class="box"></p>
+```
+```css
+.box {
+    width: 80px;
+    padding: 0 50px;
+    box-sizing: border-box;
+}
+```
+### 18.clip裁剪
+```html
+<button id="btn"></button>
+<label for="btn">按钮</label>
+```
+```css
+button {
+    position: absolute;
+    clip: rect(0, 0, 0, 0)
+}
+label {
+    display: inline-block;
+    line-height: 20px;
+    padding: 10px;
+}
+```
+### 19.css菜单栏
+```html
+<div class="icon-menu"></div>
+```
+```css
+.icon-menu {
+    display: inline-block;
+    width: 140px;
+    height: 10px;
+    padding: 35px 0;
+    border-style: solid;
+    border-width: 10px 0;
+    border-color: #ccc;
+    background-color: #ccc;
+    background-clip: content-box;
+}
+```
+```html
+<div class="icon-dot"></div>
+```
+```css
+.icon-dot {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    padding: 10px;
+    border: 10px #ccc solid;
+    border-radius: 50%;
+    background-color: #ccc;
+    background-clip: content-box;
+}
+```
+阅读至81页 4.3章节
