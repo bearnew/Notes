@@ -1,6 +1,10 @@
-const x = 2;
+const x = {};
+x.x = x; 
 const obj = {
-	x: x,
+    x: x,
+    y: {
+        z: 3
+    },
     arr: [111, 222],
     obj: {key: '对象'},
     a: () => {console.log('函数')},
@@ -8,35 +12,29 @@ const obj = {
     reg: /正则/ig
 }
 
-console.log(deepCopy(obj))
-console.log(deepCopy(obj) === obj)
-// obj = {
-//     x: 2,
-//     arr: [111, 222],
-//     obj: {key: '对象'},
-//     a: () => {console.log('函数')},
-//     date: Sun Mar 03 2019 11:33:38 GMT+0800 (中国标准时间) {},
-//     reg: /正则/gi
-// }
+const copyObj = deepCopy(obj);
+copyObj.y.z = 30;
+copyObj.arr.pop();
+copyObj.obj.key = '对象拷贝';
+copyObj.a = () => {console.log('函数拷贝')}
+copyObj.reg = /正则拷贝/ig;
+console.log(copyObj)
+console.log(obj)
+
+function isObj(obj) {
+    const typeStr = Object.prototype.toString.call(obj);
+    return typeStr === '[object Object]' || typeStr === '[object Array]';
+}
 
 function deepCopy(obj, hash = new WeakMap()) {
-    let cloneObj
-    let Constructor = obj.constructor
+    if(hash.has(obj)) return hash.get(obj)
+    let cloneObj = Array.isArray(obj) ? [] : {}
+    hash.set(obj, cloneObj)
 
-    if(hash.has(obj)) {
-        return hash.get(obj)
-    }
-
-    cloneObj = new Constructor()
-    hash.set(obj, cloneObj)
-    
-    for (let key in obj) {
+console.log(hash)
+    for (let key in obj) {
         cloneObj[key] = isObj(obj[key]) ? deepCopy(obj[key], hash) : obj[key];
     }
     return cloneObj
-}
-
-function isObj(obj) {
-    return Object.prototype.toString.call([obj]) === '[object object]'
 }
 
