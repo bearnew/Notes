@@ -1,10 +1,18 @@
- JS数据类型
+## JS数据类型
 ====
 数据类型
 ```javascript
 Undefined Null Boolean Number String  // 简单数据类型
 Object // 复杂数据类型
 ```
+#### typeof的返回值(6种)
+* string
+* number
+* boolean
+* undefined
+* object
+* function
+> 检测一个对象的类型，强烈推荐使用Object.prototype.toString方法
 
 Undefined
 ----

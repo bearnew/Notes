@@ -42,3 +42,55 @@ let notSure: any = 4;
 notSure = "maybe a string instead";
 notSure = false; // okay, definitely a boolean
 ```
+8. void
+函数无返回值，其返回值类型void
+```js
+function warnUser(): void {
+    console.log('This is my warning message');
+}
+```
+void类型的变量只能用于赋予undefined和null
+```js
+let unusable: void = undefined;
+```
+9. Null和Undefined
+```js
+// Not much else we can assign to these variables!
+let u: undefined = undefined;
+let n: null = null;
+```
+10. Never
+never类型表示的是那些永不存在的值的类型
+```js
+// 返回never的函数必须存在无法达到的终点
+function error(message: string): never {
+    throw new Error(message);
+}
+
+// 推断的返回值类型为never
+function fail() {
+    return error("Something failed");
+}
+
+// 返回never的函数必须存在无法达到的终点
+function infiniteLoop(): never {
+    while (true) {
+    }
+}
+```
+11. Object
+除number，string，boolean，symbol，null或undefined之外的类型。
+```js
+declare function create(o: object | null): void;
+```
+12. 类型断言
+* 尖括号语法
+```js
+let someValue: any = 'this is a string';
+let strLength: number = (<string>someValue).length;
+```
+* as语法（jsx中，只有as语法断言被允许）
+```js
+let someValue: any = 'this is a string';
+let strLength: number = (someValue as string).length;
+```
