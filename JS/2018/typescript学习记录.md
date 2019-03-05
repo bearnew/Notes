@@ -94,3 +94,27 @@ let strLength: number = (<string>someValue).length;
 let someValue: any = 'this is a string';
 let strLength: number = (someValue as string).length;
 ```
+### 4.typescript接口
+1. 可选属性
+```js
+interface SquareConfig {
+  color?: string;
+  width?: number;
+}
+```
+2. 只读属性
+```js
+interface Point {
+    readonly x: number;
+    readonly y: number;
+}
+
+let p1: Point = { x: 10, y: 20 };
+p1.x = 5; // error!
+```
+3. 函数类型
+```js
+interface SearchFunc {
+  (source: string, subString: string): boolean;
+}
+```
