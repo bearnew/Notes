@@ -104,4 +104,24 @@ OPTIONS * HTTP/1.1
     | :--- | :---- |
     | 响应 | HTTP/1.1 200OK<br/>Content-Type:message/http<br/>Content-Length: 1024<br/>TRACE / HTTP/1.1<br/>Host:hackr.jp<br/>Max-Forwards: 2(返回响应包含请求内容) |
 8.CONNECT: 要求用隧道协议连接代理
+    * 与代理服务器通信时建立隧道, 实现用隧道协议进行TCP通信
+    * 主要用SSL（Secure Sockets Layer，安全套接层）和TLS（Transport Layer Security, 传输层安全）通信协议将通信内容加密后经网络隧道传输
+    * CONNECT 代理服务器名:端口号 HTTP版本
 
+    | 请求 | CONNECT proxy.hackr.jp:8080 HTTP/1.1 <br/> Host: proxy.hackr.jp |
+    |:-----|:----|
+    | 响应 | HTTP/1.1 200 OK（之后进入网络隧道）|
+
+#### 6.使用方法下达命令
+
+![http method](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/http_method.png?raw=true)
+
+#### 7.持久连接
+1. HTTP的初始版本，每进行一次HTTP通信，都要进行TCP的连接和断开
+2. HTTP1.1提出了持久连接（HTTP keep-alive）,只要任意一端没提出断开连接，则保持TCP连接状态
+3. 持久连接旨在建立1次TCP连接，进行多次请求和响应的交互
+4. 持久连接的优点
+    * 减少TCP连接断开的开销，减轻服务器负载
+    * 节省了HTTP请求和响应的时间
+#### 8.管线化
+* 同时并行发送多个请求
