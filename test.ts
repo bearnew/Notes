@@ -1,7 +1,8 @@
-const enum Enum {
-    A = 1,
-    B,
-    C = 2
+interface Named {
+    name: string;
 }
 
-console.log(Enum.B)
+let x: Named;
+// y's inferred type is { name: string; location: string; }
+let y = { name: 'Alice', location: 'Seattle' };
+x = y;

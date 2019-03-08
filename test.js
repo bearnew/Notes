@@ -1,1 +1,4 @@
-console.log(2 /* B */);
+var x;
+// y's inferred type is { name: string; location: string; }
+var y = { name: 'Alice', location: 'Seattle' };
+x = y;
