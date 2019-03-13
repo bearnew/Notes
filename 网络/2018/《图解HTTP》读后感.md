@@ -270,4 +270,73 @@ OPTIONS * HTTP/1.1
       - 以关键字检索多个数据库使用的协议
     - Gopher
       - 查找与互联网连接的计算机内信息的协议
-阅读至 65 页 4.4 章节
+#### 16.HTTP首部
+##### General Header Fields(通用首部字段)
+![general header fields](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/general_header_fields.png?raw=true)
+##### Request Header Fields(请求首部字段)
+![request header fields](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_request_header_fields.png?raw=true)
+##### Response Header Fields(响应首部字段)
+![response header fields](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/response_header_fields.png?raw=true)
+##### Entity Header Fields(实体首部字段)
+![entity header fields](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/entity_header_fields.png?raw=true)
+
+#### 17.HTTP/1.1 通用首部字段
+1. Cache-Control
+> eg. Cache-Control: private, max-age=0, no-cache
+* 缓存请求响应
+
+  | 指令 | 参数 | 说明 |
+  |:---------|:---------|:-------|
+  |no-cache   |无         |强制向原服务器再次验证|
+  |no-store   |无         |不缓存请求或响应的任何内容|
+  |max-age=[秒] |必需       |响应的最大Age值 |
+  |max-stale(=[秒])|可省略    |接收已过期的响应 |
+  |min-fresh=[秒]|必需      |期望在指定时间内的响应仍有效|
+  |no-transform |无       |代理不可更改媒体类型 |
+  |only-if-cached|无  |从缓存获取资源 |
+  |cache-extension|-  |新指令标记（token）|
+
+* 缓存响应指令
+  | 指令 | 参数 | 说明 |
+  |:-----------|:------------|:--------------------|
+  |public     |无     |可向任意方提供响应的缓存   |
+  |private    |可省略 |仅向特定用户返回响应   |
+  |no-cache   |可省略 |缓存前必须先确认其有效性  |
+  |no-store   |无     |不缓存或响应的任何内容 |
+  |no-transform|无    |代理不可更改媒体类型   |
+  |must-revalidate|无  |可缓存但必须向源服务器进行确认 |
+  |proxy-revalidate|无  |要求中间缓存服务器对缓存的响应有效性在进行确认|
+  |max-age=[秒] |必需 |响应的最大Age值|
+  |s-maxage=[秒]|必需 |公共缓存服务器响应的最大Age值|
+  |cache-extension|-  |新指令标记(token) |
+2. Connection
+  * 控制不再转发给代理的首部字段
+    ![conection_remove](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/connection1.png?raw=true)
+  * 管理持久连接
+    ![connection_keep_alive](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/connection2.png?raw=true)
+3. Date
+  > eg. Date: Tue, 03 Jul 2012 04:40:59 GMT
+4. Pragma
+  > eg. Pragma: no-cache(为了兼容，需加上Cache-Control: no-cache)
+  要求所有的中间服务器不返回缓存资源
+5. Trailer
+  > eg. Trailer: Expires(事先说明报文主体记录了哪些首部字段)
+6. Transfer-Encoding
+  用这种传输编码方式发送
+  > Transfer-Encoding: chunked
+7. Upgrade
+  * 用于检测协议是否可使用更高的版本进行通信
+  * 需要与connection搭配使用
+    ```js
+    Upgrade: TLS/1.0, HTTP/1.1
+    Connection: Upgrade
+    ```
+  * 服务器对这种请求可返回 101 Switching Protocols状态码
+8. Via
+  追踪客户端与服务器之间的请求和响应报文的传输路径
+9. Warning
+  * 告知用户一些与缓存相关的问题的警告
+  * Warning: [警告码][警告的主机:端口号]“[警告内容]”([日期时间])
+  * Warning: 113 gw.hackr.jp:8080 "Heuristic expiration" Tue, 03
+  * ![warning status](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/http_warning.png?raw=true)
+10. 
