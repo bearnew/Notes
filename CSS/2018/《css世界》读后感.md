@@ -92,12 +92,14 @@ span {
     display: inline-block;
 }
 ```
+
 ### 8.替换元素
 * 1.<img>,<object>,<video>,<iframe>,<textarea>,<input>都是典型的替换元素
 * 2.替换元素，内容的外观不受css的影响
 * 3.有自己的尺寸
 * 4.在很多css上都有自己的一套表现规则
 * 4.vertical-align的默认值baseline被定义为x的下边缘,替换元素的基线被定义为元素的下边缘
+
 ### 9.图片加载
 ```html
 <img>
@@ -107,6 +109,7 @@ img:not([src]) {
     content: url(1.jpg);
 }
 ```
+
 ### 10通过hover将图片变成另一张图片
 ```html
 <img src="laugh.png">
@@ -116,12 +119,14 @@ img:hover {
     content: url(laugh-tear.png)
 }
 ```
+
 ### 11.通过content实现背景图片
 ```css
 h1 {
     content: url(logo.png);
 }
 ```
+
 ### 12.清除浮动
 ```css
 .clear:after {
@@ -130,6 +135,7 @@ h1 {
     clear: both;
 }
 ```
+
 ### 13.兼容所有浏览器的两端对齐
 ```html
 <div class="box">
@@ -160,6 +166,7 @@ h1 {
     width: 20px;
 }
 ```
+
 ### 14.css实现加载中效果
 \A,\D实现换行效果
 
@@ -188,6 +195,7 @@ dot::before {
     }
 }
 ```
+
 ### 15.content attr属性值内容审查
 ```css
 img:after {
@@ -197,6 +205,7 @@ img:after {
     content: attr(data-title);
 }
 ```
+
 ### 16.CSS counter计数器
 > 遇见counter-increment一次，变化一次
 ```html
@@ -214,6 +223,7 @@ img:after {
     counter-increment: wangxiaoer;
 }
 ```
+
 ### 17.左右padding之和大于content时
 ```html
 <!-- 实际宽度变成了100px -->
@@ -226,6 +236,7 @@ img:after {
     box-sizing: border-box;
 }
 ```
+
 ### 18.clip裁剪
 ```html
 <button id="btn"></button>
@@ -242,6 +253,7 @@ label {
     padding: 10px;
 }
 ```
+
 ### 19.css菜单栏
 ```html
 <div class="icon-menu"></div>
@@ -274,4 +286,133 @@ label {
     background-clip: content-box;
 }
 ```
-阅读至81页 4.3章节
+
+### 20.margin
+1. 尺寸通过负值变大
+    ```html
+    <div class="father">
+        <div class="son"></div>
+    </div>
+    ```
+    ```css
+    .father {
+        width: 300px;
+    }
+    <!-- son的宽度为340px -->
+    .son {
+        margin: 0 -20px;
+    }
+    ```
+2. 用负Margin实现右侧间距
+    ```html
+    <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+    ```
+    ```css
+    ul {
+        width: 100%;
+        margin-right: -20px;
+    }
+    ul > li {
+        float: left;
+        width: 100px;
+        margin-right: 20px;
+        background: green;
+    }
+    ```
+3. margin合并的场景
+    * 相邻兄弟元素的margin合并
+    ```html
+    <ul class="box">
+		<li></li>
+		<li></li>
+		<li></li>
+	</ul>
+    ```
+    ```css
+    ul {
+        width: 100%;
+        margin-bottom: -1em;
+    }
+    ul > li {
+        margin: 1em 0;
+        background: green;
+    }
+    ```
+    * 父级第一个/最后一个子元素
+    ```html
+    <div class="father" style="margin-top: 80px;">
+        <div class="son" style="margin-top: 80px;"></div>
+    </div>
+    ```
+    * 空块级元素的margin合并
+    ```html
+    <div class="father">
+        <div class="son"></div>
+    </div>
+    ```
+    ```css
+    .father {
+        overflow: hidden;
+    }
+    .son {
+        margin: 1em 0;
+    }
+    ```
+
+### 21.border
+* border-width
+  * thin: 1px
+  * medium：3px(默认值)
+  * thick：4px
+* border-style
+  * none(默认值)
+  * solid
+  * dashed
+  * dotted
+  * double
+  * inset(内凹)
+  * outset(外凸)
+  * groove(沟槽)
+  * ridge(山脊)
+* border-color
+  * border-color默认颜色就是color色值
+* border使用透明边框小技巧
+  * 增加点击区域大小
+    ```css
+        .icon-clear {
+            width: 16px;
+            height: 16px;
+            border: 11px solid transparent;
+        }
+    ```
+  * 绘制三角形
+    ```css
+        .trangle {
+            width: 0;
+            border: 10px solid;
+            border-color: #f30 transparent transparent;
+        }
+    ```
+  * 梯形
+    ```css
+        .trapezoid {
+            width: 10px;
+            height: 10px;
+            border: 10px solid;
+            border-color: #f30 transparent transparent;
+        }
+    ```
+  * 一侧开口
+    ```css
+        div {
+            width: 0;
+            border-width: 10px 20px;
+            border-style: solid;
+            border-color: #f30 #f30 transparent transparent;
+        }
+    ```
+阅读至111页 第5章
