@@ -9,7 +9,7 @@
         ch：定义为数字0的宽度
         ```
     * 相对视区长度单位
-        ```vw, vh, vmin, vmax```
+        ```vw, vh, vmin(vw和vh较小的值), vmax（vw和vh较大的值）```
 * 绝对长度单位
     ```px, pt(1pt＝1/72英寸，用于印刷业), cm(厘米), mm（毫米）, pt(相当于我国新四号铅字的尺寸)```
 ### 2.选择器
@@ -94,7 +94,7 @@ span {
 ```
 
 ### 8.替换元素
-* 1.<img>, <object>, <video>, <iframe>, <textarea>, <input>都是典型的替换元素
+* 1.```<img>, <object>, <video>, <iframe>, <textarea>, <input>```都是典型的替换元素
 * 2.替换元素，内容的外观不受css的影响
 * 3.有自己的尺寸
 * 4.在很多css上都有自己的一套表现规则
