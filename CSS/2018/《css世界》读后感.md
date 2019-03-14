@@ -94,7 +94,7 @@ span {
 ```
 
 ### 8.替换元素
-* 1.<img>,<object>,<video>,<iframe>,<textarea>,<input>都是典型的替换元素
+* 1.<img>, <object>, <video>, <iframe>, <textarea>, <input>都是典型的替换元素
 * 2.替换元素，内容的外观不受css的影响
 * 3.有自己的尺寸
 * 4.在很多css上都有自己的一套表现规则
