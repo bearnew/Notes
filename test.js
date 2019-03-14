@@ -1,4 +1,9 @@
-var x;
-// y's inferred type is { name: string; location: string; }
-var y = { name: 'Alice', location: 'Seattle' };
-x = y;
+var scope = "global scope";
+function checkscope(){
+    var scope = "local scope";
+    function f(){
+        return scope;
+    }
+    return f();
+}
+console.log(checkscope());
