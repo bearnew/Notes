@@ -1,5 +1,5 @@
 ## 你不知道的javascript读后感
-### 作用域
+### 1.作用域
 1. 全局作用域
     * 生命周期存在于整个程序之内
     * 全局变量会挂载在window对象上
@@ -44,3 +44,158 @@
     ```
 5. 动态作用域
     * 运行时根据程序的流程信息(函数调用的时候)来动态确定的
+    * 通过改变this的引用，实现动态作用域
+### 2.提升
+1. 函数声明和变量声明都会提升，函数提升会优先
+### 3.this
+1. 函数
+    * 具名函数
+    ```js
+    function foo() {
+        foo.count = 4;
+    }
+    ``` 
+    * 匿名函数
+    ```js
+    setTimeout(function() {
+
+    }, 10)
+    ```
+    使用arguments.callee引用当前正在运行的函数对象，但是arguments.callee已被废弃
+2. this的指向取决于函数的调用方式
+    1. 隐式绑定（调用位置是否有上下文对象）
+        ```js
+        // 对象属性引用链上，只有最顶层（最近的一层影响调用位置）
+        function foo() {
+            console.log( this.a );
+        }
+        var obj2 = {
+            a: 42,
+            foo: foo
+        };
+        var obj1 = {
+            a: 2,
+            obj2: obj2
+        };
+        obj1.obj2.foo(); // 42
+        ```
+    2. this的调用取决于调用的函数，与函数的引用无关系
+        ```js
+        function foo() {
+            console.log( this.a );
+        }
+        var obj = {
+            a: 2,
+            foo: foo
+        };
+        var bar = obj.foo; // 函数别名！
+        var a = "oops, global"; // a 是全局对象的属性
+        bar(); // "oops, global"
+        ```
+        参数传递，是隐式赋值
+        ```js
+        function foo() {
+            console.log( this.a );
+        }
+        function doFoo(fn) {
+            // fn 其实引用的是foo
+            fn(); // <-- 调用位置！
+        }
+        var obj = {
+            a: 2,
+            foo: foo
+        };
+        var a = "oops, global"; // a 是全局对象的属性
+        doFoo( obj.foo ); // "oops, global"
+        ```
+        回调函数丢失this绑定
+        ```js
+        function foo() {
+            console.log( this.a );
+        }
+        var obj = {
+            a: 2,
+            foo: foo
+        };
+        var a = "oops, global"; // a 是全局对象的属性
+        setTimeout( obj.foo, 100 ); // "oops, global"
+
+        // setTimeout的内部实现
+        function setTimeout(fn, delay) {
+            // 等待delay毫秒
+            fn();
+        }
+        ```
+3. 显式绑定
+   1. 使用call(...), apply(...), bind(...)方法
+    ```js
+        function foo() {
+            console.log( this.a );
+        }
+        var obj = {
+            a:2
+        };
+        var bar = function() {
+            foo.call( obj );
+        };
+        bar(); // 2
+        setTimeout( bar, 100 ); // 2
+        // 硬绑定的bar 不可能再修改它的this
+        bar.call( window ); // 2
+    ```
+   2. API第2个参数context，作用与bind一样
+    ```js
+        function foo(el) {
+            console.log( el, this.id );
+        }
+        var obj = {
+            id: "awesome"
+        };
+        // 调用foo(..) 时把this 绑定到obj
+        [1, 2, 3].forEach( foo, obj );
+        // 1 awesome 2 awesome 3 awesome
+    ```  
+4. new绑定
+    * 创建（构造）一个全新的对象
+    * 新对象被执行原型连接
+    * 新对象绑定到函数调用的this
+    * new 表达式中的函数会自动返回这个新对象
+    ```js
+        function foo(a) {
+            this.a = a;
+        }
+        var bar = new foo(2);
+        console.log( bar.a ); // 2
+    ``` 
+5. new的绑定比隐式优先级高
+    ```js
+        function foo(something) {
+            this.a = something;
+        }
+        var obj1 = {
+            foo: foo
+        };
+        var obj2 = {};
+        obj1.foo( 2 );
+        console.log( obj1.a ); // 2
+        obj1.foo.call( obj2, 3 );
+        console.log( obj2.a ); // 3
+        var bar = new obj1.foo( 4 );
+        console.log( obj1.a ); // 2
+        console.log( bar.a ); // 4
+    ```
+6. new修改了显示绑定的this指向
+    ```js
+        function foo(something) {
+            this.a = something;
+        }
+        var obj1 = {};
+        var bar = foo.bind( obj1 );
+        bar( 2 );
+        console.log( obj1.a ); // 2
+        var baz = new bar(3);
+        console.log( obj1.a ); // 2
+        console.log( baz.a ); // 3
+    ``` 
+     
+
