@@ -1,27 +1,17 @@
-Function.prototype.bind = function(oThis) {
-    if (typeof this !== "function") {
-    // 与 ECMAScript 5 最接近的
-    // 内部 IsCallable 函数
-    throw new TypeError(
-    "Function.prototype.bind - what is trying " +
-    "to be bound is not callable"
-    );
+function New(f) {
+    //返回一个func
+    return function () {
+        var o = Object.create(f.prototype);
+        console.log(f, arguments)
+        f.apply(o, arguments);//继承父类的属性
+
+        return o; //返回一个Object
     }
-    var aArgs = Array.prototype.slice.call( arguments, 1 ),
-    fToBind = this,
-    fNOP = function(){},
-    fBound = function(){
-    return fToBind.apply(
-    (
-    this instanceof fNOP &&
-    oThis ? this : oThis
-    ),
-    aArgs.concat(
-    Array.prototype.slice.call( arguments )
-    );
-    }
-    ;
-    fNOP.prototype = this.prototype;
-    fBound.prototype = new fNOP();
-    return fBound;
-};
+}
+
+function foo(something) {
+    this.a = something;
+}
+
+var baz = New(foo)(3);
+console.log(baz.a); // 3

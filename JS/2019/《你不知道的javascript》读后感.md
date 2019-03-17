@@ -197,5 +197,79 @@
         console.log( obj1.a ); // 2
         console.log( baz.a ); // 3
     ``` 
+7. bind改变this的实现
+    ```js
+        Function.prototype.bind = function (oThis) {
+            if (typeof this !== "function") {
+                // 与 ECMAScript 5 最接近的
+                // 内部 IsCallable 函数
+                throw new TypeError(
+                    "Function.prototype.bind - what is trying " +
+                    "to be bound is not callable"
+                );
+            }
+            var aArgs = Array.prototype.slice.call(arguments, 1),
+                fToBind = this,
+                fNOP = function () { },
+                fBound = function () {
+                    return fToBind.apply(
+                        (
+                            this instanceof fNOP &&
+                                oThis ? this : oThis
+                        ),
+                        aArgs.concat(Array.prototype.slice.call(arguments)));
+                }
+            fNOP.prototype = this.prototype;
+            fBound.prototype = new fNOP();
+            return fBound;
+        };
+    ```
+8. new改变this的优先级最高
+    ```js
+        function foo(p1,p2) {
+            this.val = p1 + p2;
+        }
+        // 之所以使用 null 是因为在本例中我们并不关心硬绑定的 this 是什么
+        // 反正使用 new 时 this 会被修改
+        var bar = foo.bind( null, "p1" );
+        var baz = new bar( "p2" );
+        baz.val; // p1p2
+    ```
+9. 手写一个new
+    ```js
+        function New(f) {
+            //返回一个func
+            return function () {
+                var o = Object.create(f.prototype);
+                f.apply(o, arguments);//继承父类的属性
+
+                return o; //返回一个Object
+            }
+        }
+
+        function foo(something) {
+            this.a = something;
+        }
+
+        var baz = New(foo)(3);
+        console.log(baz.a); // 3
+    ```
+10. this优先级（1-4, 从高到低）
+    * 1.存在new绑定，this指向新创建的对象
+    ```js
+        var bar = new Foo();
+    ``` 
+    * 2.函数通过call, apply, bind绑定，this指向绑定的对象
+    ```js
+        var bar = foo.call(obj);
+    ``` 
+    * 3.函数在上下文对象中调用，this指向调用的最近的上下文对象
+    ```js
+        var bar = obj1.foo();
+    ``` 
+    * 4.默认绑定，严格模式，绑定到undefined,否则绑定到全局对象
+    ```js
+        var bar = foo();
+    ``` 
      
 
