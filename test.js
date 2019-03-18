@@ -1,30 +1,42 @@
-if (!Function.prototype.softBind) {
-    Function.prototype.softBind = function (obj) {
-        var fn = this;
-        // 捕获所有 curried 参数
-        var curried = [].slice.call(arguments, 1);
-        console.log(curried)
-        var bound = function () {
-            return fn.apply(
-                (!this || this === (window || global)) ? obj : this,
-                curried.concat.apply(curried, arguments)
-            );
-        };
-        bound.prototype = Object.create(fn.prototype);
-        return bound;
-    };
-}
+/**
+ * Question 1
+ */
 
-function foo() {
-    console.log("name: " + this.name);
+var name = 'window'
+
+var person1 = {
+  name: 'person1',
+  show1: function () {
+    console.log(this.name)
+  },
+  show2: () => console.log(this.name),
+  show3: function () {
+    return function () {
+      console.log(this.name)
+    }
+  },
+  show4: function () {
+    return () => console.log(this.name)
+  },
+  test: {
+      name: 'person3',
+      show5: () => console.log(this.name)
+  }
 }
-var obj = { name: "obj" },
-    obj2 = { name: "obj2" },
-    obj3 = { name: "obj3" };
-var fooOBJ = foo.softBind(obj);
-fooOBJ(); // name: obj
-obj2.foo = foo.softBind(obj);
-obj2.foo(); // name: obj2 <---- 看！！！
-fooOBJ.call(obj3); // name: obj3 <---- 看！
-setTimeout(obj2.foo, 10);
-    // name: obj <---- 应用了软绑定
+var person2 = { name: 'person2' }
+
+person1.show1() // person1
+person1.show1.call(person2) // person2
+
+person1.test.show5(); // window
+
+person1.show2() // window
+person1.show2.call(person2) // window
+
+person1.show3()() // window
+person1.show3().call(person2) // window
+person1.show3.call(person2)() // person2
+
+person1.show4()() // window
+person1.show4().call(person2) // window
+person1.show4.call(person2)() // person2

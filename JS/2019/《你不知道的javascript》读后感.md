@@ -254,24 +254,7 @@
         var baz = New(foo)(3);
         console.log(baz.a); // 3
     ```
-10. this优先级（1-4, 从高到低）
-    * 1.存在new绑定，this指向新创建的对象
-    ```js
-        var bar = new Foo();
-    ``` 
-    * 2.函数通过call, apply, bind绑定，this指向绑定的对象
-    ```js
-        var bar = foo.call(obj);
-    ``` 
-    * 3.函数在上下文对象中调用，this指向调用的最近的上下文对象
-    ```js
-        var bar = obj1.foo();
-    ``` 
-    * 4.默认绑定，严格模式，绑定到undefined,否则绑定到全局对象
-    ```js
-        var bar = foo();
-    ``` 
-11. 间接引用
+10. 间接引用
     ```js
         function foo() {
             console.log(this.a);
@@ -282,7 +265,7 @@
         o.foo(); // 3
         (p.foo = o.foo)(); // 2
     ```
-12. 软绑定
+11. 软绑定
     ```js
         if (!Function.prototype.softBind) {
             Function.prototype.softBind = function (obj) {
@@ -315,5 +298,51 @@
         setTimeout(obj2.foo, 10);
             // name: obj <---- 应用了软绑定
     ```
-13.     
-阅读至 99页
+12. 箭头函数的this绑定无法被修改(new 也不行)
+    ```js
+    function foo() {
+        // 返回一个箭头函数
+        return (a) => {
+            //this 继承自 foo()
+            console.log( this.a );
+        };
+    }
+    var obj1 = {
+        a:2
+    };
+    var obj2 = {
+        a:3
+    };
+    var bar = foo.call( obj1 );
+    bar.call( obj2 ); // 2, 不是 3 ！
+    ```
+    ```js
+    function foo() {
+        var self = this; // lexical capture of this
+        setTimeout( function(){
+            console.log( self.a );
+        }, 100 );
+    }
+    var obj = {
+        a: 2
+    };
+    foo.call( obj ); // 2
+    ```
+13. this优先级（1-4, 从高到低）
+    * 1.存在new绑定，this指向新创建的对象
+    ```js
+        var bar = new Foo();
+    ``` 
+    * 2.函数通过call, apply, bind绑定，this指向绑定的对象
+    ```js
+        var bar = foo.call(obj);
+    ``` 
+    * 3.函数在上下文对象中调用，this指向调用的最近的上下文对象
+    ```js
+        var bar = obj1.foo();
+    ``` 
+    * 4.默认绑定，严格模式，绑定到undefined,否则绑定到全局对象
+    ```js
+        var bar = foo();
+    ``` 
+阅读至 101页
