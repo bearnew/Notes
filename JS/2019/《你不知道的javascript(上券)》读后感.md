@@ -352,4 +352,137 @@
     2. 箭头函数的this绑定无法被修改
     3. function函数this的指向，取决于调用的环境，与函数的引用无关
 > https://juejin.im/post/59aa71d56fb9a0248d24fae3 
-阅读至 101页
+15. 类型
+    * 简单基本类型
+      * string
+      * number
+      * boolean
+      * null
+        ```js
+        // 原理: 不同的对象在底层都表示为二进制，在JavaScript 中二进制前三位都为0 的话会被判断为object 类型，
+        // null 的二进制表示是全0，自然前三位也是0，所以执行typeof 时会返回“object”。
+        typeof null // object
+        ``` 
+      * undefined
+    * 复杂基本类型
+      * object
+        * 函数是一等公民
+16. 内置对象
+    * String
+        ```js
+        var strPrimitive = "I am a string";
+        typeof strPrimitive; // "string"
+        strPrimitive instanceof String; // false
+        var strObject = new String( "I am a string" );
+        typeof strObject; // "object"
+        strObject instanceof String; // true
+        // 检查sub-type 对象
+        Object.prototype.toString.call( strObject ); // [object String]
+        ``` 
+    * Number
+        ```js
+        42.359.toFixed(2) // 引擎会自动将42转换成new Number(42)
+        ``` 
+    * Boolean
+    * Object
+    * Function
+    * Array
+    * Date
+      * 只有构造形式，没有文字形式
+    * RegExp
+    * Error
+    * null和undefined没有构造形式，只有文字形式
+17. 对象访问
+    ```js
+    var myObject = {
+        a: 2
+    };
+    myObject.a; // 属性访问
+    myObject["a"]; // 键访问
+    ```
+    ```js
+    var obj = {};
+    obj[obj] = 123;
+    obj[obj] // 123
+    obj['[object Object]'] // 123
+    ```
+18. 数组
+    * 数组的每个下标都是整数，但是仍然可以给数组添加属性
+    * 如果数组的属性名看起来像一个数字，那它就变成了数值下标
+    ```js
+    var myArray = ['foo', 42, 'bar'];
+    myArray.baz = 'baz';
+    
+    myArray.length; // 3
+    myArray.baz; // 'baz'
+
+    myArray['3'] = 'xx';
+    myArray.length; // 4
+    myArray[3]; // 'xx'
+    ```
+19. 属性描述符
+    * writable
+      * 决定是否可以修改属性的值
+    * enumerable
+      * 控制属性是否出现在对象的属性枚举中
+    * configurable
+      * 只要属性是可配置的，就可以使用defineProperty(...)方法来修改属性描述符
+      * configureable: false还会禁止删除这个属性
+        ```js
+        var myObject = {
+            a:2
+        };
+        myObject.a; // 2
+        delete myObject.a;
+        myObject.a; // undefined
+        ``` 
+    ```js
+    var myObject = {
+        a:2
+    };
+    Object.getOwnPropertyDescriptor( myObject, "a" );
+    // {
+    // value: 2,
+    // writable: true, 
+    // enumerable: true,
+    // configurable: true
+    // }
+    ```
+20. 对象定义
+    * 对象常量
+        ```js
+        var myObject = {};
+        Object.defineProperty(myObject, "FAVORITE_NUMBER", {
+            value: 42,
+            writable: false,
+            configurable: false
+        });
+        ```
+    * 禁止扩展
+        ```js
+        var myObject = {
+            a:2
+        };
+        Object.preventExtensions(myObject);
+        myObject.b = 3;
+        myObject.b; // undefined
+        ```
+    * 密封
+        * 密封之后，不能添加新属性，也不能重新配置或删除现有属性, 可以修改属性的值
+        * 原理: 现有对象上调用Object.preventExtensions(..) 并把所有现有属性标记为configurable:false
+        ```js
+        var myObject = {
+            a:2
+        };
+        Object.seal(myObject);
+        ``` 
+    * 冻结
+      * 实际上会在一个现有对象上调用Object.seal(..) 并把所有“数据访问”属性标记为writable:false
+      ```js
+        var myObject = {
+            a:2
+        };
+        Object.freeze(myObject);
+      ``` 
+
+阅读至118页
