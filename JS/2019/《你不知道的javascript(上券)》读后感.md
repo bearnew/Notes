@@ -484,5 +484,129 @@
         };
         Object.freeze(myObject);
       ``` 
+21. Getter和Setter
+    ```js
+    var myObject = {
+        // 给 a 定义一个getter
+        get a() {
+            return this._a_;
+        },
+        // 给 a 定义一个setter
+        set a(val) {
+            this._a_ = val * 2;
+        }
+    };
+    myObject.a = 2;
+    myObject.a; // 4
+    ```
+22. hasOwnProperty(..) 只会检查属性是否在myObject 对象中，不会检查[[Prototype]] 链。
+    ```js
+    var myObject = {
+        a:2
+    };
 
-阅读至118页
+    myObject.hasOwnProperty( "a" ); // true
+    ```
+23. 遍历
+    * forEach(...)遍历数组中所有值，并忽略回调函数的返回值
+    * every(...)运行到回调函数返回false
+    * some(...)运行到回调函数返回true
+    * for...of
+        ```js
+        var myArray = [ 1, 2, 3 ];
+        for (var v of myArray) {
+            console.log( v );
+        }
+        // 1
+        // 2
+        // 3
+        ``` 
+    * iterator
+        ```js
+        var myArray = [ 1, 2, 3 ];
+        var it = myArray[Symbol.iterator]();
+        it.next(); // { value:1, done:false }
+        it.next(); // { value:2, done:false }
+        it.next(); // { value:3, done:false }
+        it.next(); // { done:true }
+        ``` 
+24. 面向类的设计模式：
+    * 封装
+      * 类
+      * 构造函数
+    * 继承
+    * 重载
+      * 通过arguments参数个数实现重载
+      * 通过参数类型实现重载 
+    * 对态
+        * 同一个实体同时具有多种形式
+        * 一般通过子类重写父类方法实现多态
+            ```js
+            class Vehicle {
+                engines = 1
+                ignition() {
+                    output( "Turning on my engine." );
+                }
+                drive() {
+                    ignition();
+                    output( "Steering and moving forward!" )
+                }
+            }
+            class Car inherits Vehicle {
+                wheels = 4
+                drive() {
+                    inherited:drive()
+                    output( "Rolling on all ", wheels, " wheels!" )
+                }
+            }
+            ```
+        * 通过不同的传参实现多态
+            ```js
+            var makeSound = function(animal) {
+                animal.sound();
+            }
+            
+            var Duck = function(){}
+            Duck.prototype.sound = function() {
+                console.log('嘎嘎嘎')
+            }
+            var Chiken = function() {};
+            Chiken.prototype.sound = function() {
+                console.log('咯咯咯')
+            }
+            
+            makeSound(new Chicken());
+            makeSound(new Duck());
+            ``` 
+25. 原型
+    1. Object.create(...)
+        创建一个对象，并把对象的prototype关联到指定对象
+        ```js
+        var anotherObject = {
+            a:2
+        };
+
+        // 创建一个关联到anotherObject 的对象
+        var myObject = Object.create( anotherObject );
+        console.log(myObject) // {}
+
+        // 会一直查找对象的原型链Prototype
+        for (var k in myObject) {
+        console.log("found: " + k); // found: a
+        }
+
+        ("a" in myObject); // true
+        ```
+    2. 所有Prototype链最终都会指向内置的Object.prototype
+        * Object.prototype上有toString, valueOf, hasOwnProperty, isPrototypeOf等方法
+    3. 
+26. constructor
+    ```js
+    function Foo() {
+        // ...
+    }
+    Foo.prototype.constructor === Foo; // true
+    var a = new Foo();
+    a.constructor === Foo; // true
+    ```
+27. 
