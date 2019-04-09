@@ -609,4 +609,19 @@
     var a = new Foo();
     a.constructor === Foo; // true
     ```
+
+    Foo.prototype的.constructor属性是Foo函数声明时的默认属性，如果创建一个对象替换掉了.prototype对象引用，新对象不会获取.constructor属性。
+    ```js
+    function Foo() {}
+    Foo.prototype = {}; // 创建一个新原型对象
+
+    var a1 = new Foo();
+    a1.constructor === Foo; // false
+    // a1无.constructor属性
+    // 委托Prototype链上的Foo.prototype
+    // Foo.prototype被替换过，也无constructor属性
+    // 继续委托给Object.prototype
+    // Object.prototype.constructor指向内置的Object(...)函数
+    a1.constructor === Object; // true
+    ```
 27. 
