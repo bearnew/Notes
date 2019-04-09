@@ -624,4 +624,18 @@
     // Object.prototype.constructor指向内置的Object(...)函数
     a1.constructor === Object; // true
     ```
-27. 
+27. Object.create
+    ```js
+    // 创建一个新的Bar.prototype对象，并把它关联到Foo.prototype
+    Bar.prototype = Object.create(Foo.prototype);
+    ```
+    ```js
+    // 直接相等，容易修改到Foo.prototype
+    Bar.prototype = Foo.prototype;
+    Bar.prototype.myLable = ''; // Foo.prototype也被修改了
+    ```
+    ```js
+    // ES6使用setPrototypeOf来把Bar.prototype关联到Foo.prototype
+    Object.setPrototypeOf(Bar.prototype, Foo.prototype);
+    ```
+28. 155页

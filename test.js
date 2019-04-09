@@ -1,6 +1,23 @@
-function Foo() {}
-// Foo.prototype = {}; // 创建一个新原型对象
+function Foo(name) {
+  this.name = name;
+}
 
-var a1 = new Foo();
-console.log(a1.constructor === Foo); // false
-console.log(a1.constructor === Object); // true
+Foo.prototype.myName = function() {
+  console.log('1111')
+  return this.name;
+}
+
+function Bar(name, label) {
+  Foo.call(this, name);
+  this.label = label;
+}
+
+// Bar.prototype = Object.create(Foo.prototype);
+Bar.prototype = Foo.prototype
+
+console.log(Bar.prototype)
+
+var a = new Bar('xx', 'shaun');
+
+console.log(a.name)
+console.log(a.myName())
