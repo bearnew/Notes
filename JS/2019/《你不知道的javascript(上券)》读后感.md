@@ -638,4 +638,44 @@
     // ES6使用setPrototypeOf来把Bar.prototype关联到Foo.prototype
     Object.setPrototypeOf(Bar.prototype, Foo.prototype);
     ```
-28. 155页
+    ```js
+    // Object.create的实现
+    if (!Object.create) {
+        Object.create = function(o) {
+            function F(){}
+            F.prototype = o;
+            return new F();
+        }
+    }
+    ```
+28. instanceof
+    ```js
+    var a = new Foo();
+    // 查找a的整条[[prototype]]链上是否有指向Foo.prototype的对象
+    a instanceof Foo; // true
+    ```
+29. isPrototypeOf
+    ```js
+    var a = new Foo();
+    Foo.prototype.isPrototypeOf(a); // true
+    ```
+30. 其他获取对象原型链的方法
+    ```js
+    Object.getPrototypeOf(a) === Foo.prototype; // true
+    a.__proto__ === Foo.prototype; // true
+    ```
+31. __proto__
+    > __proto__和其它常用函数（toString(), isPrototypeOf()）一样，存在内置的Object.prototype中
+    ```js
+    // __proto__实现
+    Object.defineProperty(Object.prototype, '__proto__', {
+        get: function() {
+            return Object.getPrototypeOf(this);
+        },
+        set: function(o) {
+            Object.setPrototypeOf(this, o);
+            return o;
+        }
+    })
+    ```
+    
