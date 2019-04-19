@@ -6,31 +6,60 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>test</title>
 	<style>
-		* {
-			margin: 0;
-			padding: 0;
+		ul {
+		  display: flex;
+		  position: absolute;
+		  width: 800px;
+		  top: 50%;
+		  left: 50%;
+		  transform: translate(-50%, -50%);
+		  list-style: none;
 		}
-		.box {
-			
+		li {
+		  position: relative;
+		  padding: 20px;
+		  color: #000;
+		  line-height: 1;
+		  transition: 0.2s all linear;
+		  cursor: pointer;
 		}
-		.content {
-			display: -webkit-box;
-			overflow: hidden;
-			-webkit-line-clamp: 2;
-			-webkit-box-orient: vertical;
-			text-overflow: ellipsis;
+		li::before {
+		  content: "";
+		  position: absolute;
+		  top: 0;
+		  left: 100%;
+		  width: 0;
+		  height: 100%;
+		  border-bottom: 2px solid #f00;
+		  transition: 0.2s all linear;
 		}
-		.label {
-			margin-top: 21px;
+ 
+		li:active {
+		  background: #000;
+		  color: #fff;
+		}
+ 
+		.active ~ li::before {
+		  left: 0;
+		}
+		.active::before {
+		  width: 100%;
+		  left: 0;
+		  top: 0;
+		}
+		.hover::before{
+			width: 200%;
 		}
 	</style>
 </head>
-
 <body>
-	<div class="box">
-		<div class="content">Flight prices change frequently due to availability and demand. We want to make sure you always see the most up-to-date prices.</div>
-		<div class="label">action-confirm</div>
-	</div>
+	<ul>
+	  <li class="active tab" data-index='0'> 张杰 </li>
+	  <li class="tab" data-index='1'>周杰伦</li>
+	  <li class="tab" data-index='2'>林俊杰</li>
+	  <li class="tab" data-index='3'>薛之谦</li>
+	  <li class="tab" data-index='4'>你</li>
+	</ul>
 	<script type="text/javascript" src="test.js"></script>
 </body>
 
