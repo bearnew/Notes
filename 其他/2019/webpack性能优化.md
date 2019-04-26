@@ -131,19 +131,18 @@ module.exports = {
     ]
 }
 ```
-3. ParallelUglifyPlugin(多进程压缩js文件)
+3. terser-webpack-plugin(多进程压缩js文件)
 ```js
 // webpack.config.json
-const ParallelUglifyPlugin = require('wbepack-parallel-uglify-plugin');
-//...
-plugins: [
-    new ParallelUglifyPlugin({
-        uglifyJS:{
-            //...这里放uglifyJS的参数
-        },
-        //...其他ParallelUglifyPlugin的参数，设置cacheDir可以开启缓存，加快构建速度
-    })
-]
+const TerserPlugin = require('terser-webpack-plugin');
+
+module.exports = {
+  optimization: {
+    minimizer: [new TerserPlugin(
+      parallel: true   // 多线程
+    )],
+  },
+};
 ```
 
 ### 其他
