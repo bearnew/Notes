@@ -144,6 +144,6 @@ module.exports = {
   },
 };
 ```
-
+4. thread-loader
 ### 其他
 > https://juejin.im/post/5b652b036fb9a04fa01d616b
