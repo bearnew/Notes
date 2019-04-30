@@ -341,4 +341,10 @@ OPTIONS * HTTP/1.1
   * ![warning status](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/http_warning.png?raw=true)
 10. Accept
   * 通知服务器，客户端可接受的媒体类型，及媒体类型优先级
-  * 
+  * eg.  ```Accept: text/html,application/xhtml+xml,application/xml;q=0.9```
+  * 媒体类型
+    * 文本文件
+      * text/html, text/plain, text/css ...
+      * application/xhtml+xml, application/xml ...
+    * 图片文件
+      * image/jpeg, image/gif, image/png ...
