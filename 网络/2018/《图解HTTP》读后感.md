@@ -339,4 +339,6 @@ OPTIONS * HTTP/1.1
   * Warning: [警告码][警告的主机:端口号]“[警告内容]”([日期时间])
   * Warning: 113 gw.hackr.jp:8080 "Heuristic expiration" Tue, 03
   * ![warning status](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/http_warning.png?raw=true)
-10. 
+10. Accept
+  * 通知服务器，客户端可接受的媒体类型，及媒体类型优先级
+  * 
