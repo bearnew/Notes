@@ -1,10 +1,15 @@
 ## JS数据类型
+
+![js数据类型](https://github.com/bearnew/picture/blob/master/mardown/2019-05-04%20js-type/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20190504204011.jpg?raw=true)
 ====
 数据类型
 ```javascript
-Undefined Null Boolean Number String  // 简单数据类型
+Undefined Null Boolean Number String Symbol // 简单数据类型
 Object // 复杂数据类型
 ```
+####
+* 基本数据类型存储在栈中
+* 引用数据类型存储在堆中，栈中存放指向引用数据类型在堆中存储地址的指针
 #### typeof的返回值(6种)
 * string
 * number
