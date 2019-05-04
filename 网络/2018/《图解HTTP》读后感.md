@@ -339,4 +339,77 @@ OPTIONS * HTTP/1.1
   * Warning: [警告码][警告的主机:端口号]“[警告内容]”([日期时间])
   * Warning: 113 gw.hackr.jp:8080 "Heuristic expiration" Tue, 03
   * ![warning status](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/http_warning.png?raw=true)
-10. 
+10. Accept
+  * 通知服务器，客户端可接受的媒体类型，及媒体类型优先级
+  * eg.  ```Accept: text/html,application/xhtml+xml,application/xml;q=0.9```
+  * 媒体类型
+    * 文本文件
+      * text/html, text/plain, text/css ...
+      * application/xhtml+xml, application/xml ...
+    * 图片文件
+      * image/jpeg, image/gif, image/png ...
+    * 视频文件
+      * video/mpeg, video/quicktime ...
+    * 应用程序使用的二进制文件
+      * application/octet-stream, application/zip 
+  * q= 来额外表示权重值, q的范围0-1
+11. Accept-Charset
+  * 通知服务器用户代理支持的字符集及字符集的相对优先顺序
+  * ```Accept-Charset: iso-8859-5, unicode-1-1;q=0.8```
+12. Accept-Encoding
+  * 告知服务器用户代理支持的内容编码及内容编码的优先级顺序,可指定多种内容编码
+  * ```Accept-Encoding: gzip, deflate```
+  * 支持的内容的编码
+    * gzip
+    * compress
+    * deflate
+    * identity
+13. Accept-Language
+  * 告知服务器用户代理能够处理的自然语言集，以及自然语言集的优先级
+  * ```Accept-Language: zh-cn,zh;q=0.7,en-us,en;q=0.3```
+14. Authorization
+  * 告知服务器，用户代理的认证信息
+  * ```Authorization: Basic dWVub3NlbjpwYXNzd29yZA==```
+15. Expect
+  * 客户端使用首部字段Expect来告知服务器，期望出现的某种特定行为。
+  * ```Expect: 100-continue```
+16. From
+  * 告知服务器使用用户代理的用户的电子邮件地址
+  * ```From: info@hackr.jp```
+17. Host
+  * 告知服务器，请求的资源所处的互联网主机名和端口号
+  * ```Host: www.hackr.jp```
+  * 请求被发送至服务器时，请求中的主机名会用 IP 地址直接替换解决。
+  * 但如果，相同的 IP 地址下部署运行着多个域名(一台服务器运行着多个虚拟主机)，那么服务器就会无法理解究竟是哪个域名对应的请求。
+  * 因此，就需要使用首部字段 Host 来明确指出请求的主机名
+18. If-Match
+  * 只有当客户端请求的If-Match字段值与服务器资源的实体标记ETag匹配一致，服务器才会接受请求
+19. If-Modified-Since
+  * 如果在If-Modified-Since字段指定的日期时间后，资源发生了更新，服务器会接受请求, 返回200 OK, 附带Last-Modified（最近的更新时间）。
+  * 否则返回304 Not Modified
+  * If-Modified-Since用于确认代理或客户端拥有的本地资源的有效性
+  * 获取资源的更新日期时间，可通过确认首部字段Last-Modified来确定
+20. If-None-Match
+  * 与ETag值不一致时，可处理该请求, 与If-Match首部字段的作用相反
+  * 在GET或HEAD方法中使用If-None-Match可获取最新的资源
+21. If-Range
+  * If-Range字段值若是跟ETag值或更新的日期时间匹配一致，就作为范围请求处理
+  * 若不一致，则忽略范围请求，返回全部资源
+  * 请求示例:
+    ```js
+    GET /index.html
+    If-Range: "123456"
+    Range: bytes=5001-10000
+    ```
+  * 返回示例（If-Range与ETag一致）
+    ```js
+    206 Partial Content
+    Content-Range: bytes 5001-10000/10000
+    Content-Length: 5000
+    ```
+  * 返回示例(If-Range与ETag不一致)
+    ```js
+    200 OK
+    ETag: "56789"
+    ```
+22. 
