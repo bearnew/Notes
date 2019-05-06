@@ -1,11 +1,12 @@
-var lis = document.getElementsByClassName('tab');
-	for(var i=0; i<lis.length; i++){
-		lis[i].onclick = function(){
-			var that = this;
-			for(var i=0; i<lis.length; i++){
-				lis[i].classList.remove('active')
-				this.classList.add('active')
-			}
-		}
+function test() {
+	try {
+		console.log('11111')
+		return 2222
+	} catch(err) {
+		console.log('3333')
+	} finally {
+		console.log('4444')
 	}
+}
 
+console.log(test())
