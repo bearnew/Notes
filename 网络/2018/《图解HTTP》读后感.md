@@ -422,5 +422,6 @@ OPTIONS * HTTP/1.1
   23. Max-Forwards
     * 每经过一次服务器转发请求，Max-Forward值减1
     * 当服务器收到Max-Forwards值为0的请求时，则不再转发，直接返回响应
+    * 
   24. 
-6.4.13 111页
+6.4.15 113页
