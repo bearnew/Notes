@@ -419,5 +419,8 @@ OPTIONS * HTTP/1.1
       If-Unmodified-Since: Thu, 03 Jul 2012 00:00:00 GMT
       ```
     * 指定时间后发生了更新，则以412 Precondition Failed作为响应
-  23. 
+  23. Max-Forwards
+    * 每经过一次服务器转发请求，Max-Forward值减1
+    * 当服务器收到Max-Forwards值为0的请求时，则不再转发，直接返回响应
+  24. 
 6.4.13 111页
