@@ -285,30 +285,30 @@ OPTIONS * HTTP/1.1
 > eg. Cache-Control: private, max-age=0, no-cache
 * 缓存请求响应
 
-  | 指令 | 参数 | 说明 |
-  |:---------|:---------|:-------|
-  |no-cache   |无         |强制向原服务器再次验证|
-  |no-store   |无         |不缓存请求或响应的任何内容|
-  |max-age=[秒] |必需       |响应的最大Age值 |
-  |max-stale(=[秒])|可省略    |接收已过期的响应 |
-  |min-fresh=[秒]|必需      |期望在指定时间内的响应仍有效|
-  |no-transform |无       |代理不可更改媒体类型 |
-  |only-if-cached|无  |从缓存获取资源 |
-  |cache-extension|-  |新指令标记（token）|
+  | 指令             | 参数   | 说明                         |
+  | :--------------- | :----- | :--------------------------- |
+  | no-cache         | 无     | 强制向原服务器再次验证       |
+  | no-store         | 无     | 不缓存请求或响应的任何内容   |
+  | max-age=[秒]     | 必需   | 响应的最大Age值              |
+  | max-stale(=[秒]) | 可省略 | 接收已过期的响应             |
+  | min-fresh=[秒]   | 必需   | 期望在指定时间内的响应仍有效 |
+  | no-transform     | 无     | 代理不可更改媒体类型         |
+  | only-if-cached   | 无     | 从缓存获取资源               |
+  | cache-extension  | -      | 新指令标记（token）          |
 
 * 缓存响应指令
-  | 指令 | 参数 | 说明 |
-  |:-----------|:------------|:--------------------|
-  |public     |无     |可向任意方提供响应的缓存   |
-  |private    |可省略 |仅向特定用户返回响应   |
-  |no-cache   |可省略 |缓存前必须先确认其有效性  |
-  |no-store   |无     |不缓存或响应的任何内容 |
-  |no-transform|无    |代理不可更改媒体类型   |
-  |must-revalidate|无  |可缓存但必须向源服务器进行确认 |
-  |proxy-revalidate|无  |要求中间缓存服务器对缓存的响应有效性在进行确认|
-  |max-age=[秒] |必需 |响应的最大Age值|
-  |s-maxage=[秒]|必需 |公共缓存服务器响应的最大Age值|
-  |cache-extension|-  |新指令标记(token) |
+  | 指令             | 参数   | 说明                                           |
+  | :--------------- | :----- | :--------------------------------------------- |
+  | public           | 无     | 可向任意方提供响应的缓存                       |
+  | private          | 可省略 | 仅向特定用户返回响应                           |
+  | no-cache         | 可省略 | 缓存前必须先确认其有效性                       |
+  | no-store         | 无     | 不缓存或响应的任何内容                         |
+  | no-transform     | 无     | 代理不可更改媒体类型                           |
+  | must-revalidate  | 无     | 可缓存但必须向源服务器进行确认                 |
+  | proxy-revalidate | 无     | 要求中间缓存服务器对缓存的响应有效性在进行确认 |
+  | max-age=[秒]     | 必需   | 响应的最大Age值                                |
+  | s-maxage=[秒]    | 必需   | 公共缓存服务器响应的最大Age值                  |
+  | cache-extension  | -      | 新指令标记(token)                              |
 2. Connection
   * 控制不再转发给代理的首部字段
     ![conection_remove](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/connection1.png?raw=true)
@@ -412,4 +412,12 @@ OPTIONS * HTTP/1.1
     200 OK
     ETag: "56789"
     ```
+  22. If-Unmodified-Since
+    * 指定的请求资源在指定的时间内未发生更新，才能处理请求
+    * eg.
+      ```js
+      If-Unmodified-Since: Thu, 03 Jul 2012 00:00:00 GMT
+      ```
+    * 指定时间后发生了更新，则以412 Precondition Failed作为响应
+  23. 
 6.4.13 111页
