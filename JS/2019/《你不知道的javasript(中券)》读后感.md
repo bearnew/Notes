@@ -45,4 +45,22 @@
 
     typeof typeof 42; // "string"
     ```
-4. 
+4. undefined(未定义), undeclared(未声明)
+    ```js
+    var a;
+    a; // undefined
+    b; // ReferenceError: b is not defined
+
+    typeof a; // undefined
+    // typeof有一个特殊的安全防范机制
+    typeof b; // undefined
+    ```
+5. typeof用于写polyfill
+    ```js
+    if (typeof atob === "undefined") {
+        // 不使用var声明变量，因为var会使atob提升到最顶层，即使if条件不成立
+        atob = function() { /*..*/ };
+    }
+    ```
+
+阅读至10页，第一章节完
