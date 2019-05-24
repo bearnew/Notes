@@ -62,5 +62,29 @@
         atob = function() { /*..*/ };
     }
     ```
+6. 数组
+    * 稀疏数组（sparse array, 即含有空白或空缺单元的数组）
+        ```js
+        var a = []
+        a['13'] = 42;
+        a.length; // 14
+        ```
+    * 数组转换
+        ```js
+        function foo() {
+            var arr = Array.prototype.slice.call(arguments);
+            arr.push("bam");
+            console.log(arr);
+        }
+        foo("bar", "baz"); // ["bar","baz","bam"]
+        ```
+    * ES6数组转换
+        ```js
+        var arr = Array.from(arguments);
+        ```
+7. 字符串
+    * 字符串经常被当成字符数组
+8. 
+9. 
 
 阅读至10页，第一章节完
