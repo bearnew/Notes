@@ -1,12 +1,2 @@
-function test(a, b) {
-	try {
-		console.log('11111')
-		return 2222
-	} catch (err) {
-		console.log('3333')
-	} finally {
-		console.log('4444')
-	}
-}
-
-console.log(test.length)
+b = ["f", "O", "o", "!"]
+console.log(b.reverse()); // ["!","o","O","f"]
