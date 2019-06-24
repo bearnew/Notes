@@ -339,7 +339,8 @@ OPTIONS * HTTP/1.1
   * Warning: [警告码][警告的主机:端口号]“[警告内容]”([日期时间])
   * Warning: 113 gw.hackr.jp:8080 "Heuristic expiration" Tue, 03
   * ![warning status](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/http_warning.png?raw=true)
-10. Accept
+#### 18.请求首部字段
+1. Accept
   * 通知服务器，客户端可接受的媒体类型，及媒体类型优先级
   * eg.  ```Accept: text/html,application/xhtml+xml,application/xml;q=0.9```
   * 媒体类型
@@ -353,10 +354,10 @@ OPTIONS * HTTP/1.1
     * 应用程序使用的二进制文件
       * application/octet-stream, application/zip 
   * q= 来额外表示权重值, q的范围0-1
-11. Accept-Charset
+2. Accept-Charset
   * 通知服务器用户代理支持的字符集及字符集的相对优先顺序
   * ```Accept-Charset: iso-8859-5, unicode-1-1;q=0.8```
-12. Accept-Encoding
+3. Accept-Encoding
   * 告知服务器用户代理支持的内容编码及内容编码的优先级顺序,可指定多种内容编码
   * ```Accept-Encoding: gzip, deflate```
   * 支持的内容的编码
@@ -364,35 +365,35 @@ OPTIONS * HTTP/1.1
     * compress
     * deflate
     * identity
-13. Accept-Language
+4. Accept-Language
   * 告知服务器用户代理能够处理的自然语言集，以及自然语言集的优先级
   * ```Accept-Language: zh-cn,zh;q=0.7,en-us,en;q=0.3```
-14. Authorization
+5. Authorization
   * 告知服务器，用户代理的认证信息
   * ```Authorization: Basic dWVub3NlbjpwYXNzd29yZA==```
-15. Expect
+6. Expect
   * 客户端使用首部字段Expect来告知服务器，期望出现的某种特定行为。
   * ```Expect: 100-continue```
-16. From
+7. From
   * 告知服务器使用用户代理的用户的电子邮件地址
   * ```From: info@hackr.jp```
-17. Host
+8. Host
   * 告知服务器，请求的资源所处的互联网主机名和端口号
   * ```Host: www.hackr.jp```
   * 请求被发送至服务器时，请求中的主机名会用 IP 地址直接替换解决。
   * 但如果，相同的 IP 地址下部署运行着多个域名(一台服务器运行着多个虚拟主机)，那么服务器就会无法理解究竟是哪个域名对应的请求。
   * 因此，就需要使用首部字段 Host 来明确指出请求的主机名
-18. If-Match
+9. If-Match
   * 只有当客户端请求的If-Match字段值与服务器资源的实体标记ETag匹配一致，服务器才会接受请求
-19. If-Modified-Since
+10. If-Modified-Since
   * 如果在If-Modified-Since字段指定的日期时间后，资源发生了更新，服务器会接受请求, 返回200 OK, 附带Last-Modified（最近的更新时间）。
   * 否则返回304 Not Modified
   * If-Modified-Since用于确认代理或客户端拥有的本地资源的有效性
   * 获取资源的更新日期时间，可通过确认首部字段Last-Modified来确定
-20. If-None-Match
+11. If-None-Match
   * 与ETag值不一致时，可处理该请求, 与If-Match首部字段的作用相反
   * 在GET或HEAD方法中使用If-None-Match可获取最新的资源
-21. If-Range
+12. If-Range
   * If-Range字段值若是跟ETag值或更新的日期时间匹配一致，就作为范围请求处理
   * 若不一致，则忽略范围请求，返回全部资源
   * 请求示例:
@@ -412,16 +413,57 @@ OPTIONS * HTTP/1.1
     200 OK
     ETag: "56789"
     ```
-  22. If-Unmodified-Since
+13. If-Unmodified-Since
     * 指定的请求资源在指定的时间内未发生更新，才能处理请求
     * eg.
       ```js
       If-Unmodified-Since: Thu, 03 Jul 2012 00:00:00 GMT
       ```
     * 指定时间后发生了更新，则以412 Precondition Failed作为响应
-  23. Max-Forwards
+14. Max-Forwards
     * 每经过一次服务器转发请求，Max-Forward值减1
     * 当服务器收到Max-Forwards值为0的请求时，则不再转发，直接返回响应
-    * 
-  24. 
-6.4.15 113页
+15. Proxy-Authorization
+    * 告知服务器认证所需要的信息
+    * 发生在客户端与代理之间
+    * eg.
+      ```js
+      Proxy-Authorization: Basic dGlwOjkpNlAGfFy5
+      ```
+16. Range
+    * 获取部分资源的范围请求
+    * ```js Range: bytes=5001-10000 ```
+    * 服务器处理请求后返回状态码```js 206 Partial Content```
+17. Referer
+    * 首部字段Referer会告知服务器请求的原始资源URI
+    * ```js Referer: http://www.hackr.jp/index.html```
+18. TE
+    * 告知服务器，客户端能够处理响应的传输编码方式及相应的优先级
+    * ```js TE: gzip, deflate; q=0.5 ```
+19. User-Agent
+    * 传达浏览器种类和代理名称等信息给服务器
+    * ```js User-Agent: Mozilla/5.0(Windows NT 6.1; WOW64; rv:13.0) ```
+#### 19.响应首部字段
+1. Accept-Range
+    * 告知客户端，服务器是否能够处理范围请求
+    * 可处理范围请求：```js Accept-Range: bytes```
+    * 不能处理范围请求：```js Accept-Range: none```
+2. Age
+    * 告知客户端，源服务器在多久前创建了响应，字段值单位为秒
+    * 若创建该响应的是缓存服务器，Age值是指缓存后的响应再次发起认证到认证完成的时间值
+    * ```js Age: 600```
+3. Etag
+    * 将资源以字符串形式做唯一性标识的方式
+    * 服务器会为每份资源分配对应的Etag值
+    * 资源更新时，Etag值也会更新
+    * 强Etag值：无论实体发生多么细微的变化都会改变其值
+        * ```js Etag: "usagi-1234" ```
+    * 弱Etag值：只有资源发生了根本变化，产生差异才会改变Etag值
+        * ```js Etag: W/"usage-1234" ```
+4. Location
+    * 使用Location将响应接收方引导至与请求URI不同的资源
+    * 配合```3xx: Redirection```，提供重定向的URI
+    * 几乎所有的浏览器接收到Location后，都会强制性的尝试对已提示的重定向资源访问
+
+
+6.5.5 119页
