@@ -1,15 +1,60 @@
-function test(list) {
-    var arr = [];
-    console.log(list)
-    list.map(item => {
-        //获取当前文件的绝对路径
-        if (item instanceof Array) {
-            arr = arr.concat(test(item));
-        } else {
-            arr.push(item);
+var a = function* () {
+    yield 'hello';
+    yield 'world';
+    return 'ending';
+}
+// console.log(co(a()));
+// co(helloWorldGenerator).then(() => {
+//     console.log('sdsdf')
+// });
+
+
+this.middleware = [];
+function compose(middleware) {
+    return function *(next) {
+        if (!next) next = noop();
+
+        var i = middleware.length;
+
+        while(i--) {
+            next = middleware[i].call(this, next);
         }
-    })
-    return arr;
+
+        // console.log('6666', yield *next)
+        return yield *next;
+        // yield *next;
+        // return next;
+    }
 }
 
-console.log(test([1, [2 ,[3, 4]], 5]))
+function *noop() {};
+
+function use(fn) {
+    this.middleware.push(fn); 
+}
+
+use(function *(next) {
+    console.log('first start');
+    yield next;
+    console.log('first end');
+})
+
+use(function *(next) {
+    console.log('second start');
+    yield next;
+    console.log('second end');
+})
+
+use(function *(next) {
+    console.log('three start');
+    yield next;
+    console.log('three end');
+})
+
+const koa = compose(this.middleware);
+
+// console.log('ssssss', koa)
+
+const test = co.wrap(koa)
+// console.log(typeof test, test)
+test()

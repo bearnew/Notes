@@ -81,6 +81,27 @@ b.say("hi") // b say hi
 > ES6的继承机制，实质是先创造父类的实例对象this（所以必须先调用super方法），然后再用子类的构造函数修改this。
 
 #### iterators迭代器
+* 不是语法塘，是一种迭代协议
+* 为了使对象能够实现```for...of```循环，对象或其原型链上必须带有```Symbol.iterator```键的属性
+```js
+var myIterable = {};
+myIterable[Symbol.iterator] = function* () {
+    yield 1;
+    yield 2;
+    yield 3;
+};
+
+for (let value of myIterable) { 
+    console.log(value); 
+}
+// 1
+// 2
+// 3
+
+//or
+
+console.log([...myIterable]); // [1, 2, 3]
+```
 ```js
 function chef(foods) {
     let i = 0;
@@ -104,6 +125,21 @@ console.log(test.next()) // Object {value:"banana", done:false}
 console.log(test.next()) // Object {value:undefined,done:true}
 ```
 #### generators生成器
+* yield与return相似，都能返回紧跟在语句后面表达式的值
+* 遇到yield，函数暂停执行，下一次再继续从该位置继续执行
+* 可有有任意多个yield, 只能有一个return
+* generator可以不用yield，就变成了单纯的暂缓执行函数
+```js
+function* f() {
+  console.log('执行了！')
+}
+
+var generator = f();
+
+setTimeout(function () {
+  generator.next()
+}, 2000);
+```
 ```js
 let chef = function* (foods) {
     for(var i=0; i<foods.length; i++) {
