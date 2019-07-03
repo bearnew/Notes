@@ -1,13 +1,14 @@
-var a = function* () {
-    yield 'hello';
-    yield 'world';
-    return 'ending';
-}
-// console.log(co(a()));
-// co(helloWorldGenerator).then(() => {
-//     console.log('sdsdf')
-// });
-
+// function* helloWorldGenerator() {
+//     console.log('1111')
+//     yield 'hello';
+//     console.log('22222')
+//     // yield 'world';
+//     // return 'ending';
+//   }
+  
+//   var hw = helloWorldGenerator();
+//   hw.next();
+//   hw.next()
 
 this.middleware = [];
 function compose(middleware) {
@@ -20,10 +21,7 @@ function compose(middleware) {
             next = middleware[i].call(this, next);
         }
 
-        // console.log('6666', yield *next)
         return yield *next;
-        // yield *next;
-        // return next;
     }
 }
 
@@ -53,8 +51,32 @@ use(function *(next) {
 
 const koa = compose(this.middleware);
 
-// console.log('ssssss', koa)
+co(koa);
+// test()
 
-const test = co.wrap(koa)
-// console.log(typeof test, test)
-test()
+function co(fn) {
+    const tmp = [];
+    wrap(fn);
+
+    function wrap(fn) {
+        const gen = fn();
+        // console.log(gen)
+        next(gen);    
+    }
+
+    function next(gen) {
+        const ret = gen.next();
+        tmp.push(gen);
+        // console.log(tmp)
+        // console.log(ret)
+
+        if (ret.done) {
+            tmp[2].next();
+            tmp[1].next();
+            tmp[0].next();
+            return;
+        }
+
+        wrap(() => ret.value);
+    }
+}

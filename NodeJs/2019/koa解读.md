@@ -10,4 +10,6 @@
     * ctx.res: node的response对象
     * ctx.request: koa的request对象
     * ctx.response: koa的response对象
+3. koa1中间件原理
     
+    * 2.

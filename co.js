@@ -40,7 +40,7 @@ co.wrap = function (fn) {
  */
 
 function co(gen) {
-  console.log('3333', gen.next)
+  console.log('!!!!!!!!!!!!!!!!!!!!!!!!', gen.next)
   var ctx = this;
   var args = slice.call(arguments, 1);
 
@@ -48,9 +48,11 @@ function co(gen) {
   // which leads to memory leak errors.
   // see https://github.com/tj/co/issues/180
   return new Promise(function(resolve, reject) {
+    console.log('kkkk', gen)
     if (typeof gen === 'function') gen = gen.apply(ctx, args);
     if (!gen || typeof gen.next !== 'function') return resolve(gen);
 
+    // console.log('cccccccccccccccccc')
     onFulfilled();
 
     /**
@@ -62,11 +64,14 @@ function co(gen) {
     function onFulfilled(res) {
       var ret;
       try {
+        console.log('++++++++++', gen, gen.next)
         ret = gen.next(res);
       } catch (e) {
         return reject(e);
       }
+      console.log('------------')
       next(ret);
+      // console.log('bbbb')
       return null;
     }
 
@@ -96,10 +101,15 @@ function co(gen) {
      */
 
     function next(ret) {
+      console.log('aaaa', ret)
       if (ret.done) return resolve(ret.value);
+      console.log('33333', ret.value)
       var value = toPromise.call(ctx, ret.value);
       console.log('44444', value)
-      if (value && isPromise(value)) return value.then(onFulfilled, onRejected);
+      if (value && isPromise(value)) {
+        console.log('66666')
+        return value.then(onFulfilled, onRejected);
+      }
       return onRejected(new TypeError('You may only yield a function, promise, generator, array, or object, '
         + 'but the following object was passed: "' + String(ret.value) + '"'));
     }
@@ -117,6 +127,7 @@ function co(gen) {
 function toPromise(obj) {
   if (!obj) return obj;
   if (isPromise(obj)) return obj;
+  console.log('55555', obj)
   if (isGeneratorFunction(obj) || isGenerator(obj)) return co.call(this, obj);
   if ('function' == typeof obj) return thunkToPromise.call(this, obj);
   if (Array.isArray(obj)) return arrayToPromise.call(this, obj);
