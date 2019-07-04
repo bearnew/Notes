@@ -72,7 +72,7 @@ function co(gen) {
       console.log('------------')
       next(ret);
       // console.log('bbbb')
-      return null;
+      // return null;
     }
 
     /**
@@ -126,9 +126,11 @@ function co(gen) {
 
 function toPromise(obj) {
   if (!obj) return obj;
+  console.log('8888')
   if (isPromise(obj)) return obj;
   console.log('55555', obj)
   if (isGeneratorFunction(obj) || isGenerator(obj)) return co.call(this, obj);
+  console.log('77777')
   if ('function' == typeof obj) return thunkToPromise.call(this, obj);
   if (Array.isArray(obj)) return arrayToPromise.call(this, obj);
   if (isObject(obj)) return objectToPromise.call(this, obj);

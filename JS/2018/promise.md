@@ -1,3 +1,40 @@
+## promise两种写法
+* 1.```new Promise```里面只能使用```resolve```
+* 2.函数本身为```Promise```时，可使用```return Promise.resolve()```, 或直接使用```return```
+```js
+function test1() {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(123);
+        }, 1000)
+    })
+}
+
+function test2() {
+    return test1().then(res => {
+        return 456;
+    })
+}
+
+function test3() {
+    return test2().then(res => {
+        return Promise.resolve(789)
+    })
+}
+
+test1().then(res => {
+    console.log(res); // 123
+})
+
+test2().then(res => {
+    console.log(res); // 456
+})
+
+test3().then(res => {
+    console.log(res); // 789
+})
+```
+
 ## promise错误处理
 ### 1.reject后的东西，then中有第二个回调，进入第二个回调
 ```js

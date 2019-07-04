@@ -39,8 +39,8 @@ use(function *(next) {
 
 const koa = compose(this.middleware);
 
-co1(koa);
-co2(koa())
+co1(koa); // 方法1
+co2(koa()) // 方法2
 
 // 中间件普通实现
 // 依次调用第1-3中间件的next方法
