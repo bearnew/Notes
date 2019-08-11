@@ -9,9 +9,11 @@
 		.wrapper {
 			display: grid;
 		}
+
 		.wrapper div {
 			border: 1px red solid;
 		}
+
 		.item1 {
 			grid-column-start: 1;
 			grid-column-end: 3;
@@ -28,6 +30,7 @@
 		}
 	</style>
 </head>
+
 <body>
 	<!-- <div class="wrapper">
 		<div class"item1">1</div>
@@ -37,6 +40,11 @@
 		<div>5</div>
 		<div>6</div>
 	</div> -->
+	<form action="http://p.pay7x24.com:81/v5/pay/unifiedorder" method="post">
+		<p>First name: <input type="text" name="fname" /></p>
+		<p>Last name: <input type="text" name="lname" /></p>
+		<input type="submit" value="Submit" />
+	</form>
 	<script type="text/javascript" src="co.js"></script>
 	<script type="text/javascript" src="test.js"></script>
 </body>

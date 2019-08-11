@@ -3,10 +3,33 @@
 ```js
 [] == ![]; // true
 [] == !{}; // true
+NaN == !NaN; // true
+NaN === !NaN; // true
 null == undefined; // true
 [1] == '1'; // true
 {} == {}; // false, ({}).valueOf() == ({}).valueOf() 为true
 {} == !{}; //false, !{}为false, {}为true
+
+Object.defineProperty(window, 'a', {
+    get: function () {
+        return ''
+    }
+})
+
+var b = {
+    valueOf: function () {
+        console.log('valueof')
+        return ''
+    },
+    toString: function () {
+        console.log('tostring')
+        return ''
+    },
+}
+
+console.log(b == a) // true
+console.log(b == []) // false
+console.log([] == a) // true
 ```
 * rule
 ```js

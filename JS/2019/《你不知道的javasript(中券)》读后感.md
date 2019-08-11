@@ -164,7 +164,79 @@
         ```js
         Number.MAX_SAFE_INTEGER // 2^53 - 1，即 9007199254740991, 远远小于Number.MAX_VALUE
         ``` 
-9. 
-10. 
+    * 整数检测
+        ```js
+        // es6方法
+        Number.isInteger(42); // true
+        Number.isInteger(42.000); // true
+        Number.isInteger(42.3); // false
+        ```
+        ```js
+        // Number.isInteger实现
+        if (!Number.isInteger) {
+            Number.isInteger = function(num) {
+                return typeof num === 'number' && num % 1 == 0;
+            }
+        }
+        ```
+    * 检测是否是安全的整数
+        ```js
+        Number.isSafeInteger( Number.MAX_SAFE_INTEGER ); // true
+        Number.isSafeInteger( Math.pow( 2, 53 ) ); // false, 2的53次幂
+        Number.isSafeInteger( Math.pow( 2, 53 ) - 1 ); // true
+        ```
+        ```js
+        if (!Number.isSafeInteger) {
+            Number.isSafeInteger = function(num) {
+                return Number.isInteger( num ) && Math.abs( num ) <= Number.MAX_SAFE_INTEGER;
+            };
+        }
+        ```
+    * NaN(无效数值)
+        ```js
+        var a = 2 / "foo"; // NaN
+        typeof a === "number"; // true
+        a == NaN; // false
+        a === NaN; // false
+        NaN === NaN; // false
+        NaN != NaN; // true
+        ```
+    * isNaN(判断一个数值是否是NaN)
+      ```js
+        var a = 2 / "foo";
+        a; // NaN
+        window.isNaN( a ); // true
+      ``` 
+      ```js
+        // 检测不是数字，也不是NaN的时候存在bug
+        var b = "foo";
+        b; "foo"
+        window.isNaN( b ); // true——晕！
+      ```
+    * Number.isNaN(..)
+        ```js
+            // Number.isNaN实现1
+            if (!Number.isNaN) {
+                Number.isNaN = function(n) {
+                    return typeof n === 'number' && window.isNaN(n);
+                }
+            }
+            // Number.isNaN实现2
+            if (!Number.isNaN) {
+                Number.isNaN = function(n) {
+                    return n !== n;
+                }
+            }
 
-阅读至10页，第一章节完
+            var a = 2 / "foo";
+            var b = "foo";
+            Number.isNaN( a ); // true
+            Number.isNaN( b ); // false——好！
+        ``` 
+9. undefined
+    * 没有赋值
+    * 使用void运算符可得到undefined, void并无改变表达式的结果，只是让表达式不返回值               
+10. 
+11. 
+
+阅读至24页
