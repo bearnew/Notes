@@ -71,6 +71,7 @@
 #### 3.rules of hooks
 1. hooks只能在最外层使用，不能在循环中，条件语句中，嵌套函数中使用hooks
 2. 只能在react function components中使用hooks
+3. React依赖hooks调用的顺序，因此不能使用条件语句，否则每次render的顺序无法一一对应
 #### 4.building your own hooks
 1. 在处理组件之间的状态逻辑时，一般使用higher-order component和props处理
 2. 有了hooks，我们可以使用useState和useEffect来处理
@@ -125,3 +126,278 @@
             const [todos, dispatch] = useReducer(todosReducer);
         }
         ```
+### state hook
+1. useState是一个hook，让我们能够在function组件中，使用state
+2. useState接收一个初始值作为参数
+3. useState返回一对值，一个state的value值，一个用于setState的方法
+    ```js
+    const [count, setCount] = useState(0);
+    ```
+4. state hook的advantage
+    1. 直接使用count,不需要使用this.state.count
+        ```jsx
+        <p>You clicked {count} times</p>
+        ```
+    2. 不需要使用this.setState()更新
+        ```jsx
+        <button onClick={() => setCount(count + 1)}>click me</button>
+        ```
+5. setCount更新state，是直接替换state，this.setState是合并新老state
+
+### effect hook
+1. example
+    ```jsx
+    import React, { useState, useEffect } from 'react';
+
+    function Example() {
+        const [count, setCount] = useState(0);
+
+        useEffect(() => {
+            document.title = `You clicked ${count} times`;
+        });
+
+        return (
+            <div>
+            <p>You clicked {count} times</p>
+            <button onClick={() => setCount(count + 1)}>
+                Click me
+            </button>
+            </div>
+        );
+    }
+    ```
+2. 每次执行dom更新后，会调用useEffect里面的函数
+3. 在组件内部调用useEffect，可以直接在useEffect中使用state变量
+4. 不需要考虑mounting还是updating,每一次render后都会调用useEffect中的function
+5. example
+    ```js
+    import React, { useState, useEffect } from 'react';
+
+    function FriendStatus(props) {
+        const [isOnline, setIsOnline] = useState(null);
+
+        useEffect(() => {
+            function handleStatusChange(status) {
+            setIsOnline(status.isOnline);
+            }
+
+            ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+            // Specify how to clean up after this effect:
+            return function cleanup() {
+                ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+            };
+        });
+
+        if (isOnline === null) {
+            return 'Loading...';
+        }
+        return isOnline ? 'Online' : 'Offline';
+    }
+    ```
+6. 当function组件unmount的时候，react会执行useEffect中的return函数，清空effects
+7. 使用useEffect不需要关心props是否change
+    ```js
+    // class
+    componentDidMount() {
+        ChatAPI.subscribeToFriendStatus(
+        this.props.friend.id,
+        this.handleStatusChange
+        );
+    }
+
+    componentDidUpdate(prevProps) {
+        // Unsubscribe from the previous friend.id
+        ChatAPI.unsubscribeFromFriendStatus(
+        prevProps.friend.id,
+        this.handleStatusChange
+        );
+        // Subscribe to the next friend.id
+        ChatAPI.subscribeToFriendStatus(
+        this.props.friend.id,
+        this.handleStatusChange
+        );
+    }
+
+    componentWillUnmount() {
+        ChatAPI.unsubscribeFromFriendStatus(
+        this.props.friend.id,
+        this.handleStatusChange
+        );
+    }
+    ```
+8. Effects做性能优化
+    ```js
+    // class
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.count !== this.state.count) {
+            document.title = `You clicked ${this.state.count} times`;
+        }
+    }
+    ```
+    ```js
+    // 如果这次render的count和上次的count相同，react将跳过effect
+    useEffect(() => {
+        document.title = `You clicked ${count} times`;
+    }, [count]); // Only re-run the effect if count changes
+    ```
+9. useEffect的第二个参数数组如果有多个值，只要数组中的值有一个值和最新的值不同，就会重新渲染
+10. 带有cleanup的useEffect同样也支持性能优化
+    ```js
+    useEffect(() => {
+        function handleStatusChange(status) {
+            setIsOnline(status.isOnline);
+        }
+
+        ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+        return () => {
+            ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+        };
+    }, [props.friend.id]); // Only re-subscribe if props.friend.id changes
+    ```
+11. 如果我们想要根据条件，判断是否调用useEffect，只能在useEffect里面加入if
+    ```js
+    useEffect(function persistForm() {
+        // 👍 We're not breaking the first rule anymore
+        if (name !== '') {
+        localStorage.setItem('formData', name);
+        }
+    });
+    ```
+### building your own hooks
+1. 共同的组件逻辑可以通过自定义hooks封装，而不需要引入第3个组件通过render props, higher-order components实现
+2. exmaple
+    ```js
+        import React, { useState, useEffect } from 'react';
+
+        function useFriendStatus(friendID) {
+            const [isOnline, setIsOnline] = useState(null);
+
+            useEffect(() => {
+                function handleStatusChange(status) {
+                setIsOnline(status.isOnline);
+                }
+
+                ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange);
+                return () => {
+                ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange);
+                };
+            });
+
+            return isOnline;
+        }
+    ```
+    ```js
+        function FriendStatus(props) {
+            const isOnline = useFriendStatus(props.friend.id);
+
+            if (isOnline === null) {
+                return 'Loading...';
+            }
+            return isOnline ? 'Online' : 'Offline';
+        }
+    ```
+    ```js
+        function FriendListItem(props) {
+            const isOnline = useFriendStatus(props.friend.id);
+
+            return (
+                <li style={{ color: isOnline ? 'green' : 'black' }}>
+                {props.friend.name}
+                </li>
+            );
+        }
+    ```
+3. 自定义hooks方法必须以use开头，没有use，系统无法检测hooks是否违反了rules of hooks
+4. 2个组件使用同一个hook，并不会共享state, 只会共享state相关逻辑，所有的state和effects在里面都是完全独立的
+### useYourImagination
+1. 自定义一个userReducer hook管理本地state
+2. example
+    ```js
+        function useReducer(reducer, initialState) {
+            const [state, setState] = useState(initialState);
+
+            function dispatch(action) {
+                const nextState = reducer(state, action);
+                setState(nextState);
+            }
+
+            return [state, dispatch];
+        }
+    ```
+    ```js
+        function todosReducer(state, action) {
+            switch (action.type) {
+                case 'add':
+                return [...state, {
+                    text: action.text,
+                    completed: false
+                }];
+                // ... other actions ...
+                default:
+                return state;
+            }
+        }
+    ```
+    ```js
+        function Todos() {
+            const [todos, dispatch] = useReducer(todosReducer, []);
+
+            function handleAddClick(text) {
+                dispatch({ type: 'add', text });
+            }
+
+            // ...
+        }
+    ```
+### Hooks Api
+#### Basic Hooks
+1. useState
+    1. overview
+    ```js
+        const [state, setState] = useState(initialState);
+        setState(newState);
+    ```
+    2. functional updates
+    ```js
+        function Counter({initialCount}) {
+            const [count, setCount] = useState(initialCount);
+            return (
+                <>
+                Count: {count}
+                <button onClick={() => setCount(initialCount)}>Reset</button>
+                <button onClick={() => setCount(prevCount => prevCount + 1)}>+</button>
+                <button onClick={() => setCount(prevCount => prevCount - 1)}>-</button>
+                </>
+            );
+        }
+    ```
+    3. lazy initial state(让initial state仅仅在初始化的时候执行)
+    ```js
+        const [state, setState] = useState(() => {
+            const initialState = someExpensiveComputation(props);
+            return initialState;
+        });
+    ```
+    4. 如果更新一个state hook和现在的值相同，react将释放，而不会渲染子组件
+2. useEffect
+    1. 默认情况下，effects会在每一次render之后执行，但是你也可以选择在某些值发生更改时触发它
+    2. 在effect中return一个clean-up函数，用来清空subscription, timer
+        ```js
+        useEffect(() => {
+            const subscription = props.source.subscribe();
+            return () => {
+                // Clean up the subscription
+                subscription.unsubscribe();
+            };
+        });
+        ```
+    3. 如果component渲染多次，之前的effect会在执行下一次effect时被清空
+3. useContext
+#### Additional Hooks
+1. useReducer
+2. useCallback
+3. useMemo
+4. useRef
+5. useImperativeHandle
+6. useLayoutEffect
+7. useDebugValue
