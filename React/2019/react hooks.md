@@ -392,6 +392,12 @@
         });
         ```
     3. 如果component渲染多次，之前的effect会在执行下一次effect时被清空
+    4. useLayoutEffect
+        * useEffect在布局和渲染完成之后激发
+        * useLayoutEffect在渲染的时候同步触发
+        * 使用useLayoutEffect来读取dom，然后同步更新（为了让用户不会感知到视觉上的不一致）
+        * useLayoutEffect的激发阶段与componentDidMount和componentDidUpdate相同
+        * 在浏览器绘制之前，将同步刷新useLayoutEffect中计划的更新
 3. useContext
 #### Additional Hooks
 1. useReducer
