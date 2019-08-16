@@ -15,7 +15,7 @@ npm install --save-dev extract-text-webpack-plugin@next
 ## 2.stylelint规范
 > 依赖的npm包
 ```js
-npm i stylelint stylelint-config-standard stylelint-order stylelint-webpack-plugin --save
+npm i stylelint stylelint-config-standard stylelint-order stylelint-webpack-plugin --D
 ```
 ### 1.stylelint-webpack-plugin
 ```js
