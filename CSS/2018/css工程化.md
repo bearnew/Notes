@@ -13,6 +13,10 @@ npm install --save-dev extract-text-webpack-plugin@next
 ##### 2.不支持css modules,通过设置purifyCssOptions配置whitelist，只会保留所有通过css modules手写的Css,并不会去除冗余css
 
 ## 2.stylelint规范
+> 依赖的npm包
+```js
+npm i stylelint stylelint-config-standard stylelint-order stylelint-webpack-plugin --D
+```
 ### 1.stylelint-webpack-plugin
 ```js
 const StyleLintPlugin = require('stylelint-webpack-plugin');
