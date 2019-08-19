@@ -17,7 +17,35 @@ npm install --save-dev extract-text-webpack-plugin@next
 ```js
 npm i stylelint stylelint-config-standard stylelint-order stylelint-webpack-plugin --D
 ```
-### 1.stylelint-webpack-plugin
+### 1.stylelint overview
+#### stylelint的全部rule
+* https://stylelint.io/user-guide/rules
+#### 我们使用的rule
+* 继承stylelint-config-standard, 规范css书写
+  * 规则参考：https://github.com/stylelint/stylelint-config-standard/blob/master/index.js
+* 使用style-order，规范css顺序
+  * 规则参考：https://github.com/hudochenkov/stylelint-order
+* 自定义rule
+  
+  ```js
+    {
+      "rules": {
+        "indentation": 4, // 缩进
+        "at-rule-no-unknown": null, // 是否禁止未知的规则(e.g., @include)
+        "selector-pseudo-class-no-unknown": null, // 是否禁止未知的伪类(e.g., :global)
+        "no-descending-specificity": null, // 是否禁止低权重的selctor在高权重的selector后面
+        "order/order": [ // 定义css内容块的顺序
+          "declarations", // CSS declarations (e. g., display: block)
+          "custom-properties", // Custom properties (e. g., --property: 10px;)
+          "dollar-variables", // Dollar variables (e. g., $variable)
+          "rules", // Nested rules (e. g., a { span {} })
+          "at-rules" // Nested at-rules (e. g., div { @media () {} })
+        ],
+        "order/properties-order": [] // css属性顺序配置
+      }
+    }
+  ```
+### 2.stylelint-webpack-plugin
 ```js
 const StyleLintPlugin = require('stylelint-webpack-plugin');
 
@@ -31,12 +59,12 @@ plugins: [
     })
 ]
 ```
-### 2.fixcss
+### 3.fixcss
 在```package.json```中配置如下命令:
 ```
 "fixcss": "stylelint src/components --fix",
 ```
-### 3.stylelint-config-standard stylelint-order(排序)
+### 4.stylelint-config-standard stylelint-order(排序)
 ```js
 {
     "extends": "stylelint-config-standard",
