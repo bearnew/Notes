@@ -236,7 +236,86 @@
 9. undefined
     * 没有赋值
     * 使用void运算符可得到undefined, void并无改变表达式的结果，只是让表达式不返回值               
-10. 
-11. 
+10. 无穷数
+    ```js
+        var a = 1 / 0; // Infinity
+        var b = -1 / 0; // -Infinity
 
-阅读至24页
+        var c = Number.MAX_VALUE; // 1.7976931348623157e+308
+        c + c; // Infinity
+        Infinity / Infinity; // NaN
+    ```
+11. 零值
+    ```js
+        var a = 0 / -3; // -0
+        var b = 0 * -3; // -0
+
+        a.toString(); // '0'
+        a + ''; // '0'
+        String(a); // '0'
+        JSON.string(a); // '0'
+
+        + '-0'; // -0
+        Number('-0'); // -0
+        JSON.parse('-0'); // -0 
+    ```
+    ```js
+        function isNegZero(n) {
+            n = Number( n );
+            return (n === 0) && (1 / n === -Infinity);
+        }
+        isNegZero( -0 ); // true
+        isNegZero( 0 / -3 ); // true
+        isNegZero( 0 ); // false
+    ```
+12. Object.is(...), 判断2个值是否完全相同
+    ```js
+        var a = 2 / "foo"; // NaN
+        var b = -3 * 0;  // -0
+
+        Object.is( a, NaN ); // true
+        Object.is( b, -0 ); // true
+        Object.is( b, 0 ); // false
+
+        if (!Object.is) {
+            Object.is = function(v1, v2) {
+                // 判断是否是-0
+                if (v1 === 0 && v2 === 0) {
+                    return 1 / v1 === 1 / v2;
+                }
+                // 判断是否是NaN
+                if (v1 !== v1) {
+                    return v2 !== v2;
+                }
+                // 其他情况
+                return v1 === v2;
+            }
+        }
+    ```
+13. 值和引用
+    * 简单值通过值传递的方式来赋值
+        * null
+        * undefined
+        * 字符串
+        * 数字
+        * 布尔
+        * symbol
+        ```js
+            var a = 2;
+            var b = a; // b是a的值的一个副本
+            b++;
+            a; // 2
+            b; // 3
+        ``` 
+    * 复合值通过引用赋值的方式来赋值
+        ```js
+            var c = [1,2,3];
+            var d = c; // d是[1,2,3]的一个引用
+            d.push( 4 );
+            c; // [1,2,3,4]
+            d; // [1,2,3,4]
+        ``` 
+14. 
+15. 
+
+阅读至28页
