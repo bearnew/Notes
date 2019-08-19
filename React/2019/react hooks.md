@@ -398,7 +398,32 @@
         * 使用useLayoutEffect来读取dom，然后同步更新（为了让用户不会感知到视觉上的不一致）
         * useLayoutEffect的激发阶段与componentDidMount和componentDidUpdate相同
         * 在浏览器绘制之前，将同步刷新useLayoutEffect中计划的更新
+    5. useEffect第2个参数
+        * 当第2个参数发生改变时，才会执行useEffect
+        * 数组中需要传递useEffect函数中用到的所有的值
+        * example
+            ```js
+            // propr.source改变，subscribe才会重新创建
+            useEffect(
+                () => {
+                    const subscription = props.source.subscribe();
+                    return () => {
+                    subscription.unsubscribe();
+                    };
+                },
+                [props.source],
+            );
+            ```
+        * 第2个参数传[],则useEffect仅执行1次（mount）,useEffect的回调，在unmount时仍然会执行
+        * 推荐`exhaustive-deps`规则最为eslint插件，会在不正确使用useEffect时，发出警告
+    
 3. useContext
+    * useContext接收一个context对象（React.createContext的返回值）并返回该context的当前值
+    * 调用useContext的组件会在context值变化时重新渲染
+    * example:
+    ```js
+    
+    ```
 #### Additional Hooks
 1. useReducer
 2. useCallback

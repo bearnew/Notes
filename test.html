@@ -18,19 +18,34 @@
 	<script type="text/javascript" src="co.js"></script>
 	<script type="text/javascript" src="test.js"></script>
 	<script type="text/jsx">
-		const { useState } = React;
+		const { createContext } = react;
+
+		const CountCtx = createContext(0);
+	</script>
+	<script type="text/jsx">
+		const { useContext } = react;
+
+		function Counter() {
+			const count = useContext(CountCtx)
+			return (
+				<div>Counter is {count}</div>
+			)
+		}
+	</script>
+	<script type="text/jsx">
+		const { useState, createContext } = React;
+
 		function Example() {
-		// Declare a new state variable, which we'll call "count"
 			const [count, setCount] = useState(0);
 
 			return (
 				<div>
-				<p>You clicked {count} times</p>
-				<button onClick={() => setCount(count + 1)}>
-					Click me
-				</button>
+					<CountCtx.Provider value={[count, setCount]}>
+						<Counter />
+						<button onClick={() => setCount(count + 1)}>parent button +1</button>
+					</CountCtx.Provider>
 				</div>
-			);
+			)
 		}
 
 		ReactDOM.render(
