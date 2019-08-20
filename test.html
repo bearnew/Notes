@@ -18,21 +18,6 @@
 	<script type="text/javascript" src="co.js"></script>
 	<script type="text/javascript" src="test.js"></script>
 	<script type="text/jsx">
-		const { createContext } = react;
-
-		const CountCtx = createContext(0);
-	</script>
-	<script type="text/jsx">
-		const { useContext } = react;
-
-		function Counter() {
-			const count = useContext(CountCtx)
-			return (
-				<div>Counter is {count}</div>
-			)
-		}
-	</script>
-	<script type="text/jsx">
 		const { useState, createContext } = React;
 
 		function Example() {

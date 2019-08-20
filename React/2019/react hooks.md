@@ -420,15 +420,98 @@
 3. useContext
     * useContext接收一个context对象（React.createContext的返回值）并返回该context的当前值
     * 调用useContext的组件会在context值变化时重新渲染
-    * example:
-    ```js
-    
-    ```
+    * 当前context value由最近的<MyContext.Provider>的值确定
+    * 当最近的<MyContext.Provider>更新时，使用context值的组件将重新渲染
+    * example: https://github.com/bearnew/react-hooks
+
 #### Additional Hooks
 1. useReducer
+    * 和redux一样，接受类型为`(state, action) => newState`的reducer,并返回与dispatch配对的方法
+    * 处理涉及多个子值的复杂state逻辑，`useReducer`比`useState`更适合
+    * 将init函数作为第3个参数传递，state将被重置为初始值
+    * 如果reducer返回了与当前相同的值，react将不会重新渲染
+    * example: https://github.com/bearnew/react-hooks
 2. useCallback
+    * example
+        ```js
+           const memoizedCallback = useCallback(
+                () => {
+                    doSomething(a, b);
+                },
+                [a, b],
+            ); 
+        ```
+    * 返回一个memoized回调
+    * 仅当第2个参数数组中有值发生变化时，第1个参数的回调才执行，类似于shouldComponentUpdate, 避免不必要的渲染
+    * `useCallback(fn, deps)` is equivalent to `useMemo(() => fn, deps)`.
 3. useMemo
+    * 与`useCallback`相同，第2个参数数组有值发生变化时，第1个参数函数才会执行
+    * 传递给`useMemo`的函数在`render`期间执行
+    * 不要在`useMemo`中做任何在渲染时不必做的事情，渲染时的副作用应该放在useEffect中执行
+    * 第2个参数如果没有提供一个`array`,每次`render`都会执行useMemo中的函数
+    * 函数中涉及到的每1个值，都应该在数组中出现
 4. useRef
+    * example
+        ```jsx
+        function TextInputWithFocusButton() {
+            const inputEl = useRef(null);
+            const onButtonClick = () => {
+                // `current` points to the mounted text input element
+                inputEl.current.focus();
+            };
+            return (
+                <>
+                <input ref={inputEl} type="text" />
+                <button onClick={onButtonClick}>Focus the input</button>
+                </>
+            );
+        }
+        ```
+    * `useRef`返回一个可变的`ref`对象
+    * `useRef`可以在其`.current`属性中保存可变值
+    * `.current`上的属性变化，不会`re-render`
 5. useImperativeHandle
+    * example
+        ```js
+        // 子组件
+        function FancyInput(props, ref) {
+            const inputRef = useRef();
+            useImperativeHandle(ref, () => ({
+                focus: () => {
+                inputRef.current.focus();
+                }
+            }));
+            return <input ref={inputRef} ... />;
+        }
+        FancyInput = forwardRef(FancyInput);
+        ```
+        ```js
+        // 父组件
+        <FancyInput ref={fancyInputRef} />
+        fancyInputRef.current.focus()
+        ```
+    * 在父组件中通过ref调用子组件的方法
 6. useLayoutEffect
+    * 与`useEffect`相同
+    * 在`dom`变化后，同步触发
+    * 可以使用`useLayouEffect`在dom中读取布局，并且同步重新渲染
+    * 在浏览器重新绘制之前，将同步执行`useLayoutEffect`中的更新
 7. useDebugValue
+    * 用于在`React DevTools`中同步展示自定义的`hooks`标签
+    * example
+        ```js
+            function useFriendStatus(friendID) {
+                const [isOnline, setIsOnline] = useState(null);
+
+                // ...
+
+                // Show a label in DevTools next to this Hook
+                // e.g. "FriendStatus: Online"
+                useDebugValue(isOnline ? 'Online' : 'Offline');
+
+                return isOnline;
+            }
+        ```
+        ```js
+            useDebugValue(date, date => date.toDateString());
+        ```
