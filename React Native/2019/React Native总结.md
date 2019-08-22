@@ -19,8 +19,17 @@
   1. 内存消耗略大
   2. 运行速度略慢
 ### 3.开发环境
+#### 1.概览
 * https://reactnative.cn/docs/getting-started.html
 * mac支持ios, android调试
 * windows不支持ios调试，需安装虚拟机VMWare + Mac
 * 可以搭配react dev tools的插件进行开发调试
+#### 2.react-native-cli
+* 安装: https://facebook.github.io/react-native/docs/getting-started
+#### 3.expo
+* expo是使用同一代码库，构建、部署、快速迭代iOS, Android, web的工具和服务
+* 官方文档：https://docs.expo.io/versions/latest/
+* 安装`expo`（真机、模拟器均支持）: https://docs.expo.io/versions/v34.0.0/introduction/installation/
+### 4.Flex布局
+
  
