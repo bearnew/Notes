@@ -17,27 +17,6 @@
 	<script crossorigin src="https://cdn.bootcss.com/babel-standalone/6.10.3/babel.min.js"></script>
 	<script type="text/javascript" src="co.js"></script>
 	<script type="text/javascript" src="test.js"></script>
-	<script type="text/jsx">
-		const { useState, createContext } = React;
-
-		function Example() {
-			const [count, setCount] = useState(0);
-
-			return (
-				<div>
-					<CountCtx.Provider value={[count, setCount]}>
-						<Counter />
-						<button onClick={() => setCount(count + 1)}>parent button +1</button>
-					</CountCtx.Provider>
-				</div>
-			)
-		}
-
-		ReactDOM.render(
-			<Example />,
-			document.getElementById('root')
-		)
-	</script> 
 </body>
 
 </html>
