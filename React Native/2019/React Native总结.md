@@ -46,5 +46,55 @@
     * 手机usb连接电脑，打开开发人员调试
 
 ### 4.Flex布局
+* react-native支持flexbox布局的大部分功能
+* rn开发使用flexbox布局，解决了android, ios的屏幕适配功能
+* 属性默认值差异
+  * rn中，`flexDirection`属性默认值为`column`(纵向排列)，而不是`row`
+  * rn中，`alignItems`默认值是`stretch`，而不是`flex-start`
+  * rn中，`flex`只能指定一个数值
+* 决定子组件排列规则的属性
+  * flexDirection
+  * flexWrap
+  * justifyContent
+  * alignItems
+* 决定子组件自身显示规则的属性
+  * alignSelf
+  * flex
+* flexDirection
+  > 组件排列
+  * `column`（default）: 纵向排列
+  * `column-reverse`: 倒序纵向排列
+  * `row`： 横向排列
+  * `row-reverse`： 倒序横向排列
+* flexWrap
+  > 子组件超出父组件时，是否换行
+  * `nowrap`(default): 不换行
+  * `wrap`: 换行，第一行在上方
+  * `wrap-reverse`: 换行，第一行在下方
+* justifyContent
+  > 设置主轴对齐方式, flexDirection为column, 则设置纵轴的对齐方式，flexDirection为row,则设置横轴的对齐方式
+  * `flex-start`(default): 起点对齐
+  * `flex-end`: 终点对齐
+  * `center`: 居中
+  * `space-between`: 两端对齐，项目中的间隔都相等
+  * `space-around`: 项目之间的间隔相等，项目2端与边框的间隔是项目之间间隔的1/2
+* align-items
+  > 设置主轴对齐方式, flexDirection为column, 则设置横轴的对齐方式，flexDirection为row,则设置纵轴的对齐方式
+  * `flex-start`(default): 起点对齐
+  * `flex-end`: 终点对齐
+  * `center`: 居中
+  * `space-between`: 两端对齐，项目中的间隔都相等
+  * `space-around`: 项目之间的间隔相等，项目2端与边框的间隔是项目之间间隔的1/2 
+* align-self
+  > 设置单个项目与同级项目不一样的对齐方式，可覆盖父级元素设置的align-items
+  * auto(default)
+  * flex-start
+  * flex-end
+  * center
+  * baseline
+  * stretch
+* flex
+  > 根据设置的flex值，动态计算所占空间大小
 
+阅读至34页
  
