@@ -96,5 +96,9 @@
 * flex
   > 根据设置的flex值，动态计算所占空间大小
 
+### 5.调试
+* 真机，摇晃
+* ios模拟器`command+d`
+* android模拟器`comand+m`
 阅读至34页
  
