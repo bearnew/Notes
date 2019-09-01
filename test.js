@@ -1,11 +1,9 @@
-function foo(x) {
-    x = x + 1;
-    x; // 3
-}
-var a = 2;
-var b = new Number(a); // Object(a)也一样
-var c = a;
-foo(b);
-foo(c);
-console.log(b); // 是Number {2}，不是3
-console.log(c); // 2
+var a = new Array(3);
+var b = [undefined, undefined, undefined];
+var c = [];
+c.length = 3;
+
+var x = a.map(function (v, i) { return i; }); //  [empty × 3]
+var y = b.map(function (v, i) { return i; }); // [ 0, 1, 2 ]
+
+var z = Array.apply(null, { length: 3 }); // [ undefined, undefined, undefined ]

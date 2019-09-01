@@ -381,5 +381,84 @@
         ``` 
 14. 简单基本类型只能通过值来赋值/传递
 15. 复合值通过引用来赋值/传递
+16. 内建函数（原生函数）
+    * `String()`
+        ```js
+            var a = new String( "abc" ); // 创建的是abc的封装对象，而非基本类型值'abc'
+            typeof a; // object
+            a instanceof String; // true
+            Object.prototype.toString.call( a ); // ['object', 'String']
+        ``` 
+    * `Number()`
+    * `Boolean()`
+    * `Array()`
+    * `Object()`
+    * `Function()`
+    * `RegExp()`
+    * `Date()`
+    * `Error()`
+    * `Symbol()`
+17. 所有`typeof`返回值为`object`的对象都包含一个内部属性`[[class]]`,通过`Object.prototype.toString.call()`来查看
+    ```js
+        Object.prototype.toString.call( [1,2,3] ); // "[object Array]"
+        Object.prototype.toString.call( /regex-literal/i ); // "[object RegExp]"
+        Object.prototype.toString.call( null ); // "[object Null]"
+        Object.prototype.toString.call( undefined ); // "[object Undefined]"
+        Object.prototype.toString.call( true ); // "[object Boolean]"
+    ```
+18. 封装对象
+    ```js
+        var a = "abc";
+        var b = new String( a );
+        var c = Object( a );
+        typeof a; // "string"
+        typeof b; // "object"
+        typeof c; // "object"
+        b instanceof String; // true
+        c instanceof String; // true
+        Object.prototype.toString.call( b ); // "[object String]"
+        Object.prototype.toString.call( c ); // "[object String]"
+    ```
+19. 拆封
+    * 使用`valueOf()`得到封装对象的基本类型
+        ```js
+            var a = new String( "abc" );
+            var b = new Number( 42 );
+            var c = new Boolean( true );
+            a.valueOf(); // "abc"
+            b.valueOf(); // 42
+            c.valueOf(); // true
+        ``` 
+    * 通过隐式转换得到基本类型值
+        ```js
+            var a = new String( "abc" );
+            var b = a + ""; // b的值为"abc"
+            typeof a; // "object"
+            typeof b; // "string"
+        ``` 
+20. Array(永远不要使用空数组单元)
+    ```js
+        // Array会自动补上new, 与new Array效果一致 
+        var a = new Array(1, 2, 3);
+        var b = Array(1, 2, 3);
+    ```
+    ```js
+        // Array传1个参数，该参数被当成数组的预设长度
+        var a = new Array( 3 );
+        var b = [ undefined, undefined, undefined ];
+        var c = [];
+        c.length = 3; 
+    ```
+    ```js
+        var a = new Array(3);
+        var b = [undefined, undefined, undefined];
+        var c = [];
+        c.length = 3;
 
+        var x = a.map(function (v, i) { return i; }); //  [empty × 3]
+        var y = b.map(function (v, i) { return i; }); // [ 0, 1, 2 ]
+
+        var z = Array.apply(null, { length: 3 }); // [ undefined, undefined, undefined ]
+    ```
+21. 
 阅读至32页
