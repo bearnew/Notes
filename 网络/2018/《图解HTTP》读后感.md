@@ -297,6 +297,7 @@ OPTIONS * HTTP/1.1
   | cache-extension  | -      | 新指令标记（token）          |
 
 * 缓存响应指令
+ 
   | 指令             | 参数   | 说明                                           |
   | :--------------- | :----- | :--------------------------------------------- |
   | public           | 无     | 可向任意方提供响应的缓存                       |
@@ -309,6 +310,7 @@ OPTIONS * HTTP/1.1
   | max-age=[秒]     | 必需   | 响应的最大Age值                                |
   | s-maxage=[秒]    | 必需   | 公共缓存服务器响应的最大Age值                  |
   | cache-extension  | -      | 新指令标记(token)                              |
+
 2. Connection
   * 控制不再转发给代理的首部字段
     ![conection_remove](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/connection1.png?raw=true)
@@ -464,6 +466,9 @@ OPTIONS * HTTP/1.1
     * 使用Location将响应接收方引导至与请求URI不同的资源
     * 配合```3xx: Redirection```，提供重定向的URI
     * 几乎所有的浏览器接收到Location后，都会强制性的尝试对已提示的重定向资源访问
+5. Proxy-Authenticate
+    * 
+6.  
 
 
 6.5.5 119页
