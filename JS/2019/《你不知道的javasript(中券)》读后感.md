@@ -460,5 +460,27 @@
 
         var z = Array.apply(null, { length: 3 }); // [ undefined, undefined, undefined ]
     ```
-21. 
-阅读至32页
+21. 尽量不要使用Object(), Function(), RegExp()
+    * 使用构造函数定义会更麻烦，且执行效率更低
+    ```js
+        var c = new Object();
+        c.foo = 'bar';
+        c; // { foo: 'bar' }
+        var d = { foo: 'bar' }
+        d; // { foo: 'bar' }
+
+        var e = new Function('a', 'return a * 2');
+        var f = function(a) { return a * 2 };
+        function g(a) { return a * 2 };
+
+        var h = new RegExp('^a*b+', 'g');
+        var i = /^a*b+/g;
+    ```
+22. RegExp可以用来动态定义正则表达式
+    ```js
+        var name = "Kyle";
+        var namePattern = new RegExp( "\\b(?:" + name + ")+\\b", "ig" );
+        var matches = someText.match( namePattern );
+    ```
+23. 
+阅读至40页
