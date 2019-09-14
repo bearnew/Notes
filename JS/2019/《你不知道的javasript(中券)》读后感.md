@@ -482,5 +482,24 @@
         var namePattern = new RegExp( "\\b(?:" + name + ")+\\b", "ig" );
         var matches = someText.match( namePattern );
     ```
-23. 
+23. Date(...)
+    ```js
+        // Date.now()获取当前unix的时间戳
+        if (!Date.now) {
+            Date.now = function() {
+                return (new Date()).getTime();
+            }
+        }
+    ```
+24. Error(...)
+    ```js
+        // 创建错误对象
+        function foo(x) {
+            if (!x) {
+            throw new Error( "x wasn’t provided" );
+            }
+            // ..
+        }
+    ```
+25. 
 阅读至40页

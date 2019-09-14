@@ -467,8 +467,53 @@ OPTIONS * HTTP/1.1
     * 配合```3xx: Redirection```，提供重定向的URI
     * 几乎所有的浏览器接收到Location后，都会强制性的尝试对已提示的重定向资源访问
 5. Proxy-Authenticate
-    * 
-6.  
+    * `Proxy-Authenticate: Basic realm="Usagidesign Auth"`
+    * 会把代理服务器所要求的认证信息，发送给客户端
+    * 客户端与服务器进行认证时，首部字段`www-Authorization`有着相同的作用
+6.  Retry-After
+    * `Retry-After: 120`
+    * 告知客户端在多久之后再次发出请求
+    * 与`503 Service Unavailable`响应，或`3xx Redirect`响应一起使用
+    * 字段值可以指定为具体的日期时间（Wed, 04 Jul 2012 06：34：24GMT 等格式），也可以是创建响应后的秒数。
+7.  Server
+    * `Server: Apache/2.2.6 (Unix) PHP/5.2.5` 
+    * 告知客户端当前服务器上安装的`http`服务器名称、版本号等
+8.  Vary
+    * `Vary: Accept-Language`
+    * 如果使用的 Accept-Language 字段的值相同，那么就直接从缓存返回响应。
+9.  WWW-Authenticate
+    * `WWW-Authenticate: Basic realm="Usagidesign Auth"`
+    * 告知客户端适用于的认证方案
+#### 20.实体首部字段
+> 在请求和响应的HTTP报文中，都含有与实体相关的首部字段
+1. Allow
+    * `Allow: GET, HEAD`
+    * 通知客户端能够支持的`Request-URI`指定资源的`HTTP`方法
+    * 服务器接收到不支持的`HTTP`方法，会以`405 Method Not Allowed`作为响应返回, 同时还会把所有支持的`HTTP`方法写入首部字段`Allow`后返回
+2. Content-Encoding
+    * `Content-Encoding: gzip`
+    * 告知客户端服务器对实体的主体部分选用的内容编码方式
+    * 主要采用4种内容编码方式
+      * gzip
+      * compress
+      * deflate
+      * identity 
+3. Content-Language
+    * `Content-Language: zh-CN`
+    * 告知客户端，实体主体所使用的自然语言
+4. Content-Length
+    * `Content-Length: 15000` 
+    * 表示实体的大小
+    * 对实体主体进行内容编码时，不再使用`Content-Length`首部字段
+5. Content-Location
+    * `Content-Location: http://www.hackr.jp/index-ja.html`
+    * 表示报文主体返回资源对应的URI
+    * 当访问的页面内容与实际请求的对象不同时，首部字段会写明URI
+6. Content-MD5
+    * `Content-MD5: OGFkZDUwNGVhNGY3N2MxMDIwZmQ4NTBmY2IyTY==`
+    * 检测报文主体在传输过程中是否保持完整，以及确认传输到达
+7. 
+8. 
 
 
 6.5.5 119页
