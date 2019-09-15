@@ -501,5 +501,23 @@
             // ..
         }
     ```
-25. 
+25. Symbol
+    * 具有唯一性的特殊值
+    * 是简单标量的基本类型
+    * 可作为属性名
+    * 不能使用new关键字来构造
+    * 主要用于私有或特殊属性
+    * 
+    ```js
+        var mysym = Symbol( "my own symbol" );
+        mysym; // Symbol(my own symbol)
+        mysym.toString(); // "Symbol(my own symbol)"
+        typeof mysym; // "symbol"
+        var a = { };
+        a[mysym] = "foobar";
+        // getOwnPropertySymbols可以公开获得对象上的所有符号
+        Object.getOwnPropertySymbols( a );
+        // [ Symbol(my own symbol) ]
+    ```
+26. 
 阅读至40页
