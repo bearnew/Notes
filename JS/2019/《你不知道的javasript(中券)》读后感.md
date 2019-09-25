@@ -460,5 +460,64 @@
 
         var z = Array.apply(null, { length: 3 }); // [ undefined, undefined, undefined ]
     ```
-21. 
-阅读至32页
+21. 尽量不要使用Object(), Function(), RegExp()
+    * 使用构造函数定义会更麻烦，且执行效率更低
+    ```js
+        var c = new Object();
+        c.foo = 'bar';
+        c; // { foo: 'bar' }
+        var d = { foo: 'bar' }
+        d; // { foo: 'bar' }
+
+        var e = new Function('a', 'return a * 2');
+        var f = function(a) { return a * 2 };
+        function g(a) { return a * 2 };
+
+        var h = new RegExp('^a*b+', 'g');
+        var i = /^a*b+/g;
+    ```
+22. RegExp可以用来动态定义正则表达式
+    ```js
+        var name = "Kyle";
+        var namePattern = new RegExp( "\\b(?:" + name + ")+\\b", "ig" );
+        var matches = someText.match( namePattern );
+    ```
+23. Date(...)
+    ```js
+        // Date.now()获取当前unix的时间戳
+        if (!Date.now) {
+            Date.now = function() {
+                return (new Date()).getTime();
+            }
+        }
+    ```
+24. Error(...)
+    ```js
+        // 创建错误对象
+        function foo(x) {
+            if (!x) {
+            throw new Error( "x wasn’t provided" );
+            }
+            // ..
+        }
+    ```
+25. Symbol
+    * 具有唯一性的特殊值
+    * 是简单标量的基本类型
+    * 可作为属性名
+    * 不能使用new关键字来构造
+    * 主要用于私有或特殊属性
+    * 
+    ```js
+        var mysym = Symbol( "my own symbol" );
+        mysym; // Symbol(my own symbol)
+        mysym.toString(); // "Symbol(my own symbol)"
+        typeof mysym; // "symbol"
+        var a = { };
+        a[mysym] = "foobar";
+        // getOwnPropertySymbols可以公开获得对象上的所有符号
+        Object.getOwnPropertySymbols( a );
+        // [ Symbol(my own symbol) ]
+    ```
+26. 
+阅读至40页

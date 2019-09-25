@@ -467,8 +467,106 @@ OPTIONS * HTTP/1.1
     * 配合```3xx: Redirection```，提供重定向的URI
     * 几乎所有的浏览器接收到Location后，都会强制性的尝试对已提示的重定向资源访问
 5. Proxy-Authenticate
-    * 
-6.  
-
+    * `Proxy-Authenticate: Basic realm="Usagidesign Auth"`
+    * 会把代理服务器所要求的认证信息，发送给客户端
+    * 客户端与服务器进行认证时，首部字段`www-Authorization`有着相同的作用
+6.  Retry-After
+    * `Retry-After: 120`
+    * 告知客户端在多久之后再次发出请求
+    * 与`503 Service Unavailable`响应，或`3xx Redirect`响应一起使用
+    * 字段值可以指定为具体的日期时间（Wed, 04 Jul 2012 06：34：24GMT 等格式），也可以是创建响应后的秒数。
+7.  Server
+    * `Server: Apache/2.2.6 (Unix) PHP/5.2.5` 
+    * 告知客户端当前服务器上安装的`http`服务器名称、版本号等
+8.  Vary
+    * `Vary: Accept-Language`
+    * 如果使用的 Accept-Language 字段的值相同，那么就直接从缓存返回响应。
+9.  WWW-Authenticate
+    * `WWW-Authenticate: Basic realm="Usagidesign Auth"`
+    * 告知客户端适用于的认证方案
+#### 20.实体首部字段
+> 在请求和响应的HTTP报文中，都含有与实体相关的首部字段
+1. Allow
+    * `Allow: GET, HEAD`
+    * 通知客户端能够支持的`Request-URI`指定资源的`HTTP`方法
+    * 服务器接收到不支持的`HTTP`方法，会以`405 Method Not Allowed`作为响应返回, 同时还会把所有支持的`HTTP`方法写入首部字段`Allow`后返回
+2. Content-Encoding
+    * `Content-Encoding: gzip`
+    * 告知客户端服务器对实体的主体部分选用的内容编码方式
+    * 主要采用4种内容编码方式
+      * gzip
+      * compress
+      * deflate
+      * identity 
+3. Content-Language
+    * `Content-Language: zh-CN`
+    * 告知客户端，实体主体所使用的自然语言
+4. Content-Length
+    * `Content-Length: 15000` 
+    * 表示实体的大小
+    * 对实体主体进行内容编码时，不再使用`Content-Length`首部字段
+5. Content-Location
+    * `Content-Location: http://www.hackr.jp/index-ja.html`
+    * 表示报文主体返回资源对应的URI
+    * 当访问的页面内容与实际请求的对象不同时，首部字段会写明URI
+6. Content-MD5
+    * `Content-MD5: OGFkZDUwNGVhNGY3N2MxMDIwZmQ4NTBmY2IyTY==`
+    * 检测报文主体在传输过程中是否保持完整，以及确认传输到达
+7. Content-Range
+    * `Content-Range: bytes 5001-10000/10000`
+    * 告知客户端作为响应返回的实体哪个部分符合范围请求
+8. Content-type
+    * `Content-Type: text/html; charset=UTF-8`
+    * 实体内对象的媒体类型
+9. Expires
+    * `Expires: Wed, 04 Jul 2012 08:26:05 GMT`
+    * 将资源失效的日期告知客户端
+    * 服务器接收到首部字段`Expires`的响应后，会以缓存应答请求，当超过指定时间后，会向源服务器请求资源
+    * `Cache-Control`的优先级高于`Expires`  
+10. Last-Modified
+    * `Last-Modified: Wed, 23 May 2012 09:59:55 GMT`
+    * 指定资源最终修改的时间
+#### 21.为Cookie服务的首部字段
+1. Cookie的工作机制时用户识别和状态管理
+2. 调用Cookie时，可校验有效期，发送域，路径，协议信息，所以正规发布的Cookie内的数据不会因web站点的攻击而泄露
+3. Cookie的规格标准文档有4种
+  * RFC2616(标准化)
+  * RFC2019
+  * RFC2965
+  * RFC6265
+4. 服务器开始准备管理客户端的状态时，会通过`Set-Cookie`事先告知各种信息
+  * `Set-Cookie: status=enable; expires=Tue, 05 Jul 2011 07:26:31`
+  * `Set-Cookie`的属性
+    | 属性         | 说明                                                                   |
+    | :----------- | :--------------------------------------------------------------------- |
+    | NAME=VALUE   | 赋予cookie的名称和其值(必需项)                                         |
+    | expires=DATE | Cookie的有效期（若不明确指定则默认为浏览器关闭前停止）                 |
+    | path=PATH    | Cookie适用对象的服务器文件目录（若不指定，则默认为文档所在的文件目录） |
+    | domain=域名  | Cookie适用对象的域名（若不指定，则默认为创建Cookie的服务器域名）       |
+    | Secure       | 仅在HTTPS安全通信时才会发送Cookie                                      |
+    | HttpOnly     | 加以限制，使Cookie不能被javascript脚本访问（可以防止XSS攻击）          |
+5. 客户端想获得HTTP状态管理支持时，会在请求中包含从服务器接收到的Cookie 
+#### 22.其他首部字段
+1. X-Frame-Options
+  * HTTP响应首部
+  * `X-Frame-Options: DENY`
+  * 控制网站内容是否在其他web站点的frame标签内显示
+  * DENY ：拒绝
+  * SAMEORIGIN ：仅同源域名下的页面（Top-level-browsingcontext）匹配时许可。
+2. X-XSS-Protection
+  * HTTP响应首部
+  * `X-XSS-Protection: 1`
+  * 针对跨站脚本攻击（XSS）的一种对策，用于控制浏览器XSS防护机制的开关
+  * 0: 将XSS过滤设置成无效状态
+  * 1: 将XSS过滤设置成有效状态
+3. DNT(Do Not Track拒绝个人信息被收录)
+  * HTTP 请求首部
+  * 表示拒绝被精准广告追踪的方法
+  * 0: 同意被追踪
+  * 1：拒绝被追踪
+4. P3P(The Platform for Privacy Preferences，在线隐私偏好平台)
+  * HTTP响应首部
+  * `P3P: CP="CAO DSP LAW CURa ADMa DEVa TAIa PSAa PSDa IVAa IVDa`
+  * 使web网站上的个人隐私变成一种仅供程序可理解的形式, 达到保护用户隐私的目的
 
 6.5.5 119页
