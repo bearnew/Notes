@@ -27,9 +27,8 @@ new BundleAnalyzerPlugin(
 const SpeedMeasurePlugin = require("speed-measure-webpack-plugin")
 const smp = new SpeedMeasurePlugin()
 
-module.exports = smp.wrap({
-    // ...webpack配置信息
-})
+
+module.exports = smp.wrap(YourWebpackConfig);
 ```
 
 ### webpack优化
@@ -148,4 +147,7 @@ module.exports = {
 5. splitChunks抽取公共模块
 ### 其他
 > https://juejin.im/post/5b652b036fb9a04fa01d616b
- 
+6. cache-loader
+    * 大部分`loader`都支持缓存
+    * 如果不支持，请使用`cache-loader`
+    * 
