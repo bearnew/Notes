@@ -519,5 +519,61 @@
         Object.getOwnPropertySymbols( a );
         // [ Symbol(my own symbol) ]
     ```
-26. 
-阅读至40页
+26. 原生原型
+    * `indexOf`
+        ```js
+        'Hello'.indexOf('H'); // 0
+        ``` 
+    * `charAt`
+        ```js
+        'Hello'.charAt(1); // e
+        ``` 
+    * `substr`,
+        ```js
+        // start-起始位置，可以为负数
+        // length-需要截取的字符数
+        stringObject.substr(start, length);
+        ```
+    * `substring`
+        ```js
+        // start-起始位置，非负整数
+        // stop-结束位置，非负整数，省略该参数，返回的子串会一直到字符串的结尾
+        stringObject.substring(start,stop)
+        ```
+    * `slice`
+        ```js
+        // 不会修改数组
+        // start-可以为负数
+        // end-可以为负数，省略该参数，切分的数组从start到结束
+        arrayObject.slice(start,end)
+        ```
+    * `toUpperCase`, 字符串转换成大写
+    * `toLowerCase`, 字符串转换成小写
+    * `trim`
+        ```js
+        // 去掉字符串的前后空格
+        ' a b '.trim(); // 'a b'
+        ```
+    * 以上方法都不会改变原字符串的值, 而是返回一个新的字符串
+    * 原生原型并非普通对象
+        ```js
+        typeof Function.prototype; // function
+        Function.prototype(); // 空函数
+
+        RegExp.prototype.toString(); // "/(?:)/"——空正则表达式
+        "abc".match(RegExp.prototype); // [""]
+
+        Array.isArray( Array.prototype ); // true
+        Array.prototype.push( 1, 2, 3 ); // 3
+        Array.prototype; // [1,2,3]
+        // 需要将Array.prototype设置回空，否则会导致问题！
+        Array.prototype.length = 0;
+        ``` 
+27. 值类型转换
+    ```js
+        var a = 42;
+        var b = a + ''; // '42', 隐式强制类型转换
+        var c = String(a); // '42', 显式强制类型转换 
+    ```
+28. 
+阅读至45页
