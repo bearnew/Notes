@@ -27,4 +27,6 @@
 
 9. 在`whistle`里面进行mock数据
 
+    * 使用`file://`的路径是相对`w2 start`的启动路径
+    * 使用`file:///`的路径是指的跟路径`/`
     ![mock](https://github.com/bearnew/picture/blob/master/mardown/2019-09-25%20whistle/mock.png?raw=true)
