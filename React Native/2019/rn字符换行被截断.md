@@ -1,0 +1,1 @@
+rn字符换行被截断，使用`textBreakStrategy: simple`解决
