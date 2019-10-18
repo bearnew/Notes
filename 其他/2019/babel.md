@@ -39,6 +39,17 @@
         ]
     ]
     ```
+* 使用`babel-plugin-react-css-modules`方便`css`的书写
+    ```js
+    // css modules
+    import styles from './styles.css';
+    <div className={ styles.title }>something</div>
+    ```
+    ```js
+    // babel-plugin-react-css-modules
+    import './styles.css';
+    <div styleName="title">something</div>
+    ```
 * ```node```环境```babel``` 
   * ```babel-polyfill```
   * ```babel-register```

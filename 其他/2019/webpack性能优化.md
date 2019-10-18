@@ -150,4 +150,5 @@ module.exports = {
 6. cache-loader
     * 大部分`loader`都支持缓存
     * 如果不支持，请使用`cache-loader`
-    * 
+7. 使用`react-hot-loader`实现页面不刷新重载
+8. 移除`profile` 和`source map`等耗时操作
