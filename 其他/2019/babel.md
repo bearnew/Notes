@@ -54,3 +54,4 @@
   * ```babel-polyfill```
   * ```babel-register```
   * ```babel-node```
+* `?cacheDirectory`不支持`babel`中的`react-css-module`的`generateScopedName`使用函数
