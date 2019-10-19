@@ -575,5 +575,67 @@
         var b = a + ''; // '42', 隐式强制类型转换
         var c = String(a); // '42', 显式强制类型转换 
     ```
-28. 
+28. ToString
+    * 处理非字符串到字符串的强制类型转换
+    * 对象有自己的`toString`方法，字符串会调用该方法，并使用其返回值
+    * 数组默认的`toString`方法经过了重新定义，将所有的单元字符串用`,`连接起来
+        ```js
+            var a = [1, 2, 3];
+            a.toString(); // "1, 2, 3"
+        ```
+    * `JSON.stringify`将`JSON`对象序列化为字符串时，也用到了`toString()`
+    * 对简单值来说，`JSON.stringify`和`tostring`的效果相同
+        ```js
+            JSON.stringify(42); // "42"
+            JSON.stringify("42"); // ""42""
+            JSON.stringify(null); // "null"
+            JSON.stringify(true); // "true"
+        ```
+    * `JSON.stringify`在对象中遇到`undefined`, `function`, `symbol`会将其忽略，在数组中则会返回`null`
+        ```js
+            JSON.stringify(undefined); // undefined
+            JSON.stringify(function(){}); // undefined
+            JSON.stringify([1, undefined, function(){}, 4]); // "[1, null, null, 4]"
+            JSON.stringify({a: 2, b: function(){}}) // "{"a": 2}"
+        ```
+    * 对包含循环引用的对象使用`JSON.stringify()`会报错
+    * 如果对象中定义了`toJSON()`的方法，`JSON`字符串化时会首先调用该方法
+        ```js
+        var o = {};
+        var a = {
+            b: 42,
+            c: o,
+            d: function() {}
+        };
+        o.e = a;
+         
+        JSON.stringify(a); // 有循环引用，报错
+        a.toJSON = function() {
+            return {
+                b: this.b
+            }
+        }
+
+        JSON.stringify(a); // "{"b": 42}"
+        ``` 
+    * `JSON.stringify`第2个参数可传递`replacer`, 可以是数组或者函数
+        ```js
+        var a = {
+            b: 42,
+            c: "42",
+            d: [1, 2, 3]
+        }
+
+        JSON.stringify(a, ["b", "c"]); // "{"b": "42", "c": "42"}"
+
+        // 字符串时递归的，数组[1, 2, 3]的每个元素都会通过val传给replacer
+        // val是1, 2, 3, key是0, 1, 2
+        JSON.stringify(a, function(key, val) {
+            if (key !== "c") return val;
+        })
+        // "{"b": 42, "d": [1, 2, 3]}"
+        ```
+    * `JSON.stringify`第3个参数可传递`space`，用于指定输出的缩进格式, 也可传字符串, 此时，前面的字符串被用于每1级的缩进
+    * 
+29. ToNumber
 阅读至45页
