@@ -638,4 +638,90 @@
     * `JSON.stringify`第3个参数可传递`space`，用于指定输出的缩进格式, 也可传字符串, 此时，前面的字符串被用于每1级的缩进
     * 
 29. ToNumber
+    1. 先检查值有没有`valueOf`方法，有则返回基本类型
+    2. 没有`valueOf`, 则检查`toString`, 再用返回值来进行强制类型转换
+    3. 如果`valueOf`和`toString`均不返回基本类型，则会产生`typeError`错误
+    4. `Object.create(null)`创建对象的`prototype`属性为`Null`, 并且没有`valueOf`和`toString`方法, 因此无法进行强制转换
+    5. example
+        ```js
+        // 非数字值转换成数字
+        true; // 1
+        false; // 0
+        undefined; //NaN
+        null; // 0
+        ```
+        ```js
+        var a = {
+            valueOf: function() {
+                return '42';
+            }
+        }
+        var b = {
+            toString: function() {
+                return '42';
+            }
+        }
+        var c = [4, 2];
+        c.toString = function() {
+            return this.join(''); // 42
+        }
+
+        Number(a); // 42
+        Number(b); // 42
+        Number(c); // 42
+        Number(''); // 0
+        Number([]); // 0
+        Number(['abc']); // NaN
+        ```
+30. ToBoolean
+    1. 假值，可以被强制类型转换成`false`的值
+        * undefined
+        * null
+        * false
+        * +0, -0, NaN
+        * ''
+    2. 其他，被强制类型转换成`true`的值
+    3. 假值对象
+        ```js
+        var a = new Boolean(false);
+        var b = new Number(0);
+        var c = new String('');
+
+        var d = a && b && c; // String{''}
+        var e = Boolean(a && b && c); // true
+        var f = 0 && 1; // 0
+        var g = 1 && 2 && 3; // 3
+        ```
+    4. 真值
+        ```js
+        var a = false;
+        var b = 0;
+        var c = '';
+
+        var d = a && b && c; // false
+        var e = Boolean(d); // true
+        ``` 
+        ```js
+        var a = [];
+        var b = {};
+        var c = function () { };
+
+        var d = a && b && c; // function() {}
+        var e = Boolean(a && b && c); // true
+        ```
+31. 显式强制类型转换
+    1. 字符串和数字之间的显示转换
+        ```js
+        var a = 42;
+        String(a); // '42'
+        a.toString(); // '42'
+        ```
+        ```js
+        var a = '3.14';
+        Number(a); // 3.14
+        + a; // 3.14
+        ```
+    2. 
+    3. 
+32. 
 阅读至45页
