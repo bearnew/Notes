@@ -720,8 +720,59 @@
         var a = '3.14';
         Number(a); // 3.14
         + a; // 3.14
+        - a; // -3.14 
         ```
-    2. 
-    3. 
+    2. 日期显示转换成数字
+        ```js
+        var d = new Date( "Mon, 18 Aug 2014 08:53:06 CDT" );
+        +d; // 1408369986000
+        var timestamp = +new Date();
+        ```
+        ```js
+        var timestamp = new Date().getTime();
+        // var timestamp = (new Date()).getTime();
+        // var timestamp = (new Date).getTime();
+        ```
+        ```js
+        // ES6
+        if (!Date.now) {
+            Date.now = function() {
+                return +new Date();
+            };
+        }
+        var timestamp = Date.now();
+        ```
+    3. 奇特的 ~ 运算符（~x相当于-(x+1)）
+        * 使用`if(~a.indexOf(...))`进行判断 
+        ```js
+        var a = "Hello World";
+        ~a.indexOf("lo"); // -4 <-- 真值!
+        if (~a.indexOf("lo")) { // true
+            // 找到匹配！
+        }
+        ~a.indexOf("ol"); // 0 <-- 假值!
+        !~a.indexOf("ol"); // true
+        if (!~a.indexOf("ol")) { // true
+            // 没有找到匹配！
+        }
+        ```
+    5. | (或运算符)
+        ```js
+        0 | -0; // 0
+        0 | NaN; // 0
+        0 | Infinity; // 0
+        0 | -Infinity; // 0
+        ```
+    6. 自位截除
+        * ~~只适合30位数字，对负数的处理与`Math.floor(...)`不同 
+        ```js
+        Math.floor(-49.6); // -50
+        ~~-49.6; // -49
+        -49.6 | 0; // -49
+        ~~1.3; // 1
+        -1.3 | 0; // 1
+        ```
+    8. 
+    9. 
 32. 
 阅读至45页
