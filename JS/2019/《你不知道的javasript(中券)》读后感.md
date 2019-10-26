@@ -772,7 +772,205 @@
         ~~1.3; // 1
         -1.3 | 0; // 1
         ```
-    8. 
-    9. 
-32. 
+    7. 显式解析数字字符串
+        * `Number`转换不允许出现非字符串，否则失败并返回NaN
+        * `parseInt`允许字符串中含有非数字字符串，解析从左到右，如果遇到非字符串就停止
+        * `parseFloat`解析浮点数
+            ```js
+            var a = '42';
+            var b = '42px';
+
+            Number(a); // 42
+            parseInt(a); // 42
+
+            Number(b); // NaN
+            parseInt(b); // 42
+            ```
+        * `parseInt`会先将参数强制转换成字符串，再进行解析
+            ```js
+            var a = {
+                num: 21,
+                toString: function() { return String( this.num * 2 ); }
+            };
+            parseInt( a ); // 42
+            ```
+        * `parseInt`第2个参数，表示要解析的数字的基数。该值介于 2 ~ 36 之间。
+            如果省略该参数或其值为 0，则数字将以 10 为基础来解析。如果它以 “0x” 或 “0X” 开头，将以 16 为基数。
+            如果该参数小于 2 或者大于 36，则 parseInt() 将返回 NaN。
+            ```js
+            parseInt( 0.000008 ); // 0 ("0" 来自于 "0.000008")
+            parseInt( 0.0000008 ); // 8 ("8" 来自于 "8e-7")
+            parseInt( false, 16 ); // 250 ("fa" 来自于 "false")
+            parseInt( parseInt, 16 ); // 15 ("f" 来自于 "function..")
+            parseInt( "0x10" ); // 16
+            parseInt( "103", 2 ); // 2
+            ```
+
+    9. 显式转换成布尔值
+        * 使用`Boolean`转换
+            ```js
+            var a = "0";
+            var b = [];
+            var c = {};
+            var d = "";
+            var e = 0;
+            var f = null;
+            var g;
+            Boolean( a ); // true
+            Boolean( b ); // true
+            Boolean( c ); // true
+            Boolean( d ); // false
+            Boolean( e ); // false
+            Boolean( f ); // false
+            Boolean( g ); // false
+            ```
+        * 经常使用!!进行显示转换
+            ```js
+            var a = "0";
+            var b = [];
+            var c = {};
+            var d = "";
+            var e = 0;
+            var f = null;
+            var g;
+            !!a; // true
+            !!b; // true
+            !!c; // true
+            !!d; // false
+            !!e; // false
+            !!f; // false
+            !!g; // false
+            ```
+        * 建议在if中使用Boolean和!!来进行显式转换，使代码变得清晰可读
+        * 在JSON序列化中，可将值强制转换成true或false
+            ```js
+            var a = [
+                1,
+                function(){ /*..*/ },
+                2,
+                function(){ /*..*/ }
+            ];
+            JSON.stringify(a); // "[1,null,2,null]"
+            JSON.stringify(a, function(key,val){
+                if (typeof val == "function") {
+                    // 函数的ToBoolean强制类型转换
+                    return !!val;
+                } else {
+                    return val;
+                }
+            });
+            // "[1,true,2,true]"
+            ``` 
+32. 隐式强制类型转换
+    1. 隐式强制类型转换会让代码变得晦涩难懂
+    2. 当隐式强制类型转换会让代码减少冗余，更加简洁
+    3. example
+        ```js
+        var a = "42";
+        var b = "0";
+        var c = 42;
+        var d = 0;
+
+        a + b; // "420"
+        c + d; // 42
+        ```
+        ```js
+        // a和b都会被强制转换成字符串，然后再进行拼接
+        var a = [1,2];
+        var b = [3,4];
+        a + b; // "1,23,4"
+        ```
+    4. 如果1个操作数是字符串，则执行字符串拼接，否则执行数字加法
+        ```js
+        var a = 42;
+        var b = a + "";
+        b; // "42"
+        ```
+    5. a + ''隐式，会对a调用valueOf()方法，String(a)会直接调用toString
+        ```js
+        var a = {
+            valueOf: function() { return 42; },
+            toString: function() { return 4; }
+        };
+        a + ""; // "42"
+        String( a ); // "4"
+        ``` 
+    6. 字符串强制转换成数字的情况
+        ```js
+        // a和b首先会被转换成字符串，然后再转换成数字
+        var a = [3];
+        var b = [1];
+        a - b; // 2
+        ```
+    7.  5种强制转换成boolean值的情况
+        1. if(...)语句中的条件判断表达式
+        2. for(..., ..., ...)语句中的条件判断表达式第2个
+        3. while(...)和do..while(...)循环中的条件判断表达式
+        4. ?:中的条件判断表达式
+        5. 逻辑或||与逻辑与&&左边的操作数
+        ```js
+        var a = 42;
+        var b = "abc";
+        var c;
+        var d = null;
+        if (a) {
+            console.log( "yep" ); // yep
+        }
+        while (c) {
+            console.log( "nope, never runs" );
+        }
+        c = d ? a : b;
+        c; // "abc"
+        if ((a && d) || c) {
+            console.log( "yep" ); // yep
+        }
+        ```
+    8. && 和 ||
+        * &&和||会先对第1个操作数进行条件判断，如果不是布尔值，则先进行ToBoolean强制类型转换，再执行条件判断
+        * `a || b`, 相当于 `a ? a : b`
+        * `a && b`, 相当于 `a ? b : a`
+        * 短路机制
+            ```js
+            function foo() {
+                console.log( a );
+            }
+            var a = 42;
+            a && foo(); // 42
+
+            a = b || 'something'
+            ```
+        * 条件判断表达式，最后会执行布尔的隐式转换
+            ```js
+            // a && (b || c)的结果为'foo'
+            var a = 42;
+            var b = null;
+            var c = "foo";
+            if (a && (b || c)) {
+                console.log( "yep" );
+            }
+            ``` 
+    9. Symbol的转换
+        * Symbol可显式强制转换成字符串
+            ```js
+            var s1 = Symbol( "cool" );
+            String( s1 ); // "Symbol(cool)"
+            ```
+        *  Symbol隐式转换成字符串会报错
+            ```js
+            var s2 = Symbol( "not cool" );
+            s2 + ""; // TypeError
+            ```
+        *  Symbol强制转换成number会报错
+            ```js
+            Number(Symbol('ssdd')) // TypeError
+            ```  
+        *  Symbol可强制转换成布尔值
+            ```js
+            Boolean(Symbol('')); // true
+            ```   
+33. 宽松相等和严格相等
+    * == 检查值是否相等
+    * === 检查值和类型是否相等
+    * == 允许在相等比较中进行强制类型的转换, ===不允许
+34. 
 阅读至45页
