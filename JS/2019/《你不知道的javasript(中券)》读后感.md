@@ -969,8 +969,185 @@
             Boolean(Symbol('')); // true
             ```   
 33. 宽松相等和严格相等
-    * == 检查值是否相等
-    * === 检查值和类型是否相等
-    * == 允许在相等比较中进行强制类型的转换, ===不允许
-34. 
+    1. == 检查值是否相等
+    2. === 检查值和类型是否相等
+    3. == 允许在相等比较中进行强制类型的转换, ===不允许
+        ```js
+        NaN === NaN; // false
+        +0 === -0; // true
+        ```
+    4. 字符串与数字之间比较，是将字符串转换成数字进行比较
+        ```js
+        var a = '42';
+        var b = 42;
+        a == b; // true
+        a === b; // false
+        ``` 
+    5. 其他类型与布尔类型进行==比较
+        ```js
+        x转换成数字1，y转换成数字42，不相等为false
+        var x = true;
+        var y = '42';
+        x == y; // false
+        ```
+    6. 建议不要使用== true 或者 == false进行比较，会发生隐式类型转换
+        ```js
+        var a = "42";
+        // 不要这样用，条件判断不成立：
+        if (a == true) {
+        // ..
+        }
+        // 也不要这样用，条件判断不成立：
+        if (a === true) {
+        // ..
+        }
+        // 这样的显式用法没问题：
+        if (a) {
+        // ..
+        }
+        // 这样的显式用法更好：
+        if (!!a) {
+        // ..
+        }
+        // 这样的显式用法也很好：
+        if (Boolean( a )) {
+        // ..
+        }
+        ```
+    7. null和undefined隐式相等, 但与其他值比较都为false
+        ```js
+        var a = null;
+        var b;
+        a == b; // true
+        a == null; // true
+        b == null; // true
+
+        a == false; // false
+        b == false; // false
+        a == ""; // false
+        b == ""; // false
+        a == 0; // false
+        b == 0; // false
+        ```
+        ```js
+        var a = doSomething();
+        if (a === undefined || a === null) {
+        // ..
+        }
+
+        // 这样写，提高执行效率和可读性
+        var a = doSomething();
+        if (a == null) {
+        // ..
+        }
+        ```
+    8. 对象与非对象比较，会调用对象的`valueOf`和`toString`的方法
+        ```js
+        // [42]先调用了toString转换成了'42'
+        var a = 42;
+        var b = [42];
+
+        a == b; // true 
+        ```
+        ```js
+        var a = "abc";
+        var b = Object( a ); // 和new String( a )一样
+        a === b; // false
+        // b通过强制类型转换了'abc'
+        a == b; // true
+        ```
+        ```js
+        var a = null;
+        var b = Object( a ); // 和Object()一样, null没有封装对象，返回1个常规对象{}
+        a == b; // false
+
+        var c = undefined;
+        var d = Object( c ); // 和Object()一样, undefined没有封装对象，返回1个常规对象{}
+        c == d; // false
+
+        var e = NaN;
+        var f = Object( e ); // 和new Number( e )一样, 返回Number {NaN}， 但是NaN == NaN为false
+        e == f; // false
+        ``` 
+
+34. 特殊场景
+    1. valueOf返回其他数字
+        ```js
+        Number.prototype.valueOf = function() {
+            return 3;
+        };
+        new Number( 2 ) == 3; // true
+        ```
+        ```js
+        var i = 2;
+        Number.prototype.valueOf = function() {
+            return i++;
+        };
+        var a = new Number( 42 );
+        if (a == 2 && a == 3) {
+            console.log( "Yep, this happened." );
+        }
+        ```
+    2. 非常规情况
+        ```js
+        // null与undefined与其他值比较都为false
+        "0" == null; // false
+        "0" == undefined; // false
+        "0" == false; // true -- 晕！
+        "0" == NaN; // false
+        "0" == 0; // true
+        "0" == ""; // false
+        ```
+        ```js
+        false == null; // false
+        false == undefined; // false
+        false == NaN; // false
+        false == 0; // true -- 晕！
+        false == ""; // true -- 晕！
+        false == []; // true -- 晕！
+        // 对象调valueOf为['object Object'], 与false进行比较，都转换成Number, 0 == NaN为false
+        false == {}; // false
+        ```
+        ```js
+        "" == null; // false
+        "" == undefined; // false
+        "" == NaN; // false
+        "" == 0; // true -- 晕！
+        "" == []; // true -- 晕！
+        "" == {}; // false
+        ```
+        ```js
+        0 == null; // false
+        0 == undefined; // false
+        0 == NaN; // false
+        0 == []; // true -- 晕！
+        0 == {}; // false
+        ```
+    3. 极端情况
+        ```js
+        // ![]转换成false, [] == false，再转换成 '' == 0, 变成 0 == 0为true
+        [] == ![]; // true
+
+        [] == []; // false
+        {} == {}; // false
+        [] !== []; // true
+        ```
+        ```js
+        2 == [2]; // true
+        // [null]会调用toString的方法转换成'', 
+        '' == [null]; // true
+        ```
+        ```js
+        // ""、"\n"（或者 " " 等其他空格组合）等空字符串被 ToNumber 强制类型转换为 0。
+        0 == "\n"; // true
+        ```
+        ```js
+        42 == "43"; // false
+        "foo" == 42; // false
+        "true" == true; // false
+        42 == "42"; // true
+        "foo" == [ "foo" ]; // true
+        ```
+    4. 
+35. 
 阅读至45页

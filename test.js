@@ -1,10 +1,9 @@
-var a = "Hello World";
-~a.indexOf("lo"); // -4 <-- 真值!
-if (~a.indexOf("lo")) { // true
-    // 找到匹配！
-}
-~a.indexOf("ol"); // 0 <-- 假值!
-!~a.indexOf("ol"); // true
-if (!~a.indexOf("ol")) { // true
-    // 没有找到匹配！
+
+var i = 2;
+Number.prototype.valueOf = function () {
+    return i++;
+};
+var a = new Number(123);
+if (a == 2 && a == 3) {
+    console.log("Yep, this happened.");
 }
