@@ -1129,6 +1129,7 @@
         [] == ![]; // true
 
         [] == []; // false
+        // 如果2个都是对象，则比较是否是同1个对象
         {} == {}; // false
         [] !== []; // true
         ```
@@ -1148,6 +1149,435 @@
         42 == "42"; // true
         "foo" == [ "foo" ]; // true
         ```
-    4. 
-35. 
+    4. 完整性检查
+        ```js
+        "0" == false; // true -- 晕！
+        false == 0; // true -- 晕！
+        false == ""; // true -- 晕！
+        false == []; // true -- 晕！
+        "" == 0; // true -- 晕！
+        "" == []; // true -- 晕！
+        0 == []; // true -- 晕！
+
+        "" == 0; // true -- 晕！
+        "" == []; // true -- 晕！
+        0 == []; // true -- 晕！
+        ```
+    5. 安全运用隐式强制转换类型
+        * 如果两边有true或者false,千万不要使用==
+        * 如果两边有[], ""或者0，尽量不要使用==
+35. 抽象关系比较
+    1. 比较双方会先调用toPrimitive（valueOf和toString）,再toNumber转换成数字进行比较
+        ```js
+        var a = [42];
+        var b = ['43'];
+
+        a < b; // true
+        b < a; // false
+        ```
+    2. 如果双方都是字符串，按字母顺序进行比较
+        ```js
+        // a被转换成字符串'42', b被转换成字符串'043', 它们分别以4和0开头，0在字母顺序上小于4，最后结果为false
+        var a = ['42'];
+        var b = ['043'];
+        a < b; // false
+        ```
+        ```js
+        // a转换成'4, 2', b转换成'0, 4, 3'同样是按字母顺序进行比较
+        var a = [4, 2];
+        var b = [0, 4, 3];
+        a < b; // false
+        ```
+        ```js
+        // a调用valueOf转换成[object Object], b转换成[object Object], 按字母顺序a < b并不成立
+        var a = {a: 42}
+        var b = {b: 43}
+        a < b; // false
+        ```
+    3. 对象之间的比较
+        ```js
+        var a = {b: 42};
+        var b = {b: 43};
+
+        a < b; // false
+        // 如果2个都是对象，则比较是否是同1个对象
+        a == b; // false
+        a > b; // false
+
+        // a <= b, 被处理成!(b < a), b < a为false, 所以!(b < a)为true
+        a <= b; // true
+        // a >= b, 被处理成!(a < b), a < b为false, 所以!(a < b>)为true
+        a >= b; // true
+        ``` 
+36. 语句的结果值
+    1. 语句都有1个结果值
+    2. 在控制台中输入var a = 42; 会得到结果值undefined
+    3. 代码块的结果值是最后1个语句的结果值
+        ```js
+        // 结果值为42
+        var b;
+        if (true) {
+            b = 4 + 38;
+        }
+        ```
+    4. 使用eval来获取结果值
+       ```js
+        var a, b;
+        a = eval( "if (true) { b = 4 + 38; }" );
+        a; // 42
+       ``` 
+    5. 使用ES7的do来获取结果值
+        ```js
+        var a, b;
+        a = do {
+            if (true) {
+                b = 4 + 38;
+            }
+        };
+        a; // 42
+        ``` 
+37. 表达式的副作用
+    ```js
+    function foo() {
+        a = a + 1;
+    }
+    var a = 1;
+    foo(); // 结果值：undefined。副作用：a的值被改变
+    ```
+    ```js
+    var a = 42;
+    var b = a++;
+    a; // 43
+    b; // 42
+
+    ++a; // 44
+    a; // 44
+    ```
+    ```js
+    var a = 42, b;
+    b = ( a++, a );
+    a; // 43
+    b; // 43
+    ```
+    ```js
+    // 优化前
+    function vowels(str) {
+        var matches;
+        if (str) {
+            // 提取所有元音字母
+            matches = str.match( /[aeiou]/g );
+            if (matches) {
+                return matches;
+            }
+        }
+    }
+    vowels( "Hello World" ); // ["e","o","o"]
+    ```
+    ```js
+    // 优化后
+    function vowels(str) {
+        var matches;
+        // 提取所有元音字母
+        if (str && (matches = str.match( /[aeiou]/g ))) {
+            return matches;
+        }
+    }
+    vowels( "Hello World" ); // ["e","o","o"]
+    ```
+38. 上下文规则
+    ```js
+    // 标签为bar的代码块
+    function foo() {
+        bar: {
+            console.log( "Hello" );
+            break bar;
+            console.log( "never runs" );
+        }
+        console.log( "World" );
+    }
+    foo();
+    // Hello
+    // World
+    ```
+39. 代码块
+    ```js
+    // []被转换成了'', {}被转换成'[object Object]'
+    [] + {}; // "[object Object]"
+    // {}被当做代码块， +[]为0， 所以结果为+[]为0
+    {} + []; // 0
+    ```
+40. 对象解构
+    ```js
+    function foo({a, b, c}) {
+        // 不再需要这样:
+        // var a = obj.a, b = obj.b, c = obj.c
+        console.log(a, b, c);
+    }
+    foo({
+        c: [1,2,3],
+        a: 42,
+        b: "foo"
+    }); // 42 "foo" [1, 2, 3]
+    ```
+41. 短路
+    1.如果从左边的操作数能够得出结果，就可以忽略右边的操作数 
+    ```js
+    // opts不存在，则不执行后面
+    function doSomething(opts) {
+        if (opts && opts.cool) {
+        // ..
+        }
+    }
+    // opts.cache存在，则不执行primeCache
+    function doSomething(opts) {
+        if (opts.cache || primeCache()) {
+        // ..
+        }
+    }
+    ```
+42. 运算符的优先级
+    * &&运算符的优先级高于||, ||的优先级高于?:
+    ```js
+    var a = 42;
+    var b = "foo";
+    var c = false;
+    // 执行顺序 a && b || c ? ((c || b ? a : c) && b) : a
+    var d = a && b || c ? c || b ? a : c && b : a;
+    d; // 42
+    ``` 
+43. 关联
+    * && 和 || 是左关联
+    * ? :和=是右关联
+        ```js
+        //  a ? b : (c ? d : e)
+        a ? b : c ? d : e;
+
+        var a, b, c;
+        a = b = c = 42;
+        ``` 
+44. ASI是1个语法纠错机制，会自动给代码块加上分号
+45. 提前使用变量
+    * TDZ（Temporal Dead Zone，暂时性死区）
+    ```js
+    {
+        a = 2; // ReferenceError!
+        let a;
+    }
+    ```
+    ```js
+    {
+        typeof a; // undefined
+        typeof b; // ReferenceError! (TDZ)
+        let b;
+    }
+    ```
+47. try...finally
+    1. try中有return的场景，先执行finally, 再return值
+        ```js
+        function foo() {
+            try {
+                return 42;
+            }
+            finally {
+                console.log( "Hello" );
+            }
+            console.log( "never runs" );
+        }
+        console.log( foo() );
+        // Hello
+        // 42
+        ```
+    2. try中有throw, 先执行finally, 再throw
+        ```js
+        function foo() {
+            try {
+            throw 42;
+            }
+            finally {
+            console.log( "Hello" );
+            }
+            console.log( "never runs" );
+        }
+        console.log( foo() );
+        // Hello
+        // Uncaught Exception: 42
+        ```
+    3. finally中抛出异常，函数会在此终止，try中的return返回值会被丢弃
+        ```js
+        function foo() {
+            try {
+                return 42;
+            }
+            finally {
+                throw "Oops!";
+            }
+            console.log( "never runs" );
+        }
+        console.log( foo() );
+        // Uncaught Exception: Oops!
+        ```
+    4. finally会在i++之前执行
+        ```js
+        // 结果为0-9， 而非1-10
+        for (var i=0; i<10; i++) {
+            try {
+                continue;
+            }
+            finally {
+                console.log( i );
+            }
+        }
+        // 0 1 2 3 4 5 6 7 8 9
+        ```
+    5. try中存在yeild, finally不会执行
+        ```js
+        function* foo() {
+            try {
+                console.log(1);
+                yield 'hello';
+                console.log(2);
+            } finally {
+                console.log(3);
+            }
+        }
+
+        const a = foo().next(); // 1
+        console.log(a); // {value: 'hello', done: false}
+        ```
+    6. finally中的return会覆盖try中的return
+        ```js
+        function foo() {
+            try {
+                return 42;
+            }
+            finally {
+            // 没有返回语句，所以没有覆盖
+            }
+        }
+        function bar() {
+            try {
+                return 42;
+            }
+            finally {
+                // 覆盖前面的 return 42
+                return;
+            }
+        }
+        function baz() {
+            try {
+                return 42;
+            }
+            finally {
+                // 覆盖前面的 return 42
+                return "Hello";
+            }
+        }
+        foo(); // 42
+        bar(); // undefined
+        baz(); // Hello
+        ```
+    7. finally和带标签的break混合使用
+        ```js
+        function foo() {
+            bar: {
+                try {
+                    return 42;
+                }
+                finally {
+                    // 跳出标签为bar的代码块
+                    break bar;
+                }
+            }
+            console.log("Crazy");
+            return "Hello";
+        }
+        console.log(foo());
+        // Crazy
+        // Hello
+        ```
+        ```js
+        function foo() {
+            bar: {
+                try {
+                    return 42;
+                }
+                finally {
+                    // 跳出标签为bar的代码块
+                    // break bar;
+                }
+            }
+            console.log("Crazy");
+            return "Hello";
+        }
+        console.log(foo());
+        // 42
+        ```
+48. switch
+    1. switch传true
+        ```js
+        var a = "42";
+        switch (true) {
+            case a == 10:
+                console.log( "10 or '10'" );
+                break;
+            case a == 42;
+                console.log( "42 or '42'" );
+                break;
+            default:
+            // 永远执行不到这里
+        }
+        // 42 or '42'
+        ```
+    2. case表达式的值必须为boolean值，否则条件不成立
+        ```js
+        var a = "hello world";
+        var b = 10;
+        switch (true) {
+            // (a || b == 10)的值为'hello world'
+            case (a || b == 10):
+                // 永远执行不到这里
+                break;
+            default:
+                console.log( "Oops" );
+        }
+        // Oops
+        ```
+    3. 如果没有break,则会执行下1个代码块, 直到break为止
+        ```js
+        var a = 10;
+        switch (a) {
+            case 1:
+            case 2:
+                // 永远执行不到这里
+            default:
+                console.log( "default" );
+            case 3:
+                console.log( "3" );
+                break;
+            case 4:
+                console.log( "4" );
+        }
+        // default
+        // 3
+        ```
+        ```js
+        var a = 1;
+        switch (a) {
+            case 1:
+            case 2:
+                // 永远执行不到这里
+                console.log('1 or 2')
+            case 3:
+                console.log("3");
+                break;
+            case 4:
+                console.log("4");
+            default:
+                console.log("default");
+        }
+        // 1 or 2
+        // 3
+        ``` 
+49. 
+50. 
 阅读至45页
