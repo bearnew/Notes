@@ -1,16 +1,18 @@
-var a = 1;
-switch (a) {
-    case 1:
-    case 2:
-        // 永远执行不到这里
-        console.log('1 or 2')
-    case 3:
-        console.log("3");
-        break;
-    case 4:
-        console.log("4");
-    default:
-        console.log("default");
+var rx_one = /^[\],:{}\s]*$/;
+var rx_two = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g;
+var rx_three = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g;
+var rx_four = /(?:^|:|,)(?:\s*\[)+/g;
+
+window.JSON.parse = function(json) {
+    if (
+        rx_one.test(
+            json
+                .replace(rx_two, "@")
+                .replace(rx_three, "]")
+                .replace(rx_four, "")
+        )
+    ) {
+        return eval(`(${json})`);
+        // return (new Function('return ' + json))()
+    }
 }
-// 1 or 2
-// 3
