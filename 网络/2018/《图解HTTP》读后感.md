@@ -635,8 +635,10 @@ OPTIONS * HTTP/1.1
 3. BASIC认证
      1. HTTP1.0定义的认证方式
      2. BASIC采用的是base64编码，被盗的可能性极高
+     3. ![basic 认证](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/basic%E8%AE%A4%E8%AF%81.PNG?raw=true)
 4. DIGEST认证
      1. HTTP1.1定义的认证方式
+     2. ![digest 认证](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/digest%E8%AE%A4%E8%AF%81.PNG?raw=true)
 5. SSL认证
      1. HTTPS的客户端证书完成的认证方式
      2. 服务器，接收到需要认证资源的请求，会发送Certificate Request报文，要求客户端提供证书
@@ -658,3 +660,4 @@ OPTIONS * HTTP/1.1
      11. 服务器保存用户密码等登录信息的常用方法
         1. 先给密码加盐salt(服务器随机生成的字符串，和字符串连接生成散列值)增加额外信息
         2. 再使用散列(hash)函数计算出散列值后保存 
+    12. ![表单认证](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/%E8%A1%A8%E5%8D%95%E8%AE%A4%E8%AF%81.PNG?raw=true)
