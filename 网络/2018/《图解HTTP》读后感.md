@@ -777,3 +777,37 @@ OPTIONS * HTTP/1.1
         open(MAIL, "| /usr/sbin/sendmail $adr");
         print MAIL "From: info@example.com\n";
         ```
+    5. HTTP首部注入攻击
+        1. 通过在某些响应首部字段需要处理输出值的地方，插入换行发动攻击
+        2. 设置任意cookie
+            * 输入 101%0D%0ASet-Cookie:+SID=123456789
+            * 响应 
+                Location: http://example.com/?cat=101（%0D%0A ：换行符）
+                Set-Cookie: SID=123456789
+        4. 重定向至任意url
+            * HTTP首部注入Location: http://example.com/?cat=101。令浏览器发生重定向跳转 
+        5. 显示任意的主体（HTTP响应截断攻击）
+            ```js
+            Set-Cookie: UID=（%0D%0A ：换行符）
+            （%0D%0A ：换行符）
+            <HTML><HEAD><TITLE>之后，想要显示的网页内容 <!--（原来页面对应的首部字
+            ```  
+    6. 邮件首部注入攻击
+    7. 目录遍历攻击
+    8. 远程文件包含漏洞
+5. 因设置或设计上的缺陷，引发的安全漏洞
+    1. 强制浏览
+        * 根据文件名，推断出文件目录地址，查看其他文件的隐私信息
+    2. 不正确的错误消息处理，输入邮箱，根据错误消息提示，推断出用户是否在该网站注册过
+    3. 开放重定向
+        ```js
+        `http://example.com/?redirect=http://www.tricorder.jp`
+        // 篡改后
+        `http://example.com/?redirect=http://hackr.jp`
+        ``` 
+6.  因会话管理疏忽引发的安全漏洞
+    1. 会话劫持
+    2. 会话固定攻击
+    3. 跨站点请求伪装
+7.  其他安全漏洞
+    1. 
