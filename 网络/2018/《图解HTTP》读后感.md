@@ -537,14 +537,15 @@ OPTIONS * HTTP/1.1
 4. 服务器开始准备管理客户端的状态时，会通过`Set-Cookie`事先告知各种信息
   * `Set-Cookie: status=enable; expires=Tue, 05 Jul 2011 07:26:31`
   * `Set-Cookie`的属性
-    | 属性         | 说明                                                                   |
-    | :----------- | :--------------------------------------------------------------------- |
-    | NAME=VALUE   | 赋予cookie的名称和其值(必需项)                                         |
-    | expires=DATE | Cookie的有效期（若不明确指定则默认为浏览器关闭前停止）                 |
-    | path=PATH    | Cookie适用对象的服务器文件目录（若不指定，则默认为文档所在的文件目录） |
-    | domain=域名  | Cookie适用对象的域名（若不指定，则默认为创建Cookie的服务器域名）       |
-    | Secure       | 仅在HTTPS安全通信时才会发送Cookie                                      |
-    | HttpOnly     | 加以限制，使Cookie不能被javascript脚本访问（可以防止XSS攻击）          |
+
+| 属性         | 说明                                                                   |
+| :----------- | :--------------------------------------------------------------------- |
+| NAME=VALUE   | 赋予cookie的名称和其值(必需项)                                         |
+| expires=DATE | Cookie的有效期（若不明确指定则默认为浏览器关闭前停止）                 |
+| path=PATH    | Cookie适用对象的服务器文件目录（若不指定，则默认为文档所在的文件目录） |
+| domain=域名  | Cookie适用对象的域名（若不指定，则默认为创建Cookie的服务器域名）       |
+| Secure       | 仅在HTTPS安全通信时才会发送Cookie                                      |
+| HttpOnly     | 加以限制，使Cookie不能被javascript脚本访问（可以防止XSS攻击）          |
 5. 客户端想获得HTTP状态管理支持时，会在请求中包含从服务器接收到的Cookie 
 #### 22.其他首部字段
 1. X-Frame-Options
