@@ -807,7 +807,27 @@ OPTIONS * HTTP/1.1
         ``` 
 6.  因会话管理疏忽引发的安全漏洞
     1. 会话劫持
+        ![](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/%E4%BC%9A%E8%AF%9D%E5%8A%AB%E6%8C%81.PNG?raw=true)
     2. 会话固定攻击
+        ![](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/%E4%BC%9A%E8%AF%9D%E5%9B%BA%E5%AE%9A%E6%94%BB%E5%87%BB.PNG?raw=true)
     3. 跨站点请求伪装
+        ![](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/%E8%B7%A8%E7%AB%99%E7%82%B9%E8%AF%B7%E6%B1%82%E4%BC%AA%E8%A3%85.PNG?raw=true)
 7.  其他安全漏洞
-    1. 
+    1. 密码破解
+        1. 通过网路的密码试错
+            * 穷举法
+            * 字典攻击
+        2. 通过SQL注入等入侵系统，窃取密码
+    2. 对已加密密码的破解
+        1. 采用和穷举法或字典攻击相同的手法，尝试用相同的散列函数加密候选密码，将计算出的散列值与目标散列值进行匹配，类推出密码
+        2. 彩虹表
+        3. 拿到密钥
+        4. 加密算法的漏洞
+    3. 点击劫持（用透明的按钮或者网页覆盖在用户需要访问的web页面上）
+    4. Dos攻击
+        * 通过集中访问，造成资源过载，服务器崩溃
+        * 通过攻击安全漏洞，使服务器停止
+    5. 后门程序
+        * 开发阶段作为Debug调用的后门程序
+        * 开发者为了自身的利益植入的后门程序
+        * 攻击者通过某种方法设置的后门程序
