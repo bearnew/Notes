@@ -626,3 +626,70 @@ catch (err) {
     console.error( err ); // TypeError
 } 
 ```
+10. 使用async和await代替promise加生成器
+```js
+function foo(x,y) {
+    return request(
+        "http://some.url.1/?x=" + x + "&y=" + y
+    );
+}
+async function main() {
+    try {
+        var text = await foo( 11, 31 );
+        console.log( text );
+    } catch (err) {
+        console.error( err );
+    }
+}
+main(); 
+```
+11. Promise并发
+```js
+function *foo() {
+    // 让两个请求"并行"，并等待两个promise都决议
+    var results = yield Promise.all([
+        request( "http://some.url.1" ),
+        request( "http://some.url.2" )
+    ]);
+    var r1 = results[0];
+    var r2 = results[1];
+    var r3 = yield request(
+        "http://some.url.3/?v=" + r1 + "," + r2
+    );
+    console.log( r3 );
+}
+// 使用前面定义的工具run(..)
+run( foo ); 
+```
+12. 消息委托
+```js
+function *foo() {
+    console.log( "inside *foo():", yield "B" );
+    console.log( "inside *foo():", yield "C" );
+    return "D";
+}
+function *bar() { 
+    console.log( "inside *bar():", yield "A" );
+    // yield委托！
+    console.log( "inside *bar():", yield *foo() );
+    console.log( "inside *bar():", yield "E" );
+    return "F";
+}
+
+var it = bar();
+console.log( "outside:", it.next().value );
+// outside: A
+console.log( "outside:", it.next( 1 ).value );
+// inside *bar(): 1
+// outside: B
+console.log( "outside:", it.next( 2 ).value );
+// inside *foo(): 2
+// outside: C
+console.log( "outside:", it.next( 3 ).value );
+// inside *foo(): 3
+// inside *bar(): D
+// outside: E
+console.log( "outside:", it.next( 4 ).value );
+// inside *bar(): 4
+// outside: F 
+```
