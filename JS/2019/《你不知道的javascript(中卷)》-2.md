@@ -366,6 +366,7 @@
     2. Promise只能有1个完成值，或1个拒绝值
     3. Promise一旦执行，无法取消
     4. Promise会比普通的异步回调慢一些
+   
 #### 四、生成器
 1. 迭代器和生成器
     ```js
@@ -693,3 +694,58 @@ console.log( "outside:", it.next( 4 ).value );
 // inside *bar(): 4
 // outside: F 
 ```
+13. thunk
+    1. JavaScript 中的 thunk 是指一个用于调用另外一个函数的函数，没有任何参数。
+    ```js
+    function foo(x,y) {
+        return x + y;
+    }
+    function fooThunk() {
+        return foo( 3, 4 );
+    }
+    // 将来
+    console.log(fooThunk()); // 7 
+    ```
+    ```js
+    function foo(x,y,cb) {
+        setTimeout( function(){
+            cb( x + y );
+        }, 1000 );
+    }
+    function fooThunk(cb) {
+        foo( 3, 4, cb );
+    }
+    // 将来
+    fooThunk( function(sum){
+        console.log( sum ); // 7
+    } ); 
+    ``` 
+14. thunk通用方法
+    ```js
+    function foo(x, y, cb) {
+        setTimeout(function () {
+            cb(x + y);
+        }, 1000);
+    }
+
+    function thunkify(fn) {
+        var args = [].slice.call(arguments, 1);
+        return function (cb) {
+            args.push(cb);
+            return fn.apply(null, args);
+        };
+    }
+
+    var fooThunk = thunkify(foo, 3, 4);
+
+    // 将来
+    fooThunk(function (sum) {
+        console.log(sum); // 7
+    });
+    ```
+15. 生成器小结
+    1. yield表示暂停下来等待某个值
+    2. next(...)调用会向被暂停的yield表达式传1个值（或者是隐式的undefined）
+    3. 生成器为异步代码保持了顺序、同步、阻塞的代码模式
+
+#### 五、程序性能
