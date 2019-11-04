@@ -390,8 +390,9 @@
     ```
 2. 迭代消息传递
     1. 第1个next是启动1个生成器，并运行在第1个yield处
-    2. 第2个next调用完成第1个被暂停的yield表达式
+    2. 第2个next调用完成第1个被暂停的yield表达式, 并将yield表达式的值作为it.next().value的返回值
     3. next调用需要比yield语句多1个
+    4. next函数的传值作为上1个yield表达式的结果
     ```js
     function *foo(x) {
         var y = x * (yield);
@@ -508,6 +509,7 @@
     }
     ```
 6. iterable
+    * 每次调用Symbol.iterator会返回1个全新的迭代器
     ```js
     var a = [1,3,5,7,9];
     var it = a[Symbol.iterator]();
@@ -515,4 +517,112 @@
     it.next().value; // 3
     it.next().value; // 5 
     ```
-7. 
+7. 生成器把while...true带回了js编程世界
+    ```js
+    function *something() {
+        var nextVal;
+        while (true) {
+            if (nextVal === undefined) {
+                nextVal = 1;
+            }else{
+                nextVal = (3 * nextVal) + 6;
+            }
+            yield nextVal;
+        }
+    }
+
+    // 1 9 33 105 321 969 
+    for (var v of something()) {
+        console.log( v );
+        // 不要死循环！
+        if (v > 500) {
+            break;
+        }
+    }
+    ```
+8. break和it.return()可以用来停止生成器
+```js
+function *something() {
+    try {
+        var nextVal;
+        while (true) {
+            if (nextVal === undefined) {
+                nextVal = 1;
+            }
+            else {
+                nextVal = (3 * nextVal) + 6;
+            }
+            yield nextVal;
+        }
+    }
+    // 清理子句
+    finally {
+        console.log( "cleaning up!" );
+    }
+} 
+
+var it = something();
+for (var v of it) {
+    console.log( v );
+    // 不要死循环！
+    if (v > 500) {
+        console.log(
+            // 完成生成器的迭代器
+            it.return( "Hello World" ).value
+        );
+        // break;
+    }
+} 
+```
+8. 异步迭代生成器
+```js
+function foo(x,y) {
+    ajax(
+        "http://some.url.1/?x=" + x + "&y=" + y,
+        function(err,data){
+            if (err) {
+                // 向*main()抛出一个错误
+                it.throw( err );
+            }
+            else {
+                // 用收到的data恢复*main()
+                it.next( data );
+            }
+        }
+    );
+}
+
+function *main() {
+    try {
+        var text = yield foo( 11, 31 );
+        console.log( text ); // text即为ajax请求获取的响应data
+    }
+    catch (err) {
+        console.error( err );
+    }
+}
+
+var it = main();
+// 这里启动！
+it.next(); 
+```
+9. 生成器同步错误处理
+* 生成器yield暂停能够从异步函数调用得到返回值
+* 生成器yield能够同步捕获来自异步函数调用的错误
+```js
+function *main() {
+    var x = yield "Hello World";
+    console.log(x) // 42
+    yield x.toLowerCase(); // 引发一个异常！
+}
+
+var it = main();
+it.next().value; // Hello World
+
+try {
+    it.next(42);
+}
+catch (err) {
+    console.error( err ); // TypeError
+} 
+```

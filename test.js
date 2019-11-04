@@ -1,21 +1,15 @@
-async function async1() {
-    console.log(1);
-    const result = await async2();
-    console.log(3);
+function *main() {
+    var x = yield "Hello World";
+    console.log(x) // 42
+    yield x.toLowerCase(); // 引发一个异常！
 }
 
-async function async2() {
-    console.log(2);
+var it = main();
+it.next().value; // Hello World
+
+try {
+    it.next(42);
 }
-
-Promise.resolve().then(() => {
-    console.log(4);
-});
-
-setTimeout(() => {
-    console.log(5);
-});
-
-console.log(async1)
-async1();
-console.log(6);
+catch (err) {
+    console.error( err ); // TypeError
+} 
