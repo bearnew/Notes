@@ -749,3 +749,84 @@ console.log( "outside:", it.next( 4 ).value );
     3. 生成器为异步代码保持了顺序、同步、阻塞的代码模式
 
 #### 五、程序性能
+1. Web Worker
+    1. 将程序分成2部分，一部分运行在主UI线程下，另一部分运行在另一个独立的线程中
+    2. web worker通过基本的事件消息机制相互联系
+    3. worker之间以及他们与主程序之间，不会共享任何作用域或者资源
+    ```js
+    w1.addEventListener( "message", function(evt){
+        // evt.data
+    });
+    w1.postMessage( "something cool to say" );
+    ```
+    ```js
+    // worker内部
+    addEventListener( "message", function(evt){
+    // evt.data
+    });
+    postMessage( "a really cool reply" ); 
+    ```
+2. Web Worker应用场景
+    1. 处理密集型数学计算
+    2. 大数据集排序
+    3. 数据处理（压缩、音频分析、图像处理）
+    4. 高流量网络通信
+    5. 数据传递
+    6. 共享worker(创建一个共享中心的worker，页面上的多个tab共享资源)
+3. 提升js性能
+    1. web worker可以启动独立的线程运行js文件
+    2. SIMD把CPU级的并行数学运算映射到javascript api中，获得高性能的数据并行运算
+    3. asm.js优化垃圾收集和强制类型转换的代码，提升性能
+
+#### 六、性能测试
+1. Benchmark.js
+    1. 处理了一段js代码建立公平、可靠、有效的性能测试的所有复杂性
+    2. 直接使用benchmark
+    ```html
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.15/lodash.js"></script>
+	<script src="https://cdn.bootcss.com/benchmark/2.1.4/benchmark.js"></script>
+    ```
+    ```js
+    function foo() {
+    }
+    var bench = new Benchmark('foo', foo);
+    console.log(bench.hz); // 每秒运算数
+    bench.stats.moe; // 出错边界
+    bench.stats.variance; // 样本方差
+    ```
+    3. 使用suite比较方法的性能
+    ```js
+    var Benchmark = require('benchmark');
+    var suite = new Benchmark.Suite;
+    var arr1 = function (str) {
+        return [].slice.apply(str);
+    };
+    var str2 = function (str) {
+        return [].slice.call(str);
+    };
+    // 添加测试
+    suite.add('arr1', function() {
+        arr1('test');
+    })
+        .add('str2', function() {
+            str2('test');
+        })
+    // add listeners
+        .on('cycle', function(event) {
+            console.log(String(event.target));
+        })
+        .on('complete', function() {
+            console.log('Fastest is ' + this.filter('fastest').pluck('name'));
+        })
+    // run async
+        .run({ 'async': true });
+
+    // arr1 x 596,505 ops/sec ±1.14% (95 runs sampled)
+    // str2 x 627,822 ops/sec ±1.27% (92 runs sampled)
+    // Fastest is str2
+    ```
+2. jsPerf.com
+    1. 使用BenchMark.js运行统计上精确可靠的测试，并把测试结果放在一个公开可得的URL上
+        * `https://jsperf.com/bearnew-test1`
+3. 使用`console.time()`和`console.timeEnd()`
+3. 编写更好更清晰的测试
