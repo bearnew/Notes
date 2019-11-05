@@ -830,3 +830,6 @@ console.log( "outside:", it.next( 4 ).value );
         * `https://jsperf.com/bearnew-test1`
 3. 使用`console.time()`和`console.timeEnd()`
 3. 编写更好更清晰的测试
+#### 七、asynquence 库
+1. 序列与抽象设计
+2. 
