@@ -832,4 +832,158 @@ console.log( "outside:", it.next( 4 ).value );
 3. 编写更好更清晰的测试
 #### 七、asynquence 库
 1. 序列与抽象设计
-2. 
+2. 用于序列（线性）处理`promise`或异步代码，从而简化了各种异步模式的使用，而不失其功能
+3. `asynquence`是基于事件、基于流、基于响应的编码
+```js
+const ASQ = require("asynquence");
+ASQ(
+    // 步骤1
+    function(done){
+        setTimeout(function() {
+            done( "Hello" );
+        }, 100);
+    },
+    // 步骤2
+    function(done,greeting) {
+        setTimeout( function(){
+            done(greeting + " World" );
+        }, 100);
+    }
+)
+// 步骤3
+.then( function(done,msg){
+    setTimeout( function(){
+        done( msg.toUpperCase() );
+    }, 100);
+})
+// 步骤4
+.then( function(done,msg){
+    console.log( msg ); // HELLO WORLD
+}); 
+``` 
+4. asynquence中任何一个步骤出错，都会把整个序列抛入出错模式中，剩余步骤会被忽略
+```js
+var sq = ASQ(function(done){
+    setTimeout( function(){
+        // 为序列发送出错信号
+        done.fail( "Oops" );
+    }, 100 );
+})
+.then( function(done){
+// 不会到达这里
+})
+.or( function(err){
+console.log( err ); // Oops
+})
+.then( function(done){
+// 也不会到达这里
+} );
+
+// 之后
+sq.or( function(err){
+    console.log( err ); // Oops
+} ); 
+```
+5. 用defer来避免序列实例的错误报告
+```js
+var sq1 = ASQ( function(done){
+    doesnt.Exist(); // 将会向终端抛出异常
+});
+var sq2 = ASQ( function(done){
+    doesnt.Exist(); // 只抛出一个序列错误
+})
+// 显式避免错误报告
+.defer();
+
+setTimeout( function(){
+    sq1.or( function(err){
+        console.log( err ); // ReferenceError
+    });
+    sq2.or( function(err){
+        console.log( err ); // ReferenceError
+    } );
+}, 100 );
+// ReferenceError (from sq1) 
+```
+6. 用gate处理并行的异步任务
+```js
+ASQ( function(done){
+    setTimeout( done, 100 );
+})
+.gate(
+    function(done){
+        setTimeout( function(){
+            done( "Hello" );
+        }, 100 );
+    },
+    function(done){
+        setTimeout( function(){
+            done( "World", "!" );
+        }, 100 );
+    }
+)
+.val(function(msg1,msg2){
+    console.log( msg1 ); // Hello
+    console.log( msg2 ); // [ "World", "!" ]
+}); 
+```
+```js
+// Promise.all处理起来开销多的多
+new Promise( function(resolve,reject){
+    setTimeout( resolve, 100 );
+})
+.then( function(){
+    return Promise.all( [
+        new Promise( function(resolve,reject){
+            setTimeout( function(){
+                resolve( "Hello" );
+            }, 100);
+        } ),
+        new Promise( function(resolve,reject){
+            setTimeout( function(){
+                // 注：这里需要一个[ ]数组
+                resolve( [ "World", "!" ] );
+            }, 100);
+        })
+    ]);
+})
+.then( function(msgs){
+    console.log( msgs[0] ); // Hello
+    console.log( msgs[1] ); // [ "World", "!" ]
+}); 
+```
+7. asynquence错误处理
+```js
+ASQ()
+.try( success1 )
+.val( output ) // 1
+.try( failure3 )
+.val( output ) // { catch: 3 }
+.or( function(err){
+ // 永远不会到达这里
+} ); 
+```
+```js
+var count = 0;
+ASQ( 3 )
+.until( double )
+.val( output ) // 6
+.until( function(done){
+ count++;
+ setTimeout( function(){
+ if (count < 5) {
+ done.fail();
+ }
+ else {
+ // 跳出until(..)重试循环
+ done.break( "Oops" );
+ }
+ }, 100 );
+} )
+.or( output ); // Oops
+```
+8. 序列分叉
+    * 附加多个then()处理函数注册到同一个promise中，在这个promise处有效的实现分叉流程
+    ```js
+
+    ```
