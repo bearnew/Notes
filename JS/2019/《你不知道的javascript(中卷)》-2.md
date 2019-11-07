@@ -985,5 +985,34 @@ ASQ( 3 )
 8. 序列分叉
     * 附加多个then()处理函数注册到同一个promise中，在这个promise处有效的实现分叉流程
     ```js
+    var p = Promise.resolve( 21 );
+    // 分叉1（来自p）
+    p.then( function(msg){
+    return msg * 2;
+    } )
+    .then( function(msg){
+    console.log( msg ); // 42
+    } )
+    // 分叉2 （来自p）
+    p.then( function(msg){
+    console.log( msg ); // 21
+    }); 
+    ```
+9. 合并序列
+    * 使用seq实现fork的逆操作，将1个序列归入另一个序列，来合并两个序列
+    ```js
+    var sq = ASQ( function(done){
+        setTimeout( function(){ 
+            done( "Hello World" );
+    }, 200 );
+    } ); 
 
+    ASQ( function(done){
+        setTimeout( done, 100 );
+    } )
+    // 将sq序列纳入这个序列
+    .seq( sq )
+    .val( function(msg){
+        console.log( msg ); // Hello World
+    } ) 
     ```

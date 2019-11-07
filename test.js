@@ -1,12 +1,14 @@
-var p = Promise.resolve( 21 );
-// 分叉1（来自p）
-p.then( function(msg){
-return msg * 2;
+var sq = ASQ( function(done){
+    setTimeout( function(){ 
+        done( "Hello World" );
+ }, 200 );
+} ); 
+
+ASQ( function(done){
+    setTimeout( done, 100 );
 } )
-.then( function(msg){
-console.log( msg ); // 42
-} )
-// 分叉2 （来自p）
-p.then( function(msg){
-console.log( msg ); // 21
-}); 
+   // 将sq序列纳入这个序列
+   .seq( sq )
+   .val( function(msg){
+    console.log( msg ); // Hello World
+} ) 
