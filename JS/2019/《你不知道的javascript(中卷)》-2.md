@@ -1016,3 +1016,52 @@ ASQ( 3 )
         console.log( msg ); // Hello World
     } ) 
     ```
+#### 八、高级异步模式
+1. ES7 Observable
+* 传入的生成器会yield暂停while循环，等待下一个事件
+* 每次someEvenStream发布一个新事件，都会附到迭代器next(...)，事件数据会用evt数据恢复生成器/迭代器
+```js
+// someEventStream是一个事件流，比如来自鼠标点击或其他
+var observer = new Observer(someEventStream, function*(){
+    while (var evt = yield) {
+        console.log(evt);
+    }
+}); 
+```
+* 混合原生和库中的事件绑定，常常使一个事件触发多次，容易导致内存泄漏
+* Observable提供注册事件、注销事件的功能
+* Observable是一种标准化的方法来清理事件处理程序，防止内存泄漏
+```js
+var resize = new Observable((o) => {
+
+  // listen for window resize and pass height and width
+  window.addEventListener("resize", () => {
+    var height = window.innerHeight;
+    var width = window.innerWidth;
+    o.next({height, width});
+  });
+
+});
+
+var change = new Observable((o) => {
+
+  // listen for a data model's change event
+  // and pass along the key and value that changed
+  myModel.on("change", (key, value) => {
+    o.next({ key, value });
+  });
+
+});
+
+// create an observer to handle notfications
+// from various observables
+var observer = {
+  next: (value) => {
+    console.log("VALUE:", value);
+  }
+};
+
+// listen for data from the observables
+resize.observe(observer);
+change.observe(observer);
+```
