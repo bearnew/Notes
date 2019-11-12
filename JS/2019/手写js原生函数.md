@@ -1,4 +1,5 @@
 ## 手写js原生函数
+> https://juejin.im/post/5dc3894051882517a652dbd7
 #### 1.new
 ```js
  function New(f) {
