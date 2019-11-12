@@ -65,3 +65,6 @@ git config --global http.postBuffer 1048576000
 * 在项目中将web library的更新推送到中央仓库:
 
 ```git subtree push --prefix src/lib git@code.aliyun.com:yunduo/winged-library-web.git develop --squash```
+#### git本地识别大小写
+* `git config core.ignorecase false`
+* `git rm --cached src/components/book_b/Coupon/couponList -r`
