@@ -120,11 +120,14 @@ window.JSON.parse = function(json) {
 ```js
 new Promise((resolve, reject) => {
     setTimeout(() => {
-        console.log('1111', resolve);
-        resolve({ test: 1 })
+        resolve(111);
     }, 1000)
-}).then((data) => {
-    console.log('result1', data)
+}).then(data => {
+    return new Promise((resolve, reject) => {
+        resolve(data + 1111);
+    })
+}).then(data => {
+    console.log(data);
 }).catch((ex) => {
     console.log('error', ex)
 })
