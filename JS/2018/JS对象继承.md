@@ -140,3 +140,20 @@ console.log(c.name); // james
 console.log(c.age); // 34
 
 ```
+
+### 6.__proto__
+```js
+a = { x: 1 }
+b = {
+    __proto__: a
+}
+
+console.log(b.x); // 1
+```
+### 6.Object.setPrototypeOf
+```js
+a = { x: 1 }
+b = {};
+Object.setPrototypeOf(b, a);
+console.log(b.x); // 1
+```
