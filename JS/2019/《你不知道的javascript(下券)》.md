@@ -498,3 +498,189 @@
         // 1 2 3
         ```
 10. 正则表达式
+    1. ES6正则新增y（定点模式）
+        ```js
+        var re2 = /foo/y; // <-- 注意定点标识y
+        var str = "++foo++";
+
+        re2.lastIndex; // 0
+        re2.test( str ); // false--0处没有找到"foo"
+        re2.lastIndex; // 0
+
+        re2.lastIndex = 2;
+        re2.test( str ); // true
+        re2.lastIndex; // 5--更新到前次匹配之后位置
+        re2.test( str ); // false
+        re2.lastIndex; // 0--前次匹配失败后重置
+        ```
+    2. 正则表达式flags
+        ```js
+        var re = /foo/ig;
+        re.flags; // "gi"
+        ```
+11. 迭代器
+    1. 迭代器
+    ```js
+    var greeting = "hello world";
+    var it = greeting[Symbol.iterator]();
+    it.next(); // { value: "h", done: false }
+    it.next(); // { value: "e", done: false }
+    ..
+    ```
+    ```js
+    var m = new Map();
+    m.set("foo", 42);
+    m.set({ cool: true }, "hello world");
+    var it1 = m[Symbol.iterator]();
+    var it2 = m.entries();
+    console.log(it1.next()); // { value: [ "foo", 42 ], done: false }
+    console.log(it2.next()); // { value: [ "foo", 42 ], done: false } 
+    console.log(it2.next()); // { value: [ {cool: true}, "hello world" ], done: false } 
+    console.log(it2.next()); // {value: undefined, done: true}
+    console.log(it2.next()); // {value: undefined, done: true}
+    ```
+    2. 迭代器不应该在调用 return(..) 或者 thrown(..) 之后再产生任何值。
+12. 生成器
+    1. 提前完成
+    ```js
+    function *foo() {
+        yield 1;
+        yield 2;
+        yield 3;
+    }
+    var it = foo();
+    it.next(); // { value: 1, done: false }
+    it.return( 42 ); // { value: 42, done: true }
+    it.next(); // { value: undefined, done: true }
+    ```
+    2. 错误处理
+    ```js
+    function* foo() {
+        try {
+            yield 1;
+        }
+        catch (err) {
+            console.log(err);
+        }
+        yield 2;
+        throw "Hello!";
+    }
+    var it = foo();
+    console.log(it.next()); // { value: 1, done: false }
+    try {
+        it.throw("Hi!"); // Hi!
+        console.log("never gets here"); // 不会打印
+    } catch (err) {
+        console.log(err); // Hello!
+    }
+    ```
+13. 模块
+    1. 旧模块方法
+        ```js
+        var me = (function Hello(name){
+            function greeting() {
+                console.log( "Hello " + name + "!" ); 
+            }
+            // public API
+            return {
+                greeting: greeting
+            };
+        })( "Kyle" );
+        me.greeting(); // Hello Kyle!
+        ```
+    2. 命名导出
+        ```js
+        export function foo() {
+        // ..
+        }
+        export var awesome = 42;
+        var bar = [1,2,3];
+        export { bar };
+        ```
+        ```js
+        function foo() {
+        // ..
+        }
+        var awesome = 42;
+        var bar = [1,2,3];
+        export { foo, awesome, bar };
+        ```
+        ```js
+        function foo() { .. }
+        export { foo as bar };
+        ```
+        ```js
+        var awesome = 42;
+        export { awesome };
+        // 之后
+        awesome = 100;
+
+        // 导入awesome是100，而不是42
+        ```
+    3. 默认导出
+        ```js
+        export default function foo(..) {
+        // ..
+        }
+        ```
+        ```js
+        function foo(..) {
+        // ..
+        }
+        export { foo as default };
+        ```
+        ```js
+        var foo = 42;
+        export { foo as default };
+        export var bar = "hello world";
+        foo = 10;
+        bar = "cool";
+
+        // 导入的foo是10， 导入的bar是'cool'
+        ```
+    4. 导入
+        ```js
+        import { foo as theFooFunc } from "foo";
+        theFooFunc();
+        ```
+        ```js
+        import { default as foo } from "foo";
+        ```
+    5. 命名空间导入
+        ```js
+        import * as foo from "foo";
+        foo.bar();
+        foo.x; // 42
+        foo.baz();
+        ```
+    6. import的声明是提升的
+        ```js
+        // 在编译过程中确定了foo值是什么
+        foo();
+        import { foo } from "foo";
+        ``` 
+14. 模块依赖环
+    1. 相互导入，虚拟组合了两个独立
+    2. import语义静态加载，可以确保通过 import 相互依赖的 "foo" 和 "bar" 在其中任何一个运行之前，二者都会被加载、解析和编译。
+    ```js
+    import bar from "B";
+    export default function foo(x) {
+        if (x > 10) return bar( x - 1 );
+        return x * 2;
+    }
+    ```
+    ```js
+    import foo from "A";
+    export default function bar(y) {
+        if (y > 5) return foo( y / 2 );
+        return y * 3;
+    }
+    ```
+    ```js
+    import foo from "foo";
+    import bar from "bar";
+    foo( 25 ); // 11
+    bar( 25 ); // 11.5
+    ```
+
+15. 

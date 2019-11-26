@@ -1,11 +1,21 @@
-var a = ["a", "b", "c", "d", "e"];
-for (var val, ret, it = a[Symbol.iterator]();
-    (ret = it.next()) && !ret.done;
-) {
-    val = ret.value;
-    console.log(val);
+function* foo() {
+    try {
+        yield 1;
+    }
+    catch (err) {
+        console.log(err);
+    }
+    yield 2;
+    throw "Hello!";
 }
-// "a" "b" "c" "d" "e"
+var it = foo();
+console.log(it.next()); // { value: 1, done: false }
+try {
+    it.throw("Hi!"); // Hi!
+    console.log("never gets here"); // 不会打印
+} catch (err) {
+    console.log(err); // Hello!
+}
 
 // new Promise((resolve, reject) => {
 //     console.log('11111')
