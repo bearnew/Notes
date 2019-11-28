@@ -27,6 +27,7 @@ __css__:
 ```
 __html__
 ```html
+<!--非float元素在float元素前面时，float元素会被排斥，移动到下一行, 所以此处center放最后-->
 <div class="container">
     <div class="left">left</div>
     <div class="right">right</div>

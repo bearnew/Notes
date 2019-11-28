@@ -6,12 +6,40 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>test</title>
 	<style>
+		.box div {
+			height: 100px;
+		}
 
+
+
+
+		.left {
+			width: 100px;
+			background: red;
+			float: left;
+		}
+
+		.right {
+			width: 100px;
+			background: green;
+			float: right;
+		}
+
+		.clear {
+			clear: both;
+			height: 0;
+		}
 	</style>
 </head>
 
 <body>
-	<div id="root"></div>
+	<div id="root">
+		<div class="box">
+			<div style="float: left" class="left"></div>
+			<div style="float: right" class="right"></div>
+			<div class="clear"></div>
+		</div>
+	</div>
 	<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
 	<script crossorigin src="https://cdn.bootcss.com/babel-standalone/6.10.3/babel.min.js"></script>
