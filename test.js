@@ -1,3 +1,8 @@
+var a = NaN, b = Infinity, c = 42;
+console.log(Number.isFinite(a)); // false
+console.log(Number.isFinite(b)); // false
+console.log(Number.isFinite(c)); // false
+
 new Promise((resolve, reject) => {
     console.log('11111')
     setTimeout(() => {

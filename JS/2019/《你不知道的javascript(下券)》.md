@@ -683,4 +683,554 @@
     bar( 25 ); // 11.5
     ```
 
-15. 
+15. 模块加载器
+    ```js
+    // 可以加载不符合ES6规范的模块格式，然后转换成ES6的模块
+    // 返回1个promise
+    // 可以通过promise.all组合多个Reflect.Loader.import
+    Reflect.Loader.import( "foo", { address: "/path/to/foo.js" } )
+    .then( function(foo){
+    // ..
+    })
+    ```
+16. 类class
+    1. constructor(..) 指定 Foo(..) 函数的签名以及函数体内容。
+    2. function Foo 是“提升的”, class Foo 并不是
+    3. class 只是创建了一个同名的构造器函数
+    ```js
+    class Foo {
+        constructor(a,b) {
+            this.x = a;
+            this.y = b;
+        }
+        gimmeXY() {
+            return this.x * this.y;
+        }
+    }
+    ```
+17. extends和super
+    1. `super`指向父对象，这里指向`Foo`
+    ```js
+    class Bar extends Foo {
+        constructor(a,b,c) {
+            super( a, b ); // 将a, b传给Foo的constructor中
+            this.z = c; 
+        }
+        gimmeXYZ() {
+            return super.gimmeXY() * this.z;
+        }
+    }
+    var b = new Bar( 5, 15, 25 );
+    b.x; // 5
+    b.y; // 15
+    b.z; // 25
+    b.gimmeXYZ(); // 1875
+    ```
+    ```js
+    // es6前的继承方式
+    function Foo() {
+        this.a = 1;
+    }
+    function Bar() {
+        this.b = 2;
+        Foo.call( this );
+    }
+    // `Bar` "extends" `Foo`
+    Bar.prototype = Object.create( Foo.prototype );
+    ```
+    2. 不允许在super之前调用this
+    ```js
+    class Bar extends Foo {
+        constructor() {
+            this.b = 2; // 不允许在super()之前
+            super(); // 要改正的话可以交换这两条语句
+        }
+    }
+    ```
+    3. 使用`extends`扩展原生类的方法
+    ```js
+    class MyCoolArray extends Array {
+        first() { return this[0]; }
+        last() { return this[this.length - 1]; }
+    }
+    var a = new MyCoolArray( 1, 2, 3 );
+    a.length; // 3
+    a; // [1,2,3]
+    a.first(); // 1
+    a.last(); // 3
+    ```
+18. new.target(元属性)
+    1. new.target指向new直接调用的构造器
+    2. 如果new.target时undefined，则证明此函数不是通过new调用的
+    ```js
+    class Foo {
+        constructor() {
+            console.log( "Foo: ", new.target.name );
+        }
+    }
+    class Bar extends Foo {
+        constructor() {
+            super();
+            console.log( "Bar: ", new.target.name );
+        }
+        baz() {
+            console.log( "baz: ", new.target );
+        }
+    }
+    var a = new Foo();
+    // Foo: Foo
+    var b = new Bar();
+    // Foo: Bar <-- 遵循new调用点
+    // Bar: Bar
+    b.baz();
+    // baz: undefined
+    ```
+19. static
+    1. `static`方法是直接添加到类的函数对象上，而不是函数对象的`prototype`上
+    ```js
+    class Foo {
+        static cool() { console.log( "cool" ); }
+        wow() { console.log( "wow" ); }
+    }
+    class Bar extends Foo {
+        static awesome() {
+            super.cool();
+            console.log( "awesome" );
+        }
+        neat() {
+            super.wow();
+            console.log( "neat" );
+        }
+    }
+
+    Foo.cool(); // "cool"
+    Bar.cool(); // "cool"
+
+    Bar.awesome(); // "cool"
+                    // "awesome"
+
+    var b = new Bar();
+    b.neat(); // "wow"
+                 // "neat"
+
+    // awesome和cool方法都是在对象上，而非原型prototype上
+    b.awesome; // undefined
+    b.cool; // undefined
+    ```
+    2. 
+20. Promise
+21. Map（可以使用任意类型的值作为key）
+    1. 无法使用非字符串作为普通对象的key
+        ```js
+        var m = {};
+        var x = { id: 1 },
+        y = { id: 2 };
+
+        // x 和 y 两个对象字符串化都是 "[object Object]"，
+        m[x] = "foo";
+        m[y] = "bar";
+        m[x]; // "bar"
+        m[y]; // "bar"
+        ```
+    2. map的API
+        ```js
+        var m = new Map():
+        var x = { id: 1 },
+        y = { id: 2 };
+        m.set( x, "foo" );
+        m.set( y, "bar" );
+        m.get( x ); // "foo"
+        m.get( y ); // "bar"
+        m.delete( y );
+        m.clear();
+        m.size; // 0
+        ```
+    3. map的值
+        ```js
+        var m = new Map();
+        var x = { id: 1 },
+        y = { id: 2 };
+        m.set( x, "foo" );
+        m.set( y, "bar" );
+        var vals = [ ...m.values() ];
+        vals; // ["foo","bar"]
+        Array.from( m.values() ); // ["foo","bar"]
+        ```
+    4. map的键
+        ```js
+        var m = new Map();
+        var x = { id: 1 },
+        y = { id: 2 };
+        m.set( x, "foo" );
+        m.set( y, "bar" );
+        var keys = [ ...m.keys() ];
+        keys[0] === x; // true
+        keys[1] === y; // true
+
+        m.has( x ); // true
+        m.has( y ); // false
+        ``` 
+    5. Map键的对象被丢弃（引用解除），map仍然会保留该项目，无法支持GC, WeakMap可以
+22. WeakMap
+    1. `WeakMap`弱持有它的键
+        ```js
+        var m = new WeakMap();
+        var x = { id: 1 },
+        y = { id: 2 },
+        z = { id: 3 },
+        w = { id: 4 };
+
+        m.set( x, y );
+        x = null; // { id: 1 } 可GC
+        y = null; // { id: 2 } 可GC
+        // 只因 { id: 1 } 可GC
+
+        m.set( z, w );
+        w = null; // { id: 4 } 不可GC
+        ```
+    2. `WeakMap` 没有 size 属性或 clear() 方法
+23. Set
+    1. set是1个值的集合，其中的值是唯一
+    2. set用add代替了set方法，没有get方法
+        ```js
+        var s = new Set();
+        var x = { id: 1 },
+        y = { id: 2 };
+        s.add( x );
+        s.add( y );
+        s.add( x );
+        s.size; // 2
+        s.delete( y );
+        s.size; // 1
+        s.clear();
+        s.size; // 0
+
+        s.has( x ); // true
+        s.has( y ); // false
+        ``` 
+    3. set的唯一性不允许强制转换
+        ```js
+        var s = new Set( [1,2,3,4,"1",2,4,"5"] ),
+        uniques = [ ...s ];
+        uniques; // [1,2,3,4,"1","5"]
+        ``` 
+24. WeakSet弱持有它的值
+    1. WeakSet的值必须是对象，不像set一样可以是原生对象的值
+    ```js
+    var s = new WeakSet();
+    var x = { id: 1 },
+    y = { id: 2 };
+    s.add( x );
+    s.add( y );
+    x = null; // x可GC
+    y = null; // y可GC
+    ```
+#### 5.新增API
+1. Array
+    1. Array.of(...)
+        ```js
+        // array接收1个参数时，且此参数是数字的话，此参数表示length
+        var a = Array( 3 );
+        a.length; // 3
+        a[0]; // undefined
+
+        var b = Array.of( 3 );
+        b.length; // 1
+        b[0]; // 3
+
+        var c = Array.of( 1, 2, 3 );
+        c.length; // 3
+        c; // [1,2,3]
+        ```
+    2. Array.from
+       1. 将类数组转换成数组
+        ```js
+        var arrLike = {
+            length: 3,
+            0: "foo",
+            1: "bar"
+        };
+        var arr = Array.prototype.slice.call( arrLike );
+
+        var arr = Array.from( arrLike ); 
+        ```
+        2. 复制
+        ```js
+        var arr2 = arr.slice();
+
+        var arrCopy = Array.from( arr );
+        ```
+        3. `Array.from`永远不会产生空槽位
+        ```js
+        var a = Array( 4 );
+        // 4个空槽位！
+        var b = Array.apply( null, { length: 4 } );
+        // 4个undefined值
+
+        var c = Array.from( { length: 4 } );
+        // 4个undefined值
+        ```
+        4. `Array.from()`的第2个参数，是1个映射回调
+        ```js
+        var arrLike = {
+            length: 4,
+            2: "foo"
+        };
+        Array.from( arrLike, function mapper(val,idx){
+            if (typeof val == "string") {
+                return val.toUpperCase();
+            }
+            else {
+                return idx;
+            }
+        });
+        // [ 0, 1, "FOO", 3 ]
+        ```
+        5. `Array.from`的第3个参数为第2个参数传入的回调指定this绑定，否则，this将会是undefined
+        6. 使用`Array.from`和`Array.of`，得到的值都是`Array`的实例
+    3. copyWithin(target, start, end)
+        1. target要复制到的索引
+        2. start开始复制的源索引，包括在内
+        3. end复制结束的索引，不包括在内
+        ```js
+        [1,2,3,4,5].copyWithin( 3, 0 ); // [1,2,3,1,2]
+        [1,2,3,4,5].copyWithin( 3, 0, 1 ); // [1,2,3,1,5]
+        [1,2,3,4,5].copyWithin( 0, -2 ); // [4,5,3,4,5]
+        [1,2,3,4,5].copyWithin( 0, -2, -1 ); // [4,2,3,4,5]
+        ```
+        ```js
+        [1,2,3,4,5].copyWithin( 2, 1 ); // [1,2,2,3,4]
+        ``` 
+    4. fill(...)填充已存在的数组
+       1. fill(content, start, end), start起始位置（包括），end结束位置（不包含）
+        ```js
+        var a = Array( 4 ).fill( undefined );
+        a; // [undefined,undefined,undefined,undefined]
+        ```
+        ```js
+        var a = [ null, null, null, null ].fill( 42, 1, 3 ); 
+        a; // [null,42,42,null]
+        ```
+    5. find(...)
+        1. find接收第2个参数，绑定到第1个参数回调的this, 否则this指向undefined
+        ```js
+        var a = [1,2,3,4,5];
+        a.find( function matcher(v){
+            return v == "2";
+        }); // 2
+        a.find( function matcher(v){
+            return v == 7; // undefined
+        });
+        ``` 
+    6. findIndex(...)
+        1. findIndex接收第2个参数，绑定到第1个参数回调的this, 否则this指向undefined
+    7. 原型方法entries(), values(), key()
+        ```js
+        var a = [1,2,3];
+        [...a.values()]; // [1,2,3]
+        [...a.keys()]; // [0,1,2]
+        [...a.entries()]; // [ [0,1], [1,2], [2,3] ]
+        [...a[Symbol.iterator]()]; // [1,2,3]
+        ```
+        ```js
+        var a = [];
+        a.length = 3;
+        a[1] = 2;
+        [...a.values()]; // [undefined,2,undefined]
+        [...a.keys()]; // [0,1,2]
+        [...a.entries()]; // [ [0,undefined], [1,2], [2,undefined] ]
+        ``` 
+2. Object
+    1. Object.is(...) 
+        1. 执行比===更严格的值比较
+            ```js
+            var x = NaN, y = 0, z = -0;
+
+            // ES6新增了1个Number.isNaN()检测是否是NaN
+            x === x; // false
+            Object.is( x, x ); // true
+
+            y === z; // true
+            Object.is( y, z ); // false
+            ``` 
+    2. Object.getOwnPropertySymbols(..)
+        1. 在对象上获取所有的symbols符号
+            ```js
+            var o = {
+                foo: 42,
+                [ Symbol( "bar" ) ]: "hello world",
+                baz: true
+            };
+            Object.getOwnPropertySymbols( o ); // [ Symbol(bar) ]
+            ```
+    3. Object.setPrototypeOf(..)
+        ```js
+        var o1 = {
+            foo() { console.log( "foo" ); }
+        };
+        var o2 = {
+            // .. o2的定义 ..
+        };
+
+        Object.setPrototypeOf( o2, o1 );
+        // 委托给o1.foo()
+        o2.foo(); // foo
+        ```
+        ```js
+        var o1 = {
+            foo() { console.log( "foo" ); }
+        };
+        var o2 = Object.setPrototypeOf( {
+            // .. o2的定义 ..
+        }, o1 );
+        // 委托给o1.foo()
+        o2.foo(); // foo
+        ```
+    4. Object.assign(...)
+        ```js
+        var target = {},
+        o1 = { a: 1 }, o2 = { b: 2 },
+        o3 = { c: 3 }, o4 = { d: 4 };
+
+        Object.assign( target, o1, o2, o3 );
+        target.a; // 1
+        target.b; // 2
+        target.c; // 3 
+        ``` 
+        ```js
+        var o1 = {
+            foo() { console.log( "foo" ); }
+        };
+        var o2 = Object.assign(
+            Object.create( o1 ),
+            {
+            // .. o2的定义 ..
+            }
+        );
+        // 委托给o1.foo()
+        o2.foo(); // foo
+        ```
+3. Math
+    ```js
+    三角函数：
+    cosh(..)
+    双曲余弦函数
+    acosh(..)
+    双曲反余弦函数
+    sinh(..)
+    双曲正弦函数
+    asinh(..)
+    双曲反正弦函数
+    tanh(..)
+    双曲正切函数
+    atanh(..)
+    双曲反正切函数
+    hypot(..)
+    平方和的平方根（也即：广义勾股定理）
+
+    算术：
+    cbrt(..)
+    立方根
+    clz32(..)
+    计算 32 位二进制表示的前导 0 个数
+    expm1(..)
+    等价于 exp(x) - 1
+    log2(..)
+    二进制对数（以 2 为底的对数）
+    log10(..)
+    以 10 为底的对数
+    log1p(..)
+    等价于 log(x + 1)
+    imul(..)
+    两个数字的 32 位整数乘法
+
+    元工具：
+    sign(..)
+    返回数字符号
+    trunc(..)
+    返回数字的整数部分
+    fround(..)
+    向最接近的 32 位（单精度）浮点值取整
+    ```
+4. Number
+    1. 静态属性
+        1. `Number.EPSILON`, 任意两个值之间的最小差：2^-52
+        2. `Number.MAX_SAFE_INTEGER`, 无歧义“安全”表达的最大整数：2^53 - 1
+        3. `Number.MIN_SAFE_INTEGER`, 无歧义“安全”表达的最小整数：-(2^53 - 1) 或 (-2)^53 + 1
+    2. Number.isNaN(..)
+        ```js
+        var a = NaN, b = "NaN", c = 42;
+
+        Number.isNaN( a ); // true
+        Number.isNaN( b ); // false--修正了!
+        Number.isNaN( c ); // false
+        ```
+    3. Number.isFinite(..), 检测传入的数是否是有穷数
+        ```js
+        var a = NaN, b = Infinity, c = 42;
+        Number.isFinite( a ); // false
+        Number.isFinite( b ); // false
+        Number.isFinite( c ); // true
+        ```
+    4. Number.isInteger(..), 检测是否是整型
+        ```js
+        Number.isInteger( 4 ); // true
+        Number.isInteger( 4.2 ); // false
+        ```
+        ```js
+        function isFloat(x) {
+            return Number.isFinite( x ) && !Number.isInteger( x );
+        }
+        isFloat( 4.2 ); // true
+        isFloat( 4 ); // false
+        isFloat( NaN ); // false
+        isFloat( Infinity ); // false
+        ```
+5. 字符串
+    1. Unicode函数
+        1. String.fromCodePoint(..), 静态方法返回使用指定的代码点序列创建的字符串。
+            ```js
+            // expected output: "☃★♲你"
+            console.log(String.fromCodePoint(9731, 9733, 9842, 0x2F804));
+            ```
+        2. String#codePointAt(..), 返回 一个 Unicode 编码点值的非负整数。
+            ```js
+            String.fromCodePoint( 0x1d49e ); // " "
+            "ab d".codePointAt( 2 ).toString( 16 ); // "1d49e"
+            ```
+        3. String#normalize(..), 执行 Unicode 规范化
+            ```js
+            var s2 = s1.normalize();
+            s2.length; // 1
+            s2 === "\xE9"; // true
+            ``` 
+    2. String.raw(..), 获取未被转义的原始字符串
+        ```js
+        var str = "bc";
+        String.raw`\ta${str}d\xE9`;
+        // "\tabcd\xE9", 而不是" abcdé"
+        ```
+    3. repeat
+        ```js
+        "foo".repeat( 3 ); // "foofoofoo"
+        ```
+    4. 字符串检查函数
+        1. startsWith(..)
+            ```js
+            var palindrome = "step on no pets";
+            palindrome.startsWith( "step on" ); // true
+            palindrome.startsWith( "on", 5 ); // true 
+            ```
+        2. endsWidth(..)
+            ```js
+            var palindrome = "step on no pets";
+            palindrome.endsWith( "no pets" ); // true
+            palindrome.endsWith( "no", 10 ); // true 
+            ```
+        3. includes(..)
+            ```js
+            var palindrome = "step on no pets";
+            palindrome.includes( "on" ); // true
+            palindrome.includes( "on", 6 ); // false
+            ```  
+6. 
