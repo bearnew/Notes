@@ -192,7 +192,7 @@
 13. 非javascript
     * document被称为宿主对象
     * alert和console是由浏览器提供的
-#### 3.ES6+
+#### 3.ES6
 1. 使用shim兼容旧版浏览器
     ```js
     if (!Object.is) {
@@ -210,7 +210,7 @@
         };
     }
    ```
-#### 4.ES6+语法
+#### 4.ES6语法
 1. let
     ```js
     console.log( a ); // undefined
@@ -1233,4 +1233,269 @@
             palindrome.includes( "on" ); // true
             palindrome.includes( "on", 6 ); // false
             ```  
-6. 
+#### 6.元编程
+> 代码查看自身，代码修改自身，代码修改默认语言特性
+1. 函数名称
+    ```js
+    var o = {
+        foo() { .. }, // name: foo
+        *bar() { .. }, // name: bar
+        baz: () => { .. }, // name: baz
+        bam: function(){ .. }, // name: bam
+        get qux() { .. }, // name: get qux
+        set fuz() { .. }, // name: set fuz
+        ["b" + "iz"]:
+        function(){ .. }, // name: biz
+        [Symbol( "buz" )]:
+        function(){ .. } // name: [buz]
+    }; 
+    ```
+2. 元属性，new.target
+    ```js
+    class Parent {
+        constructor() {
+            if (new.target === Parent) {
+                console.log( "Parent instantiated" );
+            }
+            else {
+                console.log( "A child instantiated" );
+            }
+        }
+    }
+
+    class Child extends Parent {}
+    var a = new Parent();
+    // Parent instantiated
+    var b = new Child();
+    // A child instantiated
+    ```
+3. 代理
+    ```js
+    var obj = { a: 1 },
+        handlers = {
+            get(target, key, context) {
+                // 注意：target === obj,
+                // context === pobj
+                console.log("accessing: ", key);
+                return Reflect.get(
+                    target, key, context
+                );
+            }
+        },
+        pobj = new Proxy(obj, handlers);
+    obj.a;
+    // 1
+    pobj.a;
+    // accessing: a
+    // 1
+    ```
+4. 可通过`revocable`创建可取消的代理
+   1. 一旦可取消代理被取消，任何对它的访问都会抛出TypeError
+    ```js
+    var obj = { a: 1 },
+        handlers = {
+            get(target,key,context) {
+                // 注意：target === obj,
+                // context === pobj
+                console.log( "accessing: ", key );
+                return target[key];
+            }
+        },
+        { proxy: pobj, revoke: prevoke } = Proxy.revocable( obj, handlers );
+        pobj.a;
+        // accessing: a
+        // 1
+        // 然后：
+        prevoke();
+        pobj.a;
+        // TypeError
+    ```
+5. 代理在先
+    ```js
+    var messages = [],
+    handlers = {
+        get(target, key) {
+            // 字符串值？
+            if (typeof target[key] == "string") {
+                // 过滤掉标点符号
+                return target[key]
+                    .replace(/[^\w]/g, "");
+            }
+            // 所有其他的传递下去
+            return target[key];
+        },
+        set(target, key, val) {
+            // 设定唯一字符串，改为小写
+            if (typeof val == "string") {
+                val = val.toLowerCase();
+                if (target.indexOf(val) == -1) {
+                    target.push(
+                        val.toLowerCase()
+                    );
+                }
+            }
+            return true;
+        }
+    },
+    messages_proxy = new Proxy(messages, handlers);
+
+    // 其他某处：
+    messages_proxy.push(
+        "heLLo...", 42, "wOrlD!!", "WoRld!!"
+    );
+
+    // Proxy {0: "hello...", 1: "world!!"}
+    console.log(messages_proxy);
+    // ["hello...", "world!!"]
+    console.log(messages);
+
+    // hello world
+    messages_proxy.forEach(function (val) {
+        console.log(val);
+    });
+
+    // hello... world!!
+    messages.forEach(function (val) {
+        console.log(val);
+    });
+    ```
+6. 通过prototype实现代理在后
+    ```js
+    var handlers = {
+        get(target,key,context) {
+            return function() {
+                context.speak(key + "!");
+            };
+        }
+    },
+    catchall = new Proxy( {}, handlers ),
+    greeter = {
+        speak(who = "someone") {
+            console.log( "hello", who );
+        }
+    };
+
+    // 设定greeter回退到catchall
+    Object.setPrototypeOf( greeter, catchall );
+    greeter.speak(); // hello someone
+    greeter.speak( "world" ); // hello world
+    greeter.everyone(); // hello everyone!
+    ```
+7. Reflect API
+    1. 为操作对象而提供的新API, 确保对象的原生行为能够正常进行
+    2. 和`Proxy`的API一致
+    3. 将Object报错的情况，改为返回false
+        ```js
+        try {
+            Object.defineProperty(target, property, attributes);
+            // success
+        } catch (e) {
+            // failure
+        }
+        ```
+        ```js
+        if (Reflect.defineProperty(target, property, attributes)) {
+        // success
+        } else {
+        // failure
+        }
+        ```
+    4. 让Object的操作变成函数行为
+        ```js
+        'name' in Object //true
+        ```
+        ```js
+        Reflect.has(Object,'name') //true
+        ```
+    5. 在Proxy上有的方法，在Reflect上一定有
+        ```js
+        let target={}
+        let handler={
+            set(target,proName,proValue,receiver){
+                //确认对象的属性赋值成功
+                let isSuccess=Reflect.set(target,proName,proValue,receiver)
+                if(isSuccess){
+                    console.log("成功")
+                }
+                return isSuccess
+            }
+        }
+        let proxy=new Proxy(target,handler)
+        ```
+#### 7.ES6+
+1. 异步函数async await
+2. Object.observe(..)
+    1. 建立监听者观察对象的变化，每次变化发生，调用1个回调
+    2. 可观察到6种类型
+        * add
+        * update
+        * delete
+        * reconfigure
+        * setPrototype
+        * preventExtensions
+    3. Object.defineProperty重新配置对象的属性，会发出`reconfigure`改变事件
+    4. Object.seal(..) 和 Object.freeze(..) 都会触发`preventExtensions`改变事件
+    5. 对象的`prototype`改变，都会触发`setPrototype`改变事件
+    6. eg.
+        ```js
+        var obj = { a: 1, b: 2 };
+        Object.observe(
+            obj,
+            function(changes){
+                for (var change of changes) {
+                    console.log( change );
+                }
+            },
+            [ "add", "update", "delete" ]
+        );
+
+        obj.c = 3;
+        // { name: "c", object: obj, type: "add" }
+        obj.a = 42;
+        // { name: "a", object: obj, type: "update", oldValue: 1 }
+        delete obj.b;
+        // { name: "b", object: obj, type: "delete", oldValue: 2 }
+        ```   
+3. Object.unobserve(..)结束观测
+    ```js
+    var obj = { a: 1, b: 2 };
+    Object.observe(obj, function observer(changes) {
+        for (var change of changes) {
+            if (change.type == "setPrototype") {
+                Object.unobserve(
+                    change.object, observer
+                );
+                break;
+            }
+        }
+    });
+    ```
+4. 幂运算符
+    ```js
+    var a = 2;
+    a ** 4; // Math.pow( a, 4 ) == 16
+    a **= 3; // a = Math.pow( a, 3 )
+    a; // 8
+    ```
+5. 对象扩展符...
+    ```js
+    var o1 = { b: 2, c: 3, d: 4 };
+    var { b, ...o2 } = o1;
+    console.log( b, o2.c, o2.d ); // 2 3 4
+    ```
+6. includes
+    ```js
+    var vals = [ "foo", "bar", 42, "baz" ];
+    if (~vals.indexOf( 42 )) {
+    // 找到了!
+    }
+    ```
+    ```js
+    var vals = [ "foo", "bar", 42, "baz" ];
+    if (vals.includes( 42 )) {
+    // 找到了!
+    }
+    ```
+8. WebAssembly (WASM)
+    1. 使js成为从其他语言（比如 C/C++、ClojureScript 等）变换 / 交叉编译的目标语言
+    2. WASM 为其他语言在浏览器运行时环境中运行提供了一条新路径
