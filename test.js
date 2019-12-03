@@ -27,7 +27,7 @@ new Promise((resolve, reject) => {
 // let p1 = new Promise((resolve, reject) => {
 //     resolve('success 1')
 // })
-  
+
 // let p2 = new Promise((resolve, reject) => {
 //     resolve('success 2')
 // })
@@ -35,7 +35,7 @@ new Promise((resolve, reject) => {
 // let p3 = new Promise((resolve, reject) => {
 //     reject('fail fail')
 // })
-  
+
 // Promise.all([p1, p2]).then((result) => {
 //     console.log(result); // ["success 1", "success 2"]
 // }).catch((error) => {
@@ -53,8 +53,6 @@ function Promise(fn) {
     let err = null;
     let status = 'pending';
     const callBacks = [];
-    const catchFunction = [];
-    const completeFunction = [];
 
     fn(resolve, reject);
 
@@ -77,14 +75,11 @@ function Promise(fn) {
     }
 
     function handleCallBacks() {
-        console.log(catchFunction)
-        if (callBacks.length === 0 && status === 'rejected' && catchFunction.length !== 0) {
-            catchFunction[0](err);
+        if (callBacks.length === 0 && status === 'rejected') {
+            catchFunction(err);
         }
         if (callBacks.length === 0) {
-            if (completeFunction.length !== 0) {
-                completeFunction[0]();
-            }
+            completeFunction();
             return;
         };
         const callBack = callBacks.shift();
@@ -132,12 +127,12 @@ function Promise(fn) {
     }
 
     this.catch = errFunction => {
-        catchFunction.push(errFunction);
-        return new Promise((resolve, reject) => {})
+        catchFunction = errFunction;
+        return new Promise((resolve, reject) => { })
     }
 
     this.finally = finallyFunction => {
-        completeFunction.push(finallyFunction);
+        completeFunction = finallyFunction;
     }
 
     Promise.resolve = value => {
