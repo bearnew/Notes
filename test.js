@@ -4,243 +4,187 @@ new Promise((resolve, reject) => {
         resolve('step-2');
     }, 1000)
 }).then(data => {
-    console.log(data); // step-2
-    return 'step-3';
+    console.log(data)
+    return new Promise((resolve, reject) => {
+        resolve('step-3')
+    })
 }).then(data => {
-    console.log(data); // step-3
-    return data.xs.x
+    console.log(data);
+    return Promise.resolve('step-4');
+}).then(data => {
+    console.log(data);
+    return Promise.reject('step-5');
+}).then(data => {
+    console.log(data); // step-4
+}, err => {
+    console.log('reject', err)
 }).catch(err => {
     console.error('error', err)
+}).finally(() => {
+    console.log('finally')
 })
 
-function Promise(fn) {
-    console.log('----------')
-    let value = null;
-    let status = 'pending';
-    let callBacks = [];
-    let errBack = null;
+// let p1 = new Promise((resolve, reject) => {
+//     resolve('success 1')
+// })
+  
+// let p2 = new Promise((resolve, reject) => {
+//     resolve('success 2')
+// })
 
-    this.x = '1'
-    let self = this;
-    console.log('+++++++++++')
+// let p3 = new Promise((resolve, reject) => {
+//     reject('fail fail')
+// })
+  
+// Promise.all([p1, p2]).then((result) => {
+//     console.log(result); // ["success 1", "success 2"]
+// }).catch((error) => {
+//     console.error(error)
+// })
+
+// Promise.race([p2, p3]).then((result) => {
+//     console.log(result); // success 2
+// }).catch((error) => {
+//     console.error(error)
+// })
+
+function Promise(fn) {
+    let value = null;
+    let err = null;
+    let status = 'pending';
+    const callBacks = [];
+    const catchFunction = [];
+    const completeFunction = [];
 
     fn(resolve, reject);
 
     function resolve(result) {
-        console.log('ppppp', errBack, callBacks)
         status = 'fulfilled';
         value = result;
 
-
-        console.log(errBack)
-        handleCallBacks();
+        setTimeout(() => {
+            handleCallBacks();
+        }, 0)
     }
 
     function reject(error) {
         status = 'rejected';
-        value = error;
+        err = error;
+
+        setTimeout(() => {
+            handleCallBacks();
+        }, 0)
     }
 
     function handleCallBacks() {
-        console.log('5555', errBack)
-        if (callBacks.length === 0) return;
+        console.log(catchFunction)
+        if (callBacks.length === 0 && status === 'rejected' && catchFunction.length !== 0) {
+            catchFunction[0](err);
+        }
+        if (callBacks.length === 0) {
+            if (completeFunction.length !== 0) {
+                completeFunction[0]();
+            }
+            return;
+        };
+        const callBack = callBacks.shift();
         const {
             onFulfilled,
             onRejected,
             resolve,
             reject
-        } = callBacks;
+        } = callBack;
 
         try {
             if (status === 'fulfilled') {
                 const newValue = onFulfilled(value);
-                resolve(newValue);
+
+                if (typeof newValue === 'object' && typeof newValue.then === 'function') {
+                    newValue.then(res => {
+                        resolve(res);
+                    })
+                } else {
+                    resolve(newValue);
+                }
             }
 
             if (status === 'rejected' && onRejected) {
-                onRejected(value);
-                reject(value);
+                onRejected(err);
+            }
+
+            if (status === 'rejected' && !onRejected) {
+                catchFunction && catchFunction(err);
             }
         } catch (err) {
-            console.log('1111', err)
-            console.log('2222', errBack)
-            errBack(err);
-        }
-
-        if (status === 'rejected' && !onRejected) {
-            errBack(value);
+            reject(err);
         }
     }
 
     this.then = (onFulfilled, onRejected) => {
-        console.log('eeeee')
         return new Promise((resolve, reject) => {
-            console.log('rrrr')
-            callBacks = {
+            callBacks.push({
                 onFulfilled,
                 onRejected,
                 resolve,
                 reject
-            }
-            err
+            });
         })
     }
 
     this.catch = errFunction => {
-        callBacks = errFunction;
-        this.x = '3333'
-        console.log('nnnn', errBack)
+        catchFunction.push(errFunction);
+        return new Promise((resolve, reject) => {})
+    }
+
+    this.finally = finallyFunction => {
+        completeFunction.push(finallyFunction);
+    }
+
+    Promise.resolve = value => {
+        return new Promise(resolve => {
+            resolve(value);
+        })
+    }
+
+    Promise.reject = err => {
+        return new Promise((resolve, reject) => {
+            reject(err);
+        })
+    }
+
+    Promise.race = promises => {
+        return new Promise(((resolve, reject) => {
+            const errs = [];
+            const res = val => {
+                resolve(val);
+            }
+            const rej = err => {
+                errs.push(err);
+                if (errs.length === promises.length) {
+                    reject(errs[0]);
+                }
+            };
+
+            for (let p of promises) {
+                p.then(res, rej);
+            }
+        }))
+    }
+
+    Promise.all = promises => {
+        return new Promise((resolve, reject) => {
+            const results = [];
+            const res = val => {
+                results.push(val);
+                if (results.length === promises.length) {
+                    resolve(results);
+                }
+            }
+            const rej = reject;
+
+            for (let p of promises) {
+                p.then(res, rej);
+            }
+        })
     }
 }
-
-
-// function Promise(fn) {
-//     let state = 'pending'
-//     let value = null
-//     const callbacks = []
-
-//     this.then = function (onFulfilled, onRejected) {
-//         return new Promise((resolve, reject) => {
-//             handle({
-//                 onFulfilled,
-//                 onRejected,
-//                 resolve,
-//                 reject,
-//             })
-//         })
-//     }
-
-//     this.catch = function (onError) {
-//         this.then(null, onError)
-//     }
-
-//     this.finally = function (onDone) {
-//         this.then(onDone, onError)
-//     }
-
-//     this.resolve = function (value) {
-//         if (value && value instanceof Promise) {
-//             return value
-//         } if (value && typeof value === 'object' && typeof value.then === 'function') {
-//             const { then } = value
-//             return new Promise((resolve) => {
-//                 then(resolve)
-//             })
-//         } if (value) {
-//             return new Promise(resolve => resolve(value))
-//         }
-//         return new Promise(resolve => resolve())
-//     }
-
-//     this.reject = function (value) {
-//         return new Promise(((resolve, reject) => {
-//             reject(value)
-//         }))
-//     }
-
-//     this.all = function (arr) {
-//         const args = Array.prototype.slice.call(arr)
-//         return new Promise(((resolve, reject) => {
-//             if (args.length === 0) return resolve([])
-//             let remaining = args.length
-
-//             function res(i, val) {
-//                 try {
-//                     if (val && (typeof val === 'object' || typeof val === 'function')) {
-//                         const { then } = val
-//                         if (typeof then === 'function') {
-//                             then.call(val, (val) => {
-//                                 res(i, val)
-//                             }, reject)
-//                             return
-//                         }
-//                     }
-//                     args[i] = val
-//                     if (--remaining === 0) {
-//                         resolve(args)
-//                     }
-//                 } catch (ex) {
-//                     reject(ex)
-//                 }
-//             }
-//             for (let i = 0; i < args.length; i++) {
-//                 res(i, args[i])
-//             }
-//         }))
-//     }
-
-//     this.race = function (values) {
-//         return new Promise(((resolve, reject) => {
-//             for (let i = 0, len = values.length; i < len; i++) {
-//                 values[i].then(resolve, reject)
-//             }
-//         }))
-//     }
-
-//     function handle(callback) {
-//         if (state === 'pending') {
-//             callbacks.push(callback)
-//             return
-//         }
-
-//         const cb = state === 'fulfilled' ? callback.onFulfilled : callback.onRejected
-//         const next = state === 'fulfilled' ? callback.resolve : callback.reject
-
-//         console.log('11111', value)
-//         if (!cb) {
-//             next(value)
-//             return
-//         }
-//         try {
-//             const ret = cb(value)
-//             next(ret)
-//         } catch (e) {
-//             callback.reject(e)
-//         }
-//     }
-//     function resolve(newValue) {
-//         const fn = () => {
-//             if (state !== 'pending') return
-
-//             if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
-//                 const { then } = newValue
-//                 if (typeof then === 'function') {
-//                     // newValue 为新产生的 Promise,此时resolve为上个 promise 的resolve
-//                     // 相当于调用了新产生 Promise 的then方法，注入了上个 promise 的resolve 为其回调
-//                     then.call(newValue, resolve, reject)
-//                     return
-//                 }
-//             }
-//             state = 'fulfilled'
-//             console.log('44444', newValue)
-//             value = newValue
-//             handelCb()
-//         }
-
-//         setTimeout(fn, 0)
-//     }
-//     function reject(error) {
-//         const fn = () => {
-//             if (state !== 'pending') return
-
-//             if (error && (typeof error === 'object' || typeof error === 'function')) {
-//                 const { then } = error
-//                 if (typeof then === 'function') {
-//                     then.call(error, resolve, reject)
-//                     return
-//                 }
-//             }
-//             state = 'rejected'
-//             value = error
-//             handelCb()
-//         }
-//         setTimeout(fn, 0)
-//     }
-//     function handelCb() {
-//         while (callbacks.length) {
-//             const fn = callbacks.shift()
-//             handle(fn)
-//         }
-//     }
-//     fn(resolve, reject)
-// }
