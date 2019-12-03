@@ -108,10 +108,10 @@ function Promise(fn) {
             }
 
             if (status === 'rejected' && !onRejected) {
-                catchFunction && catchFunction(err);
+                catchFunction(err);
             }
         } catch (err) {
-            reject(err);
+            catchFunction(err);
         }
     }
 
