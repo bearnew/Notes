@@ -116,7 +116,10 @@ window.JSON.parse = function(json) {
 #### 6.bind
 #### 7.继承
 #### 8.js函数柯里化
-#### 9.promise
+#### 9.instanceof
+#### 10.js深拷贝
+#### 11.防抖与节流
+#### 12.promise
 ```js
 new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -281,7 +284,3 @@ function Promise(fn) {
     fn(resolve, reject)
 }
 ```
-#### 10.防抖与节流
-#### 11.js深拷贝
-#### 12.instanceof
-
