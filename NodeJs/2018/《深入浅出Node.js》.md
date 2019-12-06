@@ -230,4 +230,138 @@
     });
     ```
 #### 3.异步I/O
- 
+1. 异步I/O让前端的体验更好
+2. 资源分配
+    * 多线程面临的问题
+        1. 创建线程和线程上下文切换的开销较大
+        2. 面临锁和状态同步的问题
+    * 单线程
+        * 单线程，异步I/O
+        * 利用web works高效的利用CPU和I/O
+3. 异步I/O和非阻塞I/O
+    1. 非阻塞I/O
+        * 立即返回的仅仅是当前调用的状态，需要重复调用获取值
+    2. 异步I/O
+        * 非阻塞I/O,加轮询技术，就实现了异步I/O
+        * 通过线程之间的通信将I/O得到的数据进行传递（线程池原理）
+        * 单线程仅仅是指javasript执行单线程，内部完成I/O另有线程池
+4. 事件循环
+    1. Node创建1个while(true)循环
+    2. 执行循环，查看是否有事件待处理
+    3. 取出事件及相关回调函数，执行它们
+    4. 进入下个循环，知道没有事件，退出进程
+    5. ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF.png?raw=true)
+5. 观察者
+    1. 循环过程中，需要向观察者循环事件是否需要处理
+6. 请求对象
+    1. 送入线程池等待执行以及I/O操作完毕后的回调处理，都放入在了请求对象中
+7. 非I/O的异步API
+    * setTimeout
+    * setInterval
+    * setImmediate
+        * 将回调函数延迟执行
+    * process.nextTick
+        * 定时器精确度不够，setTimeout(fn, 0)比较浪费性能
+        * process.nextTick操作相对较为轻量
+        * 每次调用process.nextTick方法，会将回调放入队列中，下一轮事件循环时取出
+        ```js
+        process.nextTick(function () {
+            console.log('延迟执行');
+        });
+        console.log('正常执行'); 
+        ```
+        * `process.nextTick`（idle观察者）先于 I/O观察者 先于 `setImmediate`（check观察者）
+        * `process.nextTick`回调函数保存在数组中
+        * `setImmediate`保存在链表中
+        ```js
+        // 加入ଇ߲nextTick()的回调函数
+        process.nextTick(function () {
+        console.log('nextTickჽ׿执行1');
+        });
+        process.nextTick(function () {
+        console.log('nextTickჽ׿执行2');
+        });
+        // 加入ଇ߲setImmediate()的回调函数
+        setImmediate(function () {
+        console.log('setImmediateჽ׿执行1');
+        // 进入ူْ循环
+        process.nextTick(function () {
+        console.log('ഽ势֭入');
+        });
+        });
+        setImmediate(function () {
+        console.log('setImmediateჽ׿执行2');
+        });
+        console.log('正常执行'); 
+        ```
+8. 事件驱动与高性能服务器
+    1. Node通过事件驱动的方式处理请求，无需为每一个请求创建额外的对应线程
+    2. 省掉创建线程和销毁线程的开销
+#### 4.异步编程
+1. 函数式编程
+    1. 高阶函数
+        1. 将函数作为参数的函数
+        ```js
+        var points = [40, 100, 1, 5, 25, 10];
+        points.sort(function(a, b) {
+            return a - b;
+        });
+        // [ 1, 5, 10, 25, 40, 100 ] 
+        ```
+        2. 将函数作为返回值的函数
+        ```js
+        function foo(x) {
+            return function () {
+                return x;
+            };
+        } 
+        ```
+    2. 偏函数
+        1. 通过传不同的参数，产生新的定制函数
+        ```js
+        var isType = function (type) {
+            return function (obj) {
+                return toString.call(obj) == '[object ' + type + ']';
+            };
+        };
+        var isString = isType('String');
+        var isFunction = isType('Function'); 
+        ```
+2. 异步编程的优势
+    1. 基于事件驱动的非阻塞I/O模型，可以使CPU与I/O并不相互依赖等待
+    2. 利用Node的异步模型与V8的高性能，充分发挥CPU和I/O资源的优势
+3. 异步编程的难点
+    1. try catch只能捕获当次事件循环内的异常
+    ```js
+    var async = function (callback) {
+        process.nextTick(callback);
+    };
+    // 对callback执行时抛出的异常无能为力
+    try {
+        async(callback);
+    } catch (e) {
+        // TODO
+    } 
+    ```
+    2. 出错，导致回调函数被执行2次
+    ```js
+    var async = function (callback) {
+        process.nextTick(function() {
+            var results = something;
+            if (error) {
+                return callback(error);
+            }
+            callback(null, results);
+        });
+    };
+
+    try {
+        req.body = JSON.parse(buf, options.reviver);
+        callback();
+    } catch (err){
+        err.body = buf;
+        err.status = 400;
+        callback(err);
+    } 
+    ```
+2. 函数嵌套太深
