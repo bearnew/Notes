@@ -364,4 +364,127 @@
         callback(err);
     } 
     ```
-2. 函数嵌套太深
+    4. 函数嵌套太深
+    5. 异步编程依赖单线程，无法充分利用CPU
+    6. 与传统的同步编程方式，存在差异
+4. 异步编程解决方案
+    1. 事件发布/订阅模式
+    ```js
+    // 订阅
+        emitter.on("event1", function (message) {
+            console.log(message);
+        });
+        // 发布
+        emitter.emit('event1', "I am message!"); 
+    ```
+    ```js
+    var options = {
+        host: 'www.google.com',
+        port: 80,
+        path: '/upload',
+        method: 'POST'
+    };
+    var req = http.request(options, function (res) {
+        console.log('STATUS: ' + res.statusCode);
+        console.log('HEADERS: ' + JSON.stringify(res.headers));
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            console.log('BODY: ' + chunk);
+        });
+        res.on('end', function () {
+        // TODO
+        });
+    });
+    req.on('error', function (e) {
+        console.log('problem with request: ' + e.message);
+    });
+    // write data to request body
+    req.write('data\n');
+    req.write('data\n');
+    req.end(); 
+    ```
+    2. Promise
+    3. 流程控制库
+        1. 尾触发与Next
+           1. 中间件利用了尾触发的机制
+            ```js
+            var app = connect();
+            // Middleware
+            app.use(connect.staticCache());
+            app.use(connect.static(__dirname + '/public'));
+            app.use(connect.cookieParser());
+            app.use(connect.session());
+            app.use(connect.query());
+            app.use(connect.bodyParser());
+            app.use(connect.csrf());
+            app.listen(3001); 
+            ```
+            ```js
+            // 中间件原理
+            app.use = function(route, fn){
+                // some code
+                this.stack.push({ route: route, handle: fn });
+                return this;
+            }; 
+            ```
+        2. async.js
+            ```js
+            async.series([
+                function (callback) {
+                    fs.readFile('file1.txt', 'utf-8', callback);
+                },
+                function (callback) {
+                    fs.readFile('file2.txt', 'utf-8', callback);
+                }
+            ], function (err, results) {
+                // results => [file1.txt, file2.txt]
+            });
+            
+            // 等价于
+            fs.readFile('file1.txt', 'utf-8', function (err, content) {
+                if (err) {
+                    return callback(err);
+                }
+                fs.readFile('file2.txt ', 'utf-8', function (err, data) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    callback(null, [content, data]);
+                });
+            }); 
+            ```
+        3. step.js
+        4. wind.js
+5. 异步并发控制
+    1. bagpipe.js
+        * 通过一个队列来控制并发量
+        * 如果当前活跃的异步调用量小于限定值，从队列中取出执行
+        * 如果当前活跃的异步调用量达到限定值，调用暂时存放在队列中
+        * 每个异步调用结束后，从队列中取出新的异步调用执行
+        ```js
+        var Bagpipe = require('bagpipe');
+        // 设定并发数为10
+        var bagpipe = new Bagpipe(10);
+        for (var i = 0; i < 100; i++) {
+            bagpipe.push(async, function () {
+            // 异步回调执行
+            });
+        }
+        bagpipe.on('full', function (length) {
+            console.warn('底层系统处理不能及时完成，队列拥堵，目前队列长度为:' + length);
+        }); 
+        ``` 
+    2. async.js
+        * 通过`parallelLimit`来处理并发的限制
+        ```js
+        async.parallelLimit([
+            function (callback) {
+                fs.readFile('file1.txt', 'utf-8', callback);
+            },
+            function (callback) {
+                fs.readFile('file2.txt', 'utf-8', callback);
+            }
+            ], 1, function (err, results) {
+            // TODO
+        }); 
+        ```
