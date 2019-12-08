@@ -699,4 +699,8 @@
         var reader = fs.createReadStream('in.txt');
         var writer = fs.createWriteStream('out.txt');
         reader.pipe(writer);  
-        ``` 
+        ```
+#### 6.Buffer结构
+> js中的字符串无法满足Node作为服务器的需求，于是Buffer对象应运而生
+1. Buffer是1个Array对象，主要用于操作字节
+2. Buffer是典型的js和C++结合的模块，将性能相关的用C++实现，将非性能相关的用js实现 
