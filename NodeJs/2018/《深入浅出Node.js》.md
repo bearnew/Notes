@@ -507,8 +507,71 @@
         ```
     2. 代码中声明变量，内存会分配在堆中
     3. 申请到的堆内存不够分配新的对象，将继续申请堆内存，直到大小超过V8的限制
-    4. V8的垃圾回收机制
+        * 64位系统申请的最大内存为1.4G
+        * 32位系统申请的最大内存位700M
+    4. V8内存分配
         1. V8的内存分为新生代和老生代
         2. 新生代的对象为存活时间较短的对象
         3. 老生代的对象为存活时间较长或常驻内存的对象
-    5. 
+        4. 对象最开始都会被分配到新生代
+        5. 新生代中的对象满足某些条件后，会晋升到老生代
+        6. 新生代内存空间不够，会直接分配到老生代
+        7. ![memory allocation](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/GC0.PNG?raw=true)
+    5. 垃圾回收机制的2种方案
+        1. 标记清除（所有的浏览器都使用的标记清除的策略）
+            * (1)垃圾收集器会在程序运行时，给内存中所有变量加上标记
+            * (2)去掉运行环境中变量，以及被运行环境中引用变量的标记
+            * (3)垃圾收集器清除仍然带标记的变量，并回收它们占用的内存空间 
+        2. 引用计数
+            * (1)跟踪被引用的每个变量，如果该变量被赋值给其他变量，则引用次数+1
+            * (2)对变量引用的值改变了引用对象，则引用次数-1
+            * (3)垃圾收集器运行时，释放掉引用次数为0的值所占用的内存 
+    6. 垃圾回收原理
+        1. 新生代垃圾回收
+            1. 新生代采用`Scavenge`垃圾回收算法，算法实现主要采用`Cheney`算法
+                * `Scavenge`只复制存活的对象，新生代中存活的对象较少，时间效率高
+                * `Scavenge`只能使用到堆内存的一半
+            2. 在`From`空间分配A B C 3个对象
+                * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/GC1.PNG?raw=true)
+            3. `GC`判定B无引用，AC为活跃对象
+                * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/GC2.PNG?raw=true)
+            4. 将活跃对象A C从`from`空间复制到`to`空间
+                * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/GC3.PNG?raw=true)
+            5. 清空`from`空间全部内存
+                * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/GC4.PNG?raw=true)
+            6. 交换`From`空间和`to`空间
+                * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/GC5.PNG?raw=true)
+            7. 在`From`空间新增对象D E
+                * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/GC6.PNG?raw=true)
+            8. 第二轮`GC`进来发现对象D没有引用，做标记
+                * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/GC7.PNG?raw=true)
+            9. 将活跃对象A、C、E从From空间复制到`To`空间
+                * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/GC8.PNG?raw=true)
+            10. 清空`From`空间全部内存
+                * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/GC9.PNG?raw=true)
+            11. 继续交换`From`空间和`To`空间，开始下一轮 
+                * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/GC10.PNG?raw=true)
+        2. 老生代垃圾回收
+            1. Mark-Sweep（标记清除）
+                1. Mark-Sweep只清除未被引用的对象
+                2. 老生代中有对象A、B、C、D、E、F
+                    * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/gco1.PNG?raw=true)
+                3. GC进入标记阶段，将A、C、E标记为存活对象
+                    * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/gco2.PNG?raw=true)
+                4. GC进入清除阶段，回收掉死亡的B、D、F对象所占用的内存空间
+                    * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/gco3.PNG?raw=true)
+                5. 标记清除后，内存碎片会出现不连续的状态，内存碎片会对后续的内存分配造成问题
+            2. Mark-compact（标记整理）
+                1. 老生代中有对象A、B、C、D、E、F（和Mark—Sweep一样）
+                    * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/gco4.PNG?raw=true)
+                2. GC进入标记阶段，将A、C、E标记为存活对象（和Mark—Sweep一样）
+                    * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/gco5.PNG?raw=true)
+                3. GC进入整理阶段，将所有存活对象向内存空间的一侧移动，灰色部分为移动后空出来的空间
+                    * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/gco6.PNG?raw=true)
+                4. GC进入清除阶段，将边界另一侧的内存一次性全部回收
+                    * ![](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/gco7.PNG?raw=true)
+            3. V8主要使用Mark-Sweep，空间不足时才使用Mark-compact        
+        3. 新生代向老生代的晋升
+           * 对象第二次经历从`From`空间复制到`To`空间，对象会被移动到老生代中
+           * 当`To`空间超过了25%的内存使用，对象会直接从`From`移动到老生代中 
+
