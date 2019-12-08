@@ -701,6 +701,228 @@
         reader.pipe(writer);  
         ```
 #### 6.Buffer结构
-> js中的字符串无法满足Node作为服务器的需求，于是Buffer对象应运而生
+> Node作为服务器语言，需要处理网络协议，操作数据库，处理图片，接收上传文件，js中的字符串无法满足Node作为服务器的需求，于是Buffer对象应运而生
 1. Buffer是1个Array对象，主要用于操作字节
-2. Buffer是典型的js和C++结合的模块，将性能相关的用C++实现，将非性能相关的用js实现 
+2. Buffer是典型的js和C++结合的模块，将性能相关的用C++实现，将非性能相关的用js实现
+3. Buffer所占用的内存不是通过V8分配的，属于堆外内存
+4. Buffer在Node进程启动时就已经加载了，无需通过require()引进
+5. Buffer对象
+    1. Buffer为16进制的2位数
+        ```js
+        var str = "深入浅出node.js";
+        var buf = new Buffer(str, 'utf-8');
+        console.log(buf);
+        // => <Buffer e6 b7 b1 e5 85 a5 e6 b5 85 e5 87 ba 6e 6f 64 65 2e 6a 73> 
+        ```
+    2. Buffer和Array相似
+        ```js
+        var buf = new Buffer(100);
+        console.log(buf.length); // => 100
+
+        console.log(buf[10]); // 0-255的随机值 
+        ```
+    3. Buffer赋值
+        1. 赋值小于0，该值逐次加256，直到得到0-255之间的整数
+        2. 得到数值大于255，逐次减256，得到0-255区间内的数值
+        3. 如果是小数，则舍弃小数部分，只保留整数部分 
+6. Buffer内存分配
+    1. Buffer使用的是在C++层面申请内存，在js中分配内存的策略
+    2. Node采用slab（动态内存管理机制）分配机制
+        1. slab是申请好的固定内存区域
+            * full: 完全分配状态
+            * partial: 部分分配状态
+            * empty: 没有被分配状态
+        2. 每个slab的大小为8kb，它作为单位单元进行内存分配
+7. Buffer的转换
+    1. 字符串转Buffer
+        ```js
+        // encoding为编码类型，支持ASCII, UTF-8, UTF-16LE/UCS-2, Base64, Binary, Hex
+        new Buffer(str, [encoding]); 
+        ```
+    2. Buffer对象可以存储不同编码类型的字符串转码的值
+        ```js
+        // 可以不断写入内容到Buffer中
+        buf.write(string, [offset], [length], [encoding]) 
+        ```
+    3. Buffer转字符串
+        ```js
+        buf.toString([encoding], [start], [end]) 
+        ```
+    4. 通过isEncoding判断Buffer是否支持该编码类型
+        ```js
+        Buffer.isEncoding(encoding) 
+        ```
+8. Buffer的拼接
+    1. Buffer可以与字符串进行拼接
+        ```js
+        var fs = require('fs');
+        var rs = fs.createReadStream('test.md');
+        var data = '';
+        rs.on("data", function (chunk){
+            // chunk对象即为buffer对象
+            data += chunk;
+        });
+        rs.on("end", function () {
+            console.log(data);
+        }); 
+        ```
+    2. 对含有宽字节的中文Buffer进行拼接，会出现乱码�
+        ```js
+        // 床前明���光，疑���地上霜
+        // Buffer的长度限制越大，出现乱码的概率越低
+        var rs = fs.createReadStream('test.md', {highWaterMark: 11});
+        ```
+    3. 通过setEncoding解决编码乱码问题
+        ```js
+        var rs = fs.createReadStream('test.md', { highWaterMark: 11});
+        rs.setEncoding('utf8');
+        ```
+    4. 
+9. 正确拼接Buffer
+    1. 通过`Buffer.concat`封装了从小Buffer对象向大Buffer对象的复制过程
+    2. 通过`iconv-lite`模块来进行转码
+    ```js
+    var chunks = [];
+    var size = 0;
+    res.on('data', function (chunk) {
+        chunks.push(chunk);
+        size += chunk.length;
+    });
+    res.on('end', function () {
+        var buf = Buffer.concat(chunks, size);
+        var str = iconv.decode(buf, 'utf8');
+        console.log(str);
+    });  
+    ```
+10. Buffer与性能
+    1. Buffer性能测试
+        ```js
+        var http = require('http');
+        var helloworld = "";
+
+        for (var i = 0; i < 1024 * 10; i++) {
+            helloworld += "a";
+        }
+        // helloworld = new Buffer(helloworld);
+        http.createServer(function (req, res) {
+            res.writeHead(200);
+            res.end(helloworld);
+        }).listen(8001); 
+        ```
+        ```js
+        // 通过ab并行发起200个客户端，进行测试
+        ab -c 200 -t 100 http://127.0.0.1:8001/ 
+        ```
+    2. Buffer性能提升方法
+        1. 预先转换静态内容为Buffer对象，有效减少CPU的重复使用，节省服务器资源
+        2. 设置highWaterMark
+            * highWaterMark的设置对内存的分配和使用有一定的影响
+            * highWaterMark设置过小，会导致系统调用的次数过多
+            ```js
+            fs.createReadStream(path, opts)
+            // opts
+            {
+                flags: 'r',
+                encoding: null,
+                fd: null,
+                mode: 0666,
+                highWaterMark: 64 * 1024
+            } 
+            ``` 
+        4. 传递start end, `{start: 90, end: 99} `
+
+#### 7.网络编程
+1. 服务器
+    1. ASP需要IIS作为服务器
+    2. PHP需要Apache或Nginx环境
+    3. JSP需要Tomcat服务器
+    4. Node提供net, dgram, http, https分别处理TCP, UDP, HTTP, HTTPS, 适用于服务器端和客户端
+2. 构建TCP服务（传输控制协议）
+    1. 创建TCP服务端
+        ```js
+        var net = require('net');
+        var server = net.createServer(function (socket) {
+            // 新的连接
+            socket.on('data', function (data) {
+                socket.write("你好")
+            });
+
+            socket.on('end', function () {
+                console.log('连接断开');
+            });
+
+            socket.write("深入浅出Node.js：\n");
+        });
+
+        server.listen(8124, function () {
+            console.log('server bound');
+        }); 
+        ```
+    2. 通过Telnet作为客户端
+        ` telnet 127.0.0.1 8124 `
+    3. 通过nc工具进行会话
+        ```js
+        // 服务端
+        server.listen('/tmp/echo.sock'); 
+
+        // 客户端
+        nc -U /tmp/echo.sock 
+        ```
+    4. 通过net模块自行构建客户端
+        ```js
+        var net = require('net');
+        var client = net.connect({port: 8124}, function () { //'connect' listener
+            console.log('client connected');
+            client.write('world!\r\n');
+        });
+        client.on('data', function (data) {
+            console.log(data.toString());
+            client.end();
+        });
+        client.on('end', function () {
+            console.log('client disconnected');
+        }); 
+        ```
+        ```js
+        // 如果服务端是Domain Socket
+        var client = net.connect({path: '/tmp/echo.sock'}); 
+        ```
+        ```js
+        node client.js
+        ```
+    5. TCP服务的事件
+        1. 服务器事件, 通过`net.createServer()`创建的服务器，是1个`EventEmitter`实例
+            1. listening
+                * server.listen(port,listeningListener), 第2个参数
+            2. connection
+                * net.createServer(), 最后1个参数传入
+            3. close
+                * 调用server.close()后，服务器停止接收新的套接字连接
+                * 等待所有连接断开，会触发该事件 
+            5. error
+                * 服务器发生异常，触发该事件
+        2. 连接事件
+            1. data
+                * 一端使用write()传递数据，另一端触发data事件，接收到的数据为write()发送的数据
+            2. end
+                * 连接中一端发送FIN数据，触发该事件
+            3. connect
+                * 用于客户端，连接成功，触发该事件
+            4. drain
+                * 一端使用write()发送数据，当前这端会触发该事件
+            5. error
+                * 异常发生时，触发该事件
+            6. close
+                * 套接字完全关闭时，触发该事件
+            7. timeout
+                * 一段时间内，无活跃连接，触发该事件
+    6. TCP套接字时可读可写的Stream对象，可使用pipe方法实现管道操作
+        ```js
+        var net = require('net');
+        var server = net.createServer(function (socket) {
+            socket.write('Echo server\r\n');
+            socket.pipe(socket);
+        });
+        server.listen(1337, '127.0.0.1'); 
+        ```    
+3. 
