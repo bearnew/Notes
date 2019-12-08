@@ -573,5 +573,130 @@
             3. V8主要使用Mark-Sweep，空间不足时才使用Mark-compact        
         3. 新生代向老生代的晋升
            * 对象第二次经历从`From`空间复制到`To`空间，对象会被移动到老生代中
-           * 当`To`空间超过了25%的内存使用，对象会直接从`From`移动到老生代中 
+           * 当`To`空间超过了25%的内存使用，对象会直接从`From`移动到老生代中
+    7. 垃圾回收日志
+        1. 通过`node --trace_gc`打印垃圾回收的日志信息
+        2. 通过`node --prof test01.js`启动，得到V8执行时的性能分析数据
+        3. 通过` linux-tick-processor v8.log `，得到统计日志信息
+3. 高效使用内存
+    1.作用域
+        1. 在js中能形成作用域的有函数调用, with, 以及全局作用域
+        2. 局部变量会被放入到新生代内存中，随函数执行完毕，作用域的销毁而销毁
+        3. 全局作用域需要等到进程的退出才能释放
+        4. 只能通过delete删除引用，或者对变量重新赋值，才能将全局变量释放
+    ```js
+    global.foo = "I am global object";
+    console.log(global.foo); // => "I am global object"
+    delete global.foo;
+    // 或者重新赋值
+    global.foo = undefined; // or null
+    console.log(global.foo); // => undefined 
+    ```
+    2. 闭包
+        1. 实现外部作用域访问内部作用域变量的方法叫做闭包
+        2. 闭包的原理时高阶函数
+            ```js
+            var foo = function () {
+                var bar = function () {
+                    var local = "局部Վ量";
+                    return function () {
+                        return local;
+                    };
+                };
+                var baz = bar();
+                console.log(baz());
+            }; 
+            ```
+        3. 闭包函数一旦被调用，原始函数作用域以及变量都不会被释放
+        4. 无法被垃圾回收的有全局变量和闭包2种情况
+    3. 内存指标
+        1. 查看内存使用情况
+            ```js
+            node
+            process.memoryUsage() 
+            ```
+        2. 查看系统内存的占用
+            ```js
+            $ node
+            > os.totalmem() // 总内存
+            8589934592
+            > os.freemem() // 空置内存
+            4527833088
+            > 
+            ``` 
+4. 内存泄漏 
+    1. Node对内存泄漏十分敏感
+    2. 造成内存泄漏的几个原因
+        * 缓存
+        * 队列消费不及时
+        * 作用域未释放
+    3. 慎将内存当作缓存
+    4. Node缓存的解决方案
+        1. 缓存限制
+            ```js
+            var LimitableMap = function (limit) {
+                this.limit = limit || 10;
+                this.map = {};
+                this.keys = [];
+            };
+            ```
+        2. 使用进程外的缓存
+            * Redis
+            * Memcached 
+    5. 关注队列（数组对象）的状态
+        * 监控队列的长度
+        * 设置超时机制
+    6. 内存泄漏的排查
+        1. node-heapdump
+            1. `npm install heapdump`
+            2. 在代码的第一行添加`var heapdump = require('heapdump');`
+            3. 抓取堆内存快照` kill -USR2 <pid>`
+            4. 使用`Chrome`的`Profile`load快照文件
+        2. node-memwatch
+            1. node-memwatch示例
+                ```js
+                var memwatch = require('memwatch');
+                // 经过5次垃圾回收，内存仍然没有被释放，会触发leak事件
+                memwatch.on('leak', function (info) {
+                    console.log('leak:');
+                    console.log(info);
+                });
+                // 垃圾回收时会触发stats事件
+                memwatch.on('stats', function (stats) {
+                    console.log('stats:')
+                    console.log(stats);
+                });
+                ```
+            2. node-memwatch抓取快照
+                ```js
+                var memwatch = require('memwatch'); 
+                // Take first snapshot
+                var hd = new memwatch.HeapDiff();
 
+                for (var i = 0; i < 10000; i++) {
+                    leak();
+                } 
+
+                // Take the second snapshot and compute the diff
+                var diff = hd.end();
+                console.log(JSON.stringify(diff, null, 2));  
+                ``` 
+        3.  
+5. 大内存应用
+    1. V8内存的限制, 无法通过fs.readFile()和fs.writeFile()进行大文件的操作
+    2. Node使用`Stream`模块来处理大文件
+        ```js
+        var reader = fs.createReadStream('in.txt');
+        var writer = fs.createWriteStream('out.txt');
+        reader.on('data', function (chunk) {
+            writer.write(chunk);
+        });
+        reader.on('end', function () {
+            writer.end();
+        });
+
+        // 简写
+        var reader = fs.createReadStream('in.txt');
+        var writer = fs.createWriteStream('out.txt');
+        reader.pipe(writer);  
+        ``` 
