@@ -1504,6 +1504,188 @@
             // 在public路径下，才会匹配静态文件中间件
             app.use('/public', staticFile); 
             ```
+5. 页面渲染
+    1. 内容响应
+        1. MIME
+            * 浏览器通过不同的`Content-Type`来决定采用不同的渲染方式，这个值称为MIME值
+            * 不同文件类型具备不同的MIME值
+                * JSON文件的值为`application/json`
+                * XML文件的值为`application/xml`
+                * PDF文件的值为`application/pdf`
+            * 可通过lookup获取文件的MIME值
+            ```js
+            var mime = require('mime');
+            mime.lookup('/path/to/file.txt'); // => 'text/plain'
+            mime.lookup('file.txt'); // => 'text/plain'
+            mime.lookup('.TXT'); // => 'text/plain'
+            mime.lookup('htm'); // => 'text/html' 
+            ``` 
+            ```js
+            // 页面展示<html><body>Hello World</body></html>
+            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.end('<html><body>Hello World</body></html>\n'); 
+            ```
+            ```js
+            // 页面展示hello world
+            res.writeHead(200, {'Content-Type': 'text/html'});
+            res.end('<html><body>Hello World</body></html>\n'); 
+            ```
+        2. 附件下载
+            * Content-Disposition
+                * inline: 内容只需即时查看
+                * attachment: 内容为可下载的附件
+            * 指定保存时使用的文件名
+                ```js
+                Content-Disposition: attachment; filename="filename.ext" 
+                ``` 
+            * 响应附件下载的API
+                ```js
+                res.sendfile = function (filepath) {
+                    fs.stat(filepath, function(err, stat) {
+                        var stream = fs.createReadStream(filepath);
+                        // 设置内容
+                        res.setHeader('Content-Type', mime.lookup(filepath));
+                        // 设置长度
+                        res.setHeader('Content-Length', stat.size);
+                        // 设置为附件
+                        res.setHeader('Content-Disposition' 'attachment; filename="' + path.basename(filepath) + '"');
+                        res.writeHead(200);
+                        stream.pipe(res);
+                    });
+                }; 
+                ``` 
+        3. 响应json
+            ```js
+            res.json = function (json) {
+                res.setHeader('Content-Type', 'application/json');
+                res.writeHead(200);
+                res.end(JSON.stringify(json));
+            }; 
+            ```
+        4. 响应跳转
+            ```js
+            res.redirect = function (url) {
+                res.setHeader('Location', url);
+                res.writeHead(302);
+                res.end('Redirect to ' + url);
+            }; 
+            ```
+    2. 视图渲染
+        ```js
+        res.render = function (view, data) {
+            res.setHeader('Content-Type', 'text/html');
+            res.writeHead(200);
+            // 实际渲染
+            var html = render(view, data);
+            res.end(html);
+        }; 
+        ```
+    3. 模板
+        1. 模板的4个要素
+            * 模板语言
+            * 包含模板语言的模板文件
+            * 拥有动态数据的数据对象
+            * 模板引擎
+        2. 模板引起的简单实现
+            ```js
+            var render = function (str, data) {
+                // 模板技术，就是替换特殊标签的技术
+                var tpl = str.replace(/<%=([\s\S]+?)%>/g, function(match, code) {
+                    return "' + obj." + code + "+ '";
+                });
+                tpl = "var tpl = '" + tpl + "'\nreturn tpl;";
+                var complied = new Function('obj', tpl);
+                return complied(data);
+            }; 
+            ```
+            ```js
+            // 模板编译
+            var complie = function (str) {
+                var tpl = str.replace(/<%=([\s\S]+?)%>/g, function(match, code) {
+                    return "' + obj." + code + "+ '";
+                });
+                tpl = "var tpl = '" + tpl + "'\nreturn tpl;";
+                return new Function('obj, escape', tpl);
+            }; 
+            ```
+        3. 模板安全
+            * 将形成HTML标签的字符，转换成安全的字符
+            ```js
+            var escape = function (html) {
+                return String(html)
+                .replace(/&(?!\w+;)/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;'); // IE不支持&apos, (单引号)转义
+            }; 
+            ``` 
+        4. 模板逻辑
+            ```js
+            <% if (user) { %> 
+            <h2><%= user.name%></h2>
+            <% } else { %>
+            <h2>匿名用户</h2>
+            <% } %>
+            ```
+        5. 集成文件系统
+            ```js
+            var cache = {};
+            var VIEW_FOLDER = '/path/to/wwwroot/views';
+            res.render = function (viewname, data) {
+                if (!cache[viewname]) {
+                    var text;
+                    try {
+                        text = fs.readFileSync(path.join(VIEW_FOLDER, viewname), 'utf8');
+                    } catch (e) {
+                        res.writeHead(500, {'Content-Type': 'text/html'});
+                        res.end('模板文件错误');
+                        return;
+                    }
+                    cache[viewname] = complie(text);
+                }
+                var complied = cache[viewname];
+                res.writeHead(200, {'Content-Type': 'text/html'});
+                var html = complied(data);
+                res.end(html);
+            };
 
-
+            app.get('/path', function (req, res) {
+                res.render('viewname', {});
+            });  
+            ```
+        6. 子模版
+            ```js
+            <ul>
+                <% users.forEach(function(user){ %>
+                <% include user/show %>
+                <% }) %> 
+            </ul> 
+            ``` 
+        7. 布局视图
+            ```js
+            res.render('user', {
+                layout: 'layout.html',
+                users: []
+            });
+            // 或者
+            res.render('profile', {
+                layout: 'layout.html',
+                users: []
+            }); 
+            ```
+        8. 模板性能
+            * 缓存模板文件
+            * 缓存模板文件编译后的函数  
+#### 9.玩转进程
+1. 服务模型的变迁
+    1. 石器时代：同步
+        * 服务耗时为N秒，QPS为1/N
+    2. 青铜时代：复制进程
+        * 100个连接启动100个进程来进行服务
+    3. 白银时代： 多线程
+        * 1个线程服务1个请求
+    4. 黄金时代：事件驱动
+        * Node和Nginx是基于事件驱动的单线程方式  
+2. 多进程架构
 
