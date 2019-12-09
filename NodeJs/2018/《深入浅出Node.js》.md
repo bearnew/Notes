@@ -925,4 +925,585 @@
         });
         server.listen(1337, '127.0.0.1'); 
         ```    
-3. 
+3. 构建UDP服务
+    1. UDP相关概念
+        1. TCP连接一旦建立，所有的会话都基于连接完成
+        2. 客户端需要与另外的TCP服务通信，需要创建一个套接字来完成
+        3. UDP中，1个套接字可以与多个UDP服务通信
+        4. UDP无需连接，资源消耗低，处理快速灵活
+        5. 网络差，容易丢包
+        6. DNS服务是基于UDP实现的
+    2. 创建UDP套接字
+        * UDP套接字创建，既可以作为客户端发送数据，又可以作为服务端接收数据
+        ```js
+        var dgram = require('dgram');
+        var socket = dgram.createSocket("udp4");
+        ```
+    3. 创建UDP服务器端
+        ```js
+        var dgram = require("dgram");
+        var server = dgram.createSocket("udp4");
+        server.on("message", function (msg, rinfo) {
+            console.log("server got: " + msg + " from " +
+            rinfo.address + ":" + rinfo.port);
+        });
+        server.on("listening", function () {
+            var address = server.address();
+            console.log("server listening " +
+            address.address + ":" + address.port);
+        });
+
+        // 该套接字将接收所有网卡上41234端口上的消息
+        server.bind(41234); 
+        ```
+    4. 创建UDP客户端
+        ```js
+        var dgram = require('dgram');
+        var message = new Buffer("深入浅出Node.js");
+        var client = dgram.createSocket("udp4");
+        // socket.send(buf, offset, length, port, address, [callback]) 
+        client.send(message, 0, message.length, 41234, "localhost", function(err, bytes) {
+            client.close();
+        }); 
+        ```
+        ```js
+        node server.js 
+        server listening 0.0.0.0:41234 
+        server got: 深入浅出Node.js from 127.0.0.1:58682
+        ```
+    5. UDP套接字事件
+        1. message: 接收到消息时触发该事件
+        2. listening: 当UDP套接字开始监听时，触发该事件
+        3. close: 调用close触发该事件，close后如需再次触发message, 需要重新绑定
+        4. error: 异常发生时，监听该事件，如果不监听，进程会直接退出
+4. 构建HTTP服务
+    1. HTTP(HyperText Transfer Protocol)
+        ```js
+        var http = require('http');
+        http.createServer(function (req, res) {
+            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.end('Hello World\n');
+        }).listen(1337, '127.0.0.1');
+        console.log('Server running at http://127.0.0.1:1337/'); 
+        ```
+        ```js
+        // 通过curl显示Http通信的所有信息
+        curl -v http://127.0.0.1:1337 
+        ```
+    2. http模块
+        1. Http服务能够与多个客户端保持连接
+        2. Node采用事件驱动的形式，并不会为每一个连接创建额外的线程或进程
+        3. 所以能够保持很低的内存占用，所以能实现高并发
+        4. 一个TCP会话能够用于多次请求和响应
+        5. http服务的事件
+            * connection: 服务器与客户端建立底层TCP连接，触发该事件
+            * request: 解析出HTTP头后，触发该事件
+            * close: 调用server.close()方法停止接受新的连接，触发该事件
+            * checkContinue: 客户端发送较大数据时，头部带Expect: 100-continue的请求到服务器，服务器触发checkContinue事件
+            * connect: 客户端发起CONNECT请求时触发
+            * upgrade: 客户端在请求头中带上Upgrade字段要求升级连接协议，服务器接收到后触发该事件
+            * clientError: 客户端触发error事件，传递到服务器，服务器触发该事件
+    3. HTTP客户端
+        1. options参数
+            * host: 服务器的域名或IP地址
+            * hostname: 服务器名称
+            * port: 服务器端口，默认80
+            * localAddress: 建立网络连接的本地网卡
+            * socketPath: Domain套接字路径
+            * method: HTTP请求方法，默认为GET
+            * path: 请求路径，默认为/
+            * headers: 请求头对象
+            * auth: Basic认证，值会被计算成请求头中的Authorization部分
+            ```js
+            var options = {
+                hostname: '127.0.0.1',
+                port: 1334,
+                path: '/',
+                method: 'GET'
+            };
+            var req = http.request(options, function(res) {
+                console.log('STATUS: ' + res.statusCode);
+                console.log('HEADERS: ' + JSON.stringify(res.headers));
+                res.setEncoding('utf8');
+                res.on('data', function (chunk) {
+                    console.log(chunk);
+                });
+            });
+            req.end();
+            ```
+        2. HTTP代理
+            * http模块包含1个默认的客户端代理对象http.globalAgent
+            * ClientRequest对象对同一个服务器端发起的HTTP请求最多可以创建5个连接
+            * 调用HTTP客户端发起10次HTTP请求，实质只有5个请求处于并发状态，后续请求会等待前面的请求完成后才发起
+        3. HTTP客户端事件
+            * response: 得到服务器响应时，触发该事件
+            * socket: 底层连接池建立的连接分配给当前请求对象时，触发该事件
+            * connect: 客户端向服务器发起CONNECT请求时，服务器响应了200，客户端会触发该事件
+            * upgrade: 客户端向服务器发起Upgrade请求时，服务器响应了101 Switching Protocols状态，客户端会触发该事件
+            * continue: 客户端向服务器端发起Expect: 100-continue头信息，服务器响应了100 continue状态，客户端将触发该事件
+5. 构建WebSocket服务
+    1. WebSocket客户端基于事件编程
+    2. WebSocket实现了客户端与服务器端的长连接
+    3. 客户端与服务器端只建立1个TCP连接，可以使用更少的连接
+    4. WebSocket比HTTP请求响应模式更灵活、更高效
+    5. WebSocket有更轻量级的协议头，减少数据传送量
+    ```js
+    var socket = new WebSocket('ws://127.0.0.1:12010/updates');
+    socket.onopen = function () {
+        // 每50ms向服务器发送一次数据
+        setInterval(function() {
+            if (socket.bufferedAmount == 0)
+                socket.send(getUpdateData());
+        }, 50);
+    };
+    // 通过onmessage接收服务器端传来的数据
+    socket.onmessage = function (event) {
+    // TODO：event.data
+    }; 
+    ```
+6. 网络服务与安全
+    1. Node在网络安全上提供了3个模块， 分别为crypto, tls, https
+    2. crypto用于加密、解密，SHA1, MD5等加密算法都在其中
+    3. tls是建立在TLS/SSL加密的TCP
+        1. TLS/SSL是一个公钥/私钥结构，是一个非对称的结构
+        2. Node在底层采用的是openssl实现TLS/SSL
+        3. 创建服务器端
+            ```js
+            var tls = require('tls');
+            var fs = require('fs');
+            var options = {
+                key: fs.readFileSync('./keys/server.key'),
+                cert: fs.readFileSync('./keys/server.crt'),
+                requestCert: true,
+                ca: [ fs.readFileSync('./keys/ca.crt') ]
+            };
+            var server = tls.createServer(options, function (stream) {
+                console.log('server connected', stream.authorized ? 'authorized' : 'unauthorized');
+                stream.write("welcome!\n");
+                stream.setEncoding('utf8');
+                stream.pipe(stream);
+            });
+            server.listen(8000, function() {
+                console.log('server bound');
+            });  
+            ```
+        4. TLS客户端
+            ```js
+            // 创建私钥
+            $ openssl genrsa -out client.key 1024
+            // 生成CSR
+            $ openssl req -new -key client.key -out client.csr
+            // 生成签名证书
+            $ openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in client.csr -out client.crt 
+            ```
+            ```js
+            var tls = require('tls');
+            var fs = require('fs');
+            var options = {
+                key: fs.readFileSync('./keys/client.key'),
+                cert: fs.readFileSync('./keys/client.crt'),
+                ca: [ fs.readFileSync('./keys/ca.crt') ]
+            };
+            var stream = tls.connect(8000, options, function () {
+                console.log('client connected', stream.authorized ? 'authorized' : 'unauthorized');
+                process.stdin.pipe(stream);
+            });
+            stream.setEncoding('utf8');
+            stream.on('data', function(data) {
+                console.log(data);
+            });
+            stream.on('end', function() {
+                server.close();
+            }); 
+            ```
+    4. https是建立在SSL上的http
+        1. 创建HTTPS服务
+            ```js
+            var https = require('https');
+            var fs = require('fs');
+            var options = {
+                key: fs.readFileSync('./keys/server.key'),
+                cert: fs.readFileSync('./keys/server.crt')
+            };
+            https.createServer(options, function (req, res) {
+                res.writeHead(200);
+                res.end("hello world\n");
+            }).listen(8000); 
+            ```
+        2. HTTPS客户端
+            ```js
+            var https = require('https');
+            var fs = require('fs');
+            var options = {
+                hostname: 'localhost',
+                port: 8000,
+                path: '/',
+                method: 'GET',
+                key: fs.readFileSync('./keys/client.key'),
+                cert: fs.readFileSync('./keys/client.crt'),
+                ca: [fs.readFileSync('./keys/ca.crt')]
+            };
+            options.agent = new https.Agent(options);
+            var req = https.request(options, function(res) {
+                res.setEncoding('utf-8');
+                res.on('data', function(d) {
+                    console.log(d);
+                });
+            });
+            req.end();
+            req.on('error', function(e) {
+                console.log(e);
+            }); 
+            ```
+#### 8.构建Web应用
+1. 基础功能
+    1. 请求方法
+        * `HTTP_Parser`在解析请求报文时，会将报文头抽取出来，设置为`req.method`
+            ```js
+            function (req, res) {
+                switch (req.method) {
+                    case 'POST':
+                        update(req, res);
+                        break;
+                    case 'DELETE':
+                        remove(req, res);
+                        break;
+                    case 'PUT':
+                        create(req, res);
+                        break;
+                    case 'GET':
+                    default:
+                        get(req, res);
+                }
+            }  
+            ```
+    2. 路径解析
+        * `HTTP_Parser`将路径解析为`req.url`
+            ```js
+            function (req, res) {
+                var pathname = url.parse(req.url).pathname;
+                var paths = pathname.split('/');
+                var controller = paths[1] || 'index';
+                var action = paths[2] || 'index';
+                var args = paths.slice(3);
+                if (handles[controller] && handles[controller][action]) {
+                    handles[controller][action].apply(null, [req, res].concat(args));
+                } else {
+                    res.writeHead(500);
+                    res.end('找不到响应控制器');
+                }
+            } 
+            ```
+    3. 查询字符串
+        * 使用`querystring`模块处理
+            ```js
+            var url = require('url');
+            var querystring = require('querystring');
+            var query = querystring.parse(url.parse(req.url).query); 
+            ```
+            ```js
+            // 将字符串解析成JSON对象
+            var query = url.parse(req.url, true).query;
+
+            {
+                foo: 'bar',
+                baz: 'val'
+            } 
+            ```
+    4. Cookie
+        1. 服务器向客户端发送Cookie
+        2. 浏览器将Cookie保存
+        3. 每次浏览器请求，都会将Cookie发送给服务端
+        4. Cookie会被放到req.headers.cookie上
+        5. Cookie的值是key=value;key2=value2的形式，需要解析
+            ```js
+            var parseCookie = function (cookie) {
+                var cookies = {};
+                if (!cookie) {
+                    return cookies;
+                }
+                
+                var list = cookie.split(';');
+                for (var i = 0; i < list.length; i++) {
+                    var pair = list[i].split('=');
+                    cookies[pair[0].trim()] = pair[1];
+                }
+                return cookies;
+            }; 
+            ```
+        6. Set-Cookie的name=value是必须包含的部分，其余都是可选参数
+        7. 减轻Cookie对性能的影响
+            1. 减少Cookie的大小
+            2. 为静态组件使用不同的域名
+    5. Session
+        1. Session的数据只保留在服务器端
+        2. 基于Cookie实现用户和数据的映射
+            1. 服务器每次接收请求，检查Cookie中的sessionId(口令)
+            2. 服务器通过sessionID 来识别用户和认证状态
+            2. 如果过期重新生成，响应时，给客户端设置新的值
+            ```js
+            var sessions = {};
+            var key = 'session_id';
+            var EXPIRES = 20 * 60 * 1000;
+            var generate = function () {
+                var session = {};
+                session.id = (new Date()).getTime() + Math.random();
+                session.cookie = {
+                    expire: (new Date()).getTime() + EXPIRES
+                };
+                sessions[session.id] = session;
+                return session;
+            };
+             
+            function (req, res) {
+                var id = req.cookies[key];
+                if (!id) {
+                    req.session = generate();
+                } else {
+                    var session = sessions[id];
+                    if (session) {
+                        if (session.cookie.expire > (new Date()).getTime()) {
+                            // 更新超时时间
+                            session.cookie.expire = (new Date()).getTime() + EXPIRES;
+                            req.session = session;
+                        } else {
+                            // 超时了，删除旧的数据，并重新生成
+                            delete sessions[id];
+                            req.session = generate();
+                        }
+                    } else {
+                        // 如果session过期或口令不对，重新生成session
+                        req.session = generate();
+                    }
+                }
+                handle(req, res);
+            } 
+            ```
+        3. 通过查询字符串来实现浏览器和服务器数据的对应
+            1. 用户访问`http://localhost/pathname`, url中不带`session_id`参数
+            2. 将用户重定向到`http://localhost/pathname?session_id=12344567`
+        4. 通常将session存储在Redis, Memcached缓存中
+        5. 通常服务器将session通过私钥加密签名后发给客户端
+    6. 缓存
+        * 添加`Expires`或`Cache-Control`到报文头中
+        * 配置`ETags`
+    7. Basic认证
+        1. 检查请求报文头中的`Authorization`字段的内容
+            `Authorization: Basic dXNlcjpwYXNz`
+        2. Basic认证中，将用户和密码组合`username + ":" + password`,然后进行Base64编码
+            ```js
+            var encode = function (username, password) {
+                return new Buffer(username + ':' + password).toString('base64');
+            }; 
+            ```
+        3. 首次访问，浏览器会响应1个401未授权状态吗
+2. 数据上传
+    1. 通过报文头的`Transfer-Encoding`或`Content-Length`判断请求中是否带有内容
+        ```js
+        var hasBody = function(req) {
+            return 'transfer-encoding' in req.headers || 'content-length' in req.headers;
+        };
+
+        // 转换成Buffer对象，再转换成没有乱码的字符串 
+        function (req, res) {
+            if (hasBody(req)) {
+                var buffers = [];
+                req.on('data', function (chunk) {
+                    buffers.push(chunk);
+                });
+                req.on('end', function () {
+                    req.rawBody = Buffer.concat(buffers).toString();
+                    handle(req, res);
+                });
+            } else {
+                handle(req, res);
+            }
+        }
+        ```
+    2. 表单提交
+        ```html
+        <form action="/upload" method="post">
+            <label for="username">Username:</label> <input type="text" name="username" id="username" />
+            <br /> 
+            <input type="submit" name="submit" value="Submit" />
+        </form> 
+        ```
+        ```js
+        // 请求头的Content-Type: application/x-www-form-urlencoded
+        var handle = function (req, res) {
+            if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
+                req.body = querystring.parse(req.rawBody);
+            }
+            todo(req, res);
+        };
+        ```
+    3. 其他格式
+        1. JSON类型的值为`application/json`
+            ```js
+            var mime = function (req) {
+                var str = req.headers['content-type'] || '';
+                return str.split(';')[0];
+            };
+            var handle = function (req, res) {
+                if (mime(req) === 'application/json') {
+                    try {
+                        req.body = JSON.parse(req.rawBody);
+                    } catch (e) {
+                        // 异常内容ǈ响应Bad request
+                        res.writeHead(400);
+                        res.end('Invalid JSON');
+                        return;
+                    }
+                }
+                todo(req, res);
+            }; 
+            ```
+        2. XML的值为`application/xml`
+            ```js
+            var xml2js = require('xml2js');
+            var handle = function (req, res) {
+                if (mime(req) === 'application/xml') {
+                    xml2js.parseString(req.rawBody, function (err, xml) {
+                        if (err) {
+                            // 异常内容ǈ响应Bad request
+                            res.writeHead(400);
+                            res.end('Invalid XML');
+                            return;
+                        }
+                        req.body = xml;
+                        todo(req, res);
+                    });
+                }
+            }; 
+            ```
+    4. 附件上传
+        ```html
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <label for="username">Username:</label> <input type="text" name="username" id="username" />
+            <label for="file">Filename:</label> <input type="file" name="file" id="file" />
+            <br />
+            <input type="submit" name="submit" value="Submit" />
+        </form> 
+        ```
+        ```js
+        // 基于流式处理解析报文，将接收到的文件写入系统的临时文件夹，并返回对应的路径
+        var formidable = require('formidable');
+         
+         function (req, res) {
+            if (hasBody(req)) {
+                if (mime(req) === 'multipart/form-data') {
+                    var form = new formidable.IncomingForm();
+                    form.parse(req, function(err, fields, files) {
+                        req.body = fields;
+                        req.files = files;
+                        handle(req, res);
+                    });
+                }
+            } else {
+                handle(req, res);
+            }
+        } 
+        ```
+    5. 数据上传与安全
+        1. 内存
+            * 限制上传内容的大小，一旦超出限制，停止接收数据，响应400
+            * 通过流式解析，将数据流导向到磁盘中，Node只保留文件路径等小数据
+        2. CSRF（跨站请求伪造）
+            * 在Session中赋予1个随机值，并将随机值告之前端
+            ```js
+            var generateRandom = function(len) {
+                return crypto.randomBytes(Math.ceil(len * 3 / 4))
+                .toString('base64')
+                .slice(0, len);
+            }; 
+            ```
+            ```js
+            // 对每个请求的用户，在Session中赋予1个随机值
+            var token = req.session._csrf || (req.session._csrf = generateRandom(24)); 
+            ```
+            ```html
+            <form id="test" method="POST" action="http://domain_a.com/guestbook">
+                <input type="hidden" name="content" value="vim是这个世界上最好的编辑器" />
+                <input type="hidden" name="_csrf" value="<%=_csrf%>" />
+            </form> 
+            ```
+            ```js
+            function (req, res) {
+                var token = req.session._csrf || (req.session._csrf = generateRandom(24));
+                var _csrf = req.body._csrf;
+                if (token !== _csrf) {
+                    res.writeHead(403);
+                    res.end("禁止访问");
+                } else {
+                    handle(req, res);
+                }
+            } 
+            ```
+3. 路由解析
+    1. 文件路径型
+        1. 静态文件
+            * URL路径与网站目录路径一致
+        2. 动态文件
+            * 根据文件路径，执行动态脚本
+    2. MVC
+        1. MVC模型
+            * 控制器Controller, 一组行为的集合
+            * 模型Model, 数据相关的操作和封装
+            * 视图View, 视图的渲染
+            * 路由解析，根据URL寻找到对应的控制器和行为
+            * 行为调用相关的模型，进行数据操作
+            * 数据操作结束后，调用视图和相关数据进行页面渲染，输出到客户端
+    3. Restful(Representational State Transfer 表现层状态转化)
+        1. RESTful设计主要是将服务器端提供的内容实体看作1个资源，并表现在URL上
+            ```js
+            // 传统模式
+            POST /user/add?username=jacksontian
+            GET /user/remove?username=jacksontian
+            POST /user/update?username=jacksontian
+            GET /user/get?username=jacksontian
+            ```
+            ```js
+            POST /user/jacksontian
+            DELETE /user/jacksontian
+            PUT /user/jacksontian
+            GET /user/jacksontian 
+            ```
+            ```js
+            // node端的实现
+
+            // 添加用户
+            app.post('/user/:username', addUser);
+            // 删除用户
+            app.delete('/user/:username', removeUser);
+            // 修改用户
+            app.put('/user/:username', updateUser);
+            // 查询用户
+            app.get('/user/:username', getUser); 
+            ```
+4. 中间件
+    1. 用中间件来简化和隔离基础设施与业务逻辑之间的细节
+    2. 每个中间件处理掉相对简单的逻辑
+    3. 将路由和中间件进行结合
+        ```js
+        app.use(querystring);
+        app.use(cookie);
+        app.use(session);
+        app.get('/user/:username', getUser);
+        app.put('/user/:username', authorize, updateUser);
+        ```
+    4. 中间件异常处理
+        1. 异步方法的异常不能直接捕获，中间件异步产生的异常需要自己传递出来
+    5. 中间件性能
+        1. 编写高效的中间件
+            * 使用高效的方法（通过jsperf.com测试）
+            * 缓存需要重复计算的结果
+            * 避免不必要的计算
+        2. 合理的使用路由
+            * 匹配特定的路由使用特定的中间件
+            ```js
+            // 在public路径下，才会匹配静态文件中间件
+            app.use('/public', staticFile); 
+            ```
+
+
+
