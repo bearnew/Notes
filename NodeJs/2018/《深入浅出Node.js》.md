@@ -1688,4 +1688,43 @@
     4. 黄金时代：事件驱动
         * Node和Nginx是基于事件驱动的单线程方式  
 2. 多进程架构
+    1. Node提供了`child_process`模块，并且也提供了`child_process.fork()`供我们实现进程的复制
+    ```js
+    // work.js 监听多个端口
+    var http = require('http');
+    http.createServer(function (req, res) {
+        res.writeHead(200, {'Content-Type': 'text/plain'});
+        res.end('Hello World\n');
+    }).listen(Math.round((1 + Math.random()) * 1000), '127.0.0.1');
 
+    // master.js
+    var fork = require('child_process').fork;
+    var cpus = require('os').cpus();
+    for (var i = 0; i < cpus.length; i++) {
+        fork('./worker.js');
+    }
+    ```
+    2. child_process提供4个方法创建子进程
+        * spawn(): 启动一个子进程来执行命令
+        * exec(): 启动一个子进程来执行命令，有1个回调函数来获知子进程的状况
+        * execFile(): 启动一个子进程来执行可执行文件
+        * fork(): 启动一个子进程，只需指定要执行的javascript文件模版
+        ```js
+        var cp = require('child_process');
+        cp.spawn('node', ['worker.js']);
+        cp.exec('node worker.js', function (err, stdout, stderr) {
+        // some code
+        });
+
+        // 通过execFile执行的javascript文件，首行需添加#!/usr/bin/env node
+        cp.execFile('worker.js', function (err, stdout, stderr) {
+        // some code
+        });
+        cp.fork('./worker.js'); 
+        ```
+    3. 进程间通信
+        1. 子进程对象由send()方法实现主进程向子进程发送数据
+        2. message事件实现收听子进程发来的数据
+        ```js
+        
+        ```
