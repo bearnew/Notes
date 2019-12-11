@@ -391,4 +391,109 @@ module: {
                 ]
             }
         ``` 
-2. 
+2. noParse
+    * 忽略对未采用模块化文件的递归解析和处理, 提高构建性能
+    * noParse接收的类型可以是`RegExp`或`function`
+    ```js
+    // 使用正则
+    noParse: /jquery|chartjs/
+
+    // 使用function, webpack3.0+支持
+    noParse: content => {
+        // content代表模块的文件路径
+        // 返回true或者false
+        return /jquery|chartjs/.test(content);
+    }
+    ```
+3. parser
+    * 更细粒度的配置哪些模块语法被解析，哪些不被解析
+    * 支持AMD, CommonJS, SystemJS, ES6
+    ```js
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                use: ['babel-loader'],
+                parser: {
+                    amd: false, // 禁用AMD
+                    commonjs: false, // 禁用CommonJS
+                    system: false, // 禁用SystemJS
+                    harmony: false, // 禁用ES6 import/export
+                    requireInclude: false, // 禁用require.include
+                    requireEnsure: false, // 禁用require.ensure
+                    requireContext: false, // 禁用require.context
+                    browserify: false, // 禁用browserify
+                    requireJs: false // 禁用requirejs
+                }
+            }
+        ]
+    }
+    ```
+## 17.Resolve
+1. Resolve配置webpack如何寻找模块所对应的文件
+2. alias
+    * 将原导入路径映射成新的导入路径
+        ```js
+        resolve: {
+            alias: {
+                components: './src/components/'
+            }
+        }
+        ```
+    * 支持以$符号只命中以关键字结尾的导入语句
+        ```js
+        resolve: {
+            alias: {
+                'react$': '/path/to/react.min.js'
+            }
+        }
+        ```
+3. mainFields
+    * 配置决定优先采用哪份代码
+        ```json
+        // 第三方模块的package.json
+        {
+            "jsnext:main": "es/index.js", // 采用ES6语法的代码入口文件
+            "main": "lib/index.js" // 采用ES5语法的代码入口文件
+        }
+        ```
+        ```js
+        // webpack配置
+        mainFields: ['jsnext:main', 'browser', 'main']
+        ```
+4. extensions
+    * 配置查找文件时的后缀列表
+        ```js
+        extensions: ['.ts', '.js', '.json']
+        ```
+5. modules
+    * 默认模块的查找只会去node_modules目录下寻找
+    * 配置去哪些目录下寻找模块
+    ```js
+    // 常规导入
+    import '../../../components/button';
+    ```
+    ```js
+    // resolve.modules配置
+    modules: ['./src/components', 'node_modules'];
+    // 导入
+    import 'button';
+    ```
+6. descriptionFiles
+    * 配置描述第三方模块的文件名称
+    ```js
+    descriptionFiles: ['package.json']
+    ```
+7. enforceExtension
+    * 配置成true, 则所有导入的语句都必须带上文件后缀
+    ```js
+    // 配置前
+    import './foo';
+
+    // 配置后
+    import './foo.js';
+    ```
+8. enforceModuleExtension
+    * 只对node_modules下的模块生效
+    * enforceExtension配置成true时，enforceModuleExtension需配置成false兼容第三方模块
+    * 第三方模块大多数语句都没有带文件后缀
