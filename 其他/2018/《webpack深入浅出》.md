@@ -497,3 +497,94 @@ module: {
     * 只对node_modules下的模块生效
     * enforceExtension配置成true时，enforceModuleExtension需配置成false兼容第三方模块
     * 第三方模块大多数语句都没有带文件后缀
+## 18.Plugin
+* 用于扩展webpack的功能
+* Plugin接收1个数组，数组的每一项都是要使用的Plugin的实例
+```js
+const CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
+
+module.exports = {
+    plugins : [
+        // 所有页面都会用到的公共代码被提取到 common 代码块中
+        new CommonsChunkPlugin({
+            name: 'common',
+            chunks: ['a', 'b']
+        })
+    ]
+}
+```
+## 19.DevServer
+1. 只有通过DevServer启动Webpack时，DevServer里面的配置才生效
+2. hot
+    * DevServer默认行为是代码被更新后，自动刷新整个页面
+    * 开启hot后，将在不刷新整个页面的情况下通过新模块替换老模块做到实时预览
+3. inline
+    * 开启inline, DevServer会在构建变化后的代码时通过代理客户端控制网页刷新
+    * 关闭inline, DevServer通过iframe的方式运行要开发的网页，
+       构建完变化后的代码，通过刷新iframe实现实时预览，我们可以
+       去`http://localhost:8080/webpack-dev-server/`实时预览自己的网页
+    * 使用DevServer的模块热替换实现实时预览，最方便的方法是开启inline
+4. historyApiFallback
+    * `historyApiFallback: true`导致任何请求都会返回`index.html`文件，只能用于只有一个HTML文件的应用
+    * DevServer根据不同的请求返回不同的HTML文件
+        ```js
+        historyApiFallback: {
+            // 使用正则匹配命中路由
+            rewrites: [
+                // user开头的都返回user.html
+                {
+                    from: /^\/user/,
+                    to: '/user.html'
+                },
+                // game开头的都返回game.html
+                {
+                    from: /^\/game/,
+                    to: '/game.html'
+                },
+                // 其他都返回index.html
+                {
+                    from: /./,
+                    to: '/index.html'
+                },
+            ]
+        }
+        ``` 
+5. contentBase
+    1. 配置DevServer HTTP服务器的文件根目录
+        ```js
+        devServer: {
+            contentBase: path.join(__dirname, 'public')
+        }
+        ```
+    2. DevServer服务器通过HTTP服务暴露文件分2种
+        1. 暴露本地文件
+        2. 暴漏Webpack构建出的结果，构建出的结果交给DevServer处理，不在本地
+    3. `contentBase: false`来关闭暴漏本地文件
+6. headers
+    * 在DevServer的HTTP响应中，注入一些HTTP响应头
+    ```js
+    devServer: {
+        headers: {
+            'X-foo': 'bar'
+        }
+    }
+    ``` 
+7. host
+    1. 配置DevServer服务监听的地址
+    2. 配置`host: '0.0.0.0'`, 可以让局域网的其他设备访问自己的本地服务
+    3. 默认`host: 127.0.0.1`, 只有本地才可以访问DevServer的HTTP服务
+8. port
+    1. 默认监听的端口, 默认为8080
+    2. 默认8080，被占用，使用8081, 被占用，使用8082, 以此类推
+9. allowedHosts
+    1. 配置一个白名单列表，只有HTTP请求HOST在列表中的才返回
+    ```js
+    allowedHosts: [
+        // 匹配单个域名
+        'host.com',
+        'sub.host.com',
+        // host2.com和所有的子域名*.host2.com都将匹配
+        '.host2.com'
+    ]
+    ``` 
+10. 
