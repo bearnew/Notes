@@ -14,7 +14,7 @@ __tips:__
 + 每打开一个Tab页，就创建了一个独立的浏览器进程。
 
 ![image](https://user-gold-cdn.xitu.io/2018/1/21/1611938b2d813f16?imageView2/0/w/1280/h/960/format/webp/ignore-error/1) 
-#### 2. 浏览器包含的进程
+#### 3. 浏览器包含的进程
 
 1. __Browser进程__
 >> 浏览器的主进程（负责协调，主控），只有一个。
@@ -32,4 +32,34 @@ __tips:__
 __tips:__
 浏览器有时会将多个进程合并（如打开多个空白标签页后，多个空白标签页会合并成一个进程）
 ![image](https://user-gold-cdn.xitu.io/2018/1/21/1611938b32460672?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+#### 4. 浏览器线程
+1. GUI渲染线程
+    * 负责渲染浏览器界面，解析HTML, CSS, 构建DOM树和RenderObject树，布局和绘制
+    * 界面Repaint(重绘)或Reflow(回流)时，线程会执行
+    * GUI渲染线程与JS引擎线程互斥，JS引擎执行时，GUI会被挂起，js引擎空闲后，GUI才会被执行
+2. JS引擎线程
+    * 负责解析javascript脚本，运行代码
+    * 1个进程始终只有1个JS线程在运行js程序
+    * js执行时间过长，会阻塞GUI的渲染线程
+
+#### 5. 浏览器渲染流程
+1. 流程
+    1. 解析`html`建立`dom`树
+    2. 解析`css`生成`CSSOM`规则树（css加载会阻塞render树渲染）
+    3. 将`DOM`树与`CSSOM`树一起生成`render`树
+    4. 绘制render树，绘制页面像素信息
+2. 事件触发
+    * DOM加载完成，不包括样式表、图片，DOMContentLoaded事件会触发
+    * 所有DOM,样式表，脚本，图片加载完成，onload事件触发
+3. 普通图层和复合图层
+    1. 浏览器默认只有1个复合图层
+    2. 其他render树绘制都会按普通图层渲染
+    3. GPU（硬件加速）方式，可以声明一个新的复合图层
+    4. 新的复合图层会脱离普通文档流，单独分配资源
+    5. GPU方式
+        1. translate3d, translateZ
+        2. opacity/过渡动画（动画执行中，才会创建复合图层）
+        3. will-change(提前告诉浏览器，有哪些属性需要变化，达到页面优化)
+        4. <video>, <iframe>, <canvas>, <webgl>, 等元素
 
