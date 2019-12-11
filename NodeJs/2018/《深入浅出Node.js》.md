@@ -1726,5 +1726,188 @@
         1. 子进程对象由send()方法实现主进程向子进程发送数据
         2. message事件实现收听子进程发来的数据
         ```js
-        
+        // parent.js
+        var cp = require('child_process');
+        var n = cp.fork(__dirname + '/sub.js');
+        n.on('message', function (m) {
+            console.log('PARENT got message:', m);
+        });
+        n.send({hello: 'world'}); 
         ```
+        ```js
+        // sub.js
+        process.on('message', function (m) {
+            console.log('CHILD got message:', m);
+        });
+        process.send({foo: 'bar'}); 
+        ```
+        3. 进程通信原理
+            * 创建IPC通道进行监听
+            * IPC与网络socket的行为比较类似，属于双向通信
+        4. 主进程与多个子进程通信
+            ```js
+            // parent.js
+            var cp = require('child_process');
+            var child1 = cp.fork('child.js');
+            var child2 = cp.fork('child.js');
+            // Open up the server object and send the handle
+            var server = require('net').createServer();
+            server.on('connection', function (socket) {
+                socket.end('handled by parent\n');
+            });
+            server.listen(1337, function () {
+                child1.send('server', server);
+                child2.send('server', server);
+            }); 
+            ```
+            ```js
+            // child.js
+            process.on('message', function (m, server) {
+                if (m === 'server') {
+                    server.on('connection', function (socket) {
+                        socket.end('handled by child, pid is ' + process.pid + '\n');
+                    });
+                }
+            }); 
+            ```
+        5. 让子进程处理HTTP请求
+        ```js
+        // parent.js
+        var cp = require('child_process');
+         
+        var child1 = cp.fork('child.js');
+        var child2 = cp.fork('child.js');
+        // Open up the server object and send the handle
+        var server = require('net').createServer();
+        server.listen(1337, function () {
+            child1.send('server', server);
+            child2.send('server', server);
+            // 关ۖ
+            server.close();
+        });
+        ```
+        ```js
+        var http = require('http');
+        var server = http.createServer(function (req, res) {
+            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.end('handled by child, pid is ' + process.pid + '\n');
+        });
+        process.on('message', function (m, tcp) {
+            if (m === 'server') {
+                tcp.on('connection', function (socket) {
+                    server.emit('connection', socket);
+                });
+            }
+        });
+        ```
+3. 集群
+    1. 用child_process模块在单机上搭建Node集群
+    2. 进程事件
+        * error: 子进程无法复制，创建，杀死，发送消息时会触发该事件
+        * exit: 子进程退出时触发该事件
+        * close: 子进程中止时触发该事件
+        * disconnect: 调用disconnect()方法关闭监听IPC通道时触发该事件
+    3. 自动重启
+        1. 主进程监听到工作进程exit后，立即启动新的进程服务
+        2. 限量重启
+    4. 集群
+        * 通过多台计算机完成同一个工作，达到更高的效率
+        * 同一个业务，部署到多台服务器上
+    5. 分布式
+        * 一个业务拆分成多个子业务，部署在不同的服务器上
+    6. 负载均衡
+        1. 多进程监听相同的端口，使任务分配到多个进程上处理，保证每个处理单元工作量公平的策略叫做负载均衡
+        2. Node采用Round-Robin(轮叫调度)使负载均衡更合理
+    7. 状态共享
+        1. 通过第三方数据存储，比如数据库，磁盘文件，缓存服务（Redis）
+        2. 主动通知，数据发生更新，主动通知子进程
+4. Cluster模块
+    1. Node使用cluster模块解决多核CPU的利用率问题
+        ```js
+        // cluster.js
+        var cluster = require('cluster');
+        // 使用setupMaster将主进程和工作进程从代码上完全剥离
+        cluster.setupMaster({
+            exec: "worker.js"
+        });
+        var cpus = require('os').cpus();
+        for (var i = 0; i < cpus.length; i++) {
+            cluster.fork();
+        } 
+        ```
+    2. `cluster`模块就是`child_process`和`net`模块的组合应用
+    3. cluster事件
+        * fork: 复制1个工作进程后触发该事件
+        * online: 复制工作进程后，主进程收到消息后，触发该事件
+        * listening: 工作进程调用listen()后，主进程收到消息，触发该事件
+        * disconnect: 主进程和工作进程之间IPC通道断开后触发该事件
+        * exit: 工作进程退出时触发该事件
+        * setup: cluster.setupMaster执行后触发该事件
+#### 10.测试
+    1. 单元测试
+        1. 测试原则
+            * 单一职责
+            * 接口抽象
+            * 层次分离
+        2. 断言
+        3. jest mocha
+        4. 配合ci持续集成
+    2. 性能测试
+        1. 基准测试
+            * 将函数执行相同次数，然后比较时间
+            * 使用`benchmark`进行基准测试
+        2. 压力测试
+            * 测试吞吐量，响应时间，并发数
+            * 常用的工具有ab, siege, http_load
+
+#### 11.其他
+1. 日志
+    1. 通过重写console来监控/统计异常
+        ```js
+        Console.prototype.warn = function() {
+            this._stderr.write(util.format.apply(this, arguments) + '\n');
+        };
+        ```
+2. 监控
+    1. 需要监控的点
+        1. 日志监控
+        2. 响应时间
+        3. 进程监控
+        4. 磁盘监控
+        5. 内存监控
+        6. CPU占用监控
+        7. CPU load监控
+        8. I/O负载
+        9. 网络监控
+        10. 应用状态监控
+        11. DNS监控
+    2. 报警
+        * 邮件报警
+            ```js
+            var nodemailer = require("nodemailer");
+            // 建立一个SMTP传输连接
+            var smtpTransport = nodemailer.createTransport("SMTP", {
+                service: "Gmail",
+                auth: {
+                    user: "gmail.user@gmail.com",
+                    pass: "userpass"
+                }
+            });
+            // 邮件选项
+            var mailOptions = {
+                from: "Fred Foo ✔ <foo@bar.com>", // 发件人邮件地址
+                to: "bar@bar.com, baz@bar.com", // 收件人邮件地址列表
+                subject: "Hello ✔", // 标题
+                text: "Hello world ✔", // 纯文本内容
+                html: "<b>Hello world ✔</b>" // HTML内容
+            }
+            // 发ໃᆰ件
+            smtpTransport.sendMail(mailOptions, function (err, response) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log("Message sent: " + response.message);
+                }
+            });
+            ```
+        * 短信/电话报警，接入短信服务平台
