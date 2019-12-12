@@ -587,4 +587,61 @@ module.exports = {
         '.host2.com'
     ]
     ``` 
-10. 
+10. disableHostCheck
+    1. 是否关闭用于DNS重新绑定的HTTP请求的HOST检查
+    2. 为了访问时直接通过IP地址访问而不是通过HOST访问
+11. https
+    1. 是否使用https服务
+    2. HTTP2和Service Worker必须运行在HTTPS上
+    3. DevServer会自动为我们生成一份HTTPS证书
+    ```js
+    devServer: {
+        https: true
+    }
+    ```
+    4. 也可以使用自己的证书
+    ```js
+    devServer: {
+        https: {
+            key: fs.readFileSync('path/to/server.key'),
+            cert: fs.readFileSync('path/to/server.crt'),
+            ca: fs.readFileSync('path/to/ca.pem')
+        }
+    }
+    ```
+12. clientLogLevel
+    * 配置客户端的日志等级，枚举值：
+        * none
+        * error
+        * warning
+        * info(默认)
+13. compress
+    * 是否启用Gzip压缩，默认为false
+14. open
+    * 构建完成后，用默认浏览器打开需要开发的网页
+    * devServer.openPage配置项来打开指定URL的网页
+
+## 20.其他配置项
+1. Target
+    * 构建出针对不同环境的代码
+    * `target: 'node'`, 导入Node.js的原生模块语句`require('fs')`将会保留，fs模块不会被打包到chunk里
+
+| target值 | 描述 |
+|:--------|:------|
+|web|针对浏览器（默认），所有代码都集中在一个文件里面 |
+|node|针对Node.js, 使用require语句加载Chunk代码 |
+|aync-node|针对Node.js. 异步加载Chunk代码 |
+|webworker|针对webWorker |
+|electron-main|针对Electron主线程 |
+|electron-renderer|针对Electron渲染线程 |
+
+2. Devtool
+    * 配置webpack如何生成source map
+    * 默认值为false
+    ```js
+    module.exports = {
+        devtool: 'source-map'
+    }
+    ```
+3. Watch
+    * 文件发生变化时，是否重新编译
