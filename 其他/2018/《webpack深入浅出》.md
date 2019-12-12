@@ -626,14 +626,14 @@ module.exports = {
     * 构建出针对不同环境的代码
     * `target: 'node'`, 导入Node.js的原生模块语句`require('fs')`将会保留，fs模块不会被打包到chunk里
 
-| target值 | 描述 |
-|:--------|:------|
-|web|针对浏览器（默认），所有代码都集中在一个文件里面 |
-|node|针对Node.js, 使用require语句加载Chunk代码 |
-|aync-node|针对Node.js. 异步加载Chunk代码 |
-|webworker|针对webWorker |
-|electron-main|针对Electron主线程 |
-|electron-renderer|针对Electron渲染线程 |
+| target值          | 描述                                             |
+| :---------------- | :----------------------------------------------- |
+| web               | 针对浏览器（默认），所有代码都集中在一个文件里面 |
+| node              | 针对Node.js, 使用require语句加载Chunk代码        |
+| aync-node         | 针对Node.js. 异步加载Chunk代码                   |
+| webworker         | 针对webWorker                                    |
+| electron-main     | 针对Electron主线程                               |
+| electron-renderer | 针对Electron渲染线程                             |
 
 2. Devtool
     * 配置webpack如何生成source map
@@ -643,5 +643,103 @@ module.exports = {
         devtool: 'source-map'
     }
     ```
-3. Watch
+3. watch
     * 文件发生变化时，是否重新编译
+    * 默认为false
+    ```js
+    module.export = {
+        watch: true
+    }
+    ```
+4. watchOptions
+    * 通过`watchOptions`配置项去灵活的控制监听模式
+    ```js
+    module.export = {
+        // 只有开启了watch, watchOptions才有意义
+        watch: true,
+        // 监听模式运行时的参数
+        watchOptions: {
+            // 不监听的文件或文件夹，支持正则匹配
+            ignored: /node_modules/,
+            // 监听到变化后等300ms再去执行编译，避免重新编译频率过高
+            aggregateTimeout: 300,
+            // 每秒轮询1000次去监听变化
+            poll: 1000
+        }
+    }
+    ```
+5. Externals
+    * 告诉webpack，运行环境已经内置了哪些全局变量，不必再进行打包
+    ```html
+    <script src="path/to/jquery.js"></script>
+    ```
+    ```js
+    import $ from 'jquery';
+    ```
+    ```js
+    // webpack
+    module.export = {
+        externals: {
+            // 将导入语句的jquery替换成运行环境中的全局变量jQuery
+            jquery: 'jQuery'
+        }
+    }
+    ``` 
+6. ResolveLoader
+    * 加载本地的loader
+    * 根据配置的loader包名，去找到loader的实际代码，以调用Loader去处理源文件
+    ```js
+    module.exports = {
+        resolveLoader: {
+            // 去哪个目录下寻找Loader
+            modules: ['node_modules'],
+            // 入口文件的后缀
+            extensions: ['.js', '.json'],
+            // 指明入口文件位置的字段
+            mainFields: ['loader', 'main']
+        }
+    }
+    ``` 
+## 21.多种配置类型
+1. 导出一个Function
+    * env
+        * 运行webpack时的专属环境变量
+        * env是1个Object
+        * 例如启动命令是`webpack --env.production --env.bao=foo`, 则env的值是`{"production": "true", "bao": "foo"}`
+    * argv
+        * 启动webpack时通过命令行传入的参数
+        * 例如--config --env --devtool, 可通过webpack -h列出所有的参数
+
+    ```js
+    module.exports = function (env = {}, argv) {
+        return {
+            ...,
+            devtool: env['production'] ? undefined : 'source-map'
+        }
+    }
+    ```   
+2. 导出1个promise函数
+    ```js
+    module.exports = function (env = {}, argv) {
+        return new Promise((resolve, reject) => {
+            ...
+        })
+    }
+    ```
+3. 导出多份配置
+    * 导出1个数组
+    * 每份配置都会执行一遍构建
+    * 适合需要包含多种模块化格式的代码，例如CommonJs UMD, 上传到NPM
+    ```js
+    module.exports = [
+        {
+            ...
+        },
+        function () {
+            return {
+                ...
+            }
+        }
+    ]
+    ```
+ 
