@@ -177,11 +177,13 @@ module: {
 ## 14.Entry
 1. Entry配置
    * `entry`的3种配置方法
-       | type   | example                                                        | description                        |
-       | :----- | :------------------------------------------------------------- | :--------------------------------- |
-       | string | './app/entry'                                                  | 文件路径，相对路径                 |
-       | string | ['./app/entryl', './app/entry2']                               | 文件路径，相对路径                 |
-       | object | { a: './app/entry1', b: ['./app/entry-b1', './app/entry-b2'] } | 配置多个入口，每个入口生成1个chunk |
+
+| type   | example                                                        | description                        |
+| :----- | :------------------------------------------------------------- | :--------------------------------- |
+| string | './app/entry'                                                  | 文件路径，相对路径                 |
+| string | ['./app/entryl', './app/entry2']                               | 文件路径，相对路径                 |
+| object | { a: './app/entry1', b: ['./app/entry-b1', './app/entry-b2'] } | 配置多个入口，每个入口生成1个chunk |
+
    * 如果是array类型，搭配output.library配置使用，只有数组的最后一个入口文件的模块被导出
  
 2 .Chunk
