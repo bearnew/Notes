@@ -224,12 +224,14 @@ module: {
         filename: '[name].js'
         ``` 
     * 配置`filename`可使用字符串模板函数，除了内置变量name,还包括id, hash, chunkhash
-        | variable  | decription               |
-        | :-------- | :----------------------- |
-        | id        | chunk的唯一标识，从0开始 |
-        | name      | chunk的名称              |
-        | hash      | chunk的唯一标识的hash值  |
-        | chunkhash | chunk内容的hash值        |
+
+| variable  | decription               |
+|:--------|:-----------------------|
+| id        | chunk的唯一标识，从0开始 |
+| name      | chunk的名称              |
+| hash      | chunk的唯一标识的hash值  |
+| chunkhash | chunk内容的hash值        |
+
     * hash和contenthash的长度的是可指定的，[hash:8]代表8位hash值，默认是20位
     * ExtractTextWebpackPlugin插件使用`contenthash`而不是`chunkhash`, 因为ExtractTextWebpackPlugin提取出来的是代码内容本身，而不是一组模块组成的chunk
 2.  chunkFilename
