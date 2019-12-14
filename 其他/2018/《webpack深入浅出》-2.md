@@ -151,4 +151,128 @@
         }
     }
     ``` 
-7. 
+6. react
+    ```js
+    // 安装依赖
+    npm i -D react react-dom
+    npm i -D babel-preset-react
+    ```
+    ```js
+    // .babelrc
+    "preset": [
+        "react"
+    ]
+    ```
+7. typescript配合react
+    ```js
+    // 安装依赖
+    npm i -D @types/react @types/react-dom
+    ```
+    ```js
+    // tsconfig
+    {
+        "compilerOptions": {
+            "jsx": "react" // 开启jsx, 支持react
+        }
+    }
+    ```
+    ```js
+    // webpack
+    module.exports = {
+        module: {
+            rules: [
+                {
+                    // 同时匹配ts, tsx的typescript源码文件
+                    test: /\.tsx?$/,
+                    loader: 'awesome-typescript-loader'
+                }
+            ]
+        }
+    }
+    ```
+8. 使用vue
+    1. `vue-loader`,解析和转换.vue文件，提取出其中的逻辑代码script, 样式代码style,
+        以及HTMl模板template，再分别将它们交给对应的Loader处理
+    2. `css-loader`, 加载由vue-loader提取出的css
+    3. `vue-template-compiler`, 将vue-loader提取出的HTMl模板编译成对应的可执行的js代码
+9. 使用typescript编写vue
+    ```js
+    // tsconfig
+    {
+        "compilerOptions": {
+            // 构建出ES5版本的js,与vue的浏览器支持保持一致
+            "target": "es5",
+            // 开启严格模式，这可以对`this`上的数据属性进行更严格的判断
+            "strict": true,
+            // typescript编译器输出的js采用es2015模块化，使tree sharking生效
+            "module": "es2015",
+            "moduleResolution": "node"
+        }
+    }
+    ```
+    ```js
+    // vue.shims.d.ts
+    // 告诉Typescript编译器.vue文件其实是一个Vue
+    declare module "*.vue" {
+        import Vue from 'vue';
+        export default Vue;
+    }
+    ```
+    ```js
+    npm i -D ts-loader typescript
+    ```
+    ```js
+    // webpack
+    module.exports = {
+        module: {
+            rules: [
+                {
+                    test: /\.ts$/,
+                    loader: 'ts-loader',
+                    exclude: /node_modules/,
+                    options: {
+                        // 让ts处理vue
+                        appendTsSuffixTo: [/\.vue$/]
+                    }
+                }
+            ]
+        }
+    }
+    ```
+10. 生成HTML
+    1. 为单页应用生成html
+        ```js
+        module.exports = {
+            plugins: [
+                // 1个webPlugin对应1个HTML文件
+                new WebPlugin({
+                    template: './template.html', // HTML模板文件所在的文件路径
+                    filename: 'index.html' // 输出的HTML的文件名称
+                })
+            ]
+        }
+        ```
+    2. 多个单页应用
+        ```js
+        // webpack
+        const { AutoWebPlugin } = require('web-webpack-plugin');
+
+        // 自动寻找pages下的所有目录，将每一个目录当作1个单页应用
+        const autoWebPlugin = new AutoWebPlugin('pages', {
+            template: './template.html', // html模板文件所在的文件路径
+            postEntrys: ['./common.css'], // 所有页面都依赖的css样式
+            commonChunk: {
+                name: 'common' // 提取公共代码的chunk名称
+            }
+        })
+
+        module.exports = {
+            entry: autoWebPlugin.entry({
+                // 这里可加入我们额外需要的chunk入口
+            }),
+            plugins: [
+                autoWebPlugin
+            ]
+        }
+        ``` 
+11. 
