@@ -275,4 +275,149 @@
             ]
         }
         ``` 
-11. 
+#### 3.构建同构应用
+> 同构应用是写一份代码同时在浏览器和服务器中运行的应用
+1. 客户端渲染的缺点
+    1. 搜索引擎无法收录网页，爬虫无法获取数据
+    2. 低端设备用户会有性能问题
+2. 虚拟DOM的优点
+    1. 减少dom树操作，优化网页性能
+    2. 能将虚拟dom用在服务端渲染，也能渲染成手机原生UI组件
+    3. react-dom渲染虚拟dom
+        1. 通过`render()`函数去操作浏览器DOM树来展示出结果
+        2. 通过`renderToString()`计算虚拟DOM的HTML形式的字符串
+3. 同构应用注意:
+    1. 不能包含浏览器环境的API
+    2. 不能包含css, 渲染css会增加计算量，影响服务端的性能
+    3. 不能将node.js原生模块和node_modules第三方模块打包进去，需要通过commonjs规范引入
+    4. 通过CommonJs规范导出1个渲染函数，在HTTP服务器中执行这个渲染函数，渲染出HTML的内容返回
+    ```js
+    // webpack.server.config.js
+    module.exports = {
+        context: path.resolve(__dirname, '../src'),
+        entry: './main_server.js', // js入口文件
+        target: 'node', // 为了不将node.js内置的模块打包进输出文件中
+        externals: [nodeExternals()], // 为了不将node_modules下的第三方模块打包进输出文件中
+        output: {
+            libraryTarget: 'commonjs2', // 为了被node.js编写的http服务调用
+            filename: 'bundle_server.js', // 将要在node.js运行的代码输出到bundle_server.js中
+            path: path.resolve(__dirname, './dist')
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.js$/,
+                    use: ['babel-loader'],
+                    exclude: path.resolve(__dirname, 'node_modules')
+                },
+                {
+                    test: /\.css/,
+                    use: ['ignore-loader'] // 忽略css文件
+                }
+            ]
+        },
+        devtool: 'source-map'
+    }
+    ```
+    ```js
+    // main_server.js
+    import React from 'react';
+    import { renderTostring } from 'react-dom/server';
+
+    export function render() {
+        return renderTostring(<hl >Hello,Webpack</hl>)
+    }
+    ```
+    ```js
+    // http_server.js
+    const express = require('express');
+    const { render } = require('./dist/bundle_server');
+    const app = express();
+
+    app.get('/', function (req, res) {
+        res.send(`
+            <html>
+                <head>
+                    <meta charset="UTF-8">
+                </head>
+                <body>
+                    <div id="app">${render()}</div>
+                    <script src="./dist/bundle_browser.js"></script>
+                </body>
+            </html>
+        `)
+    })
+
+    app.use(express.static('.'));
+    app.listen(3000, function () {
+        console.log('app listening on port 3000!')
+    })
+    ``` 
+#### 4.electron
+1. 用web技术开发跨平台的桌面端应用
+2. 用Chromium浏览器显示web界面作为应用的GUI, 通过Node.js和操作系统交互
+3. Atom和VsCode就是使用Electron开发的
+4. 优点
+    * 降低开发门槛，大量web开发技术和现成库可以复用于Electron
+    * Chromium浏览器和Node.js都是跨平台，Electron能做到不同的操作系统运行一份代码
+5. Electron一个窗口对应一个网页
+
+#### 5.构建npm模块
+1. npm
+    1. 每个模块根目录下都有1个package.json文件
+    2. 模块文件以js为主，但同时可包括css 图片 文件
+    3. NPM仓库目前广泛支持的是commonjs规范
+2. 使用webpack构建npm模块
+    ```js
+    // webpack.config.js
+    const path = require('path');
+    const ExtractTextPlugin = require('extract-text-webpack-plugin');
+
+    module.exports = {
+        entry: './src/index.js',
+        output: {
+            filename: 'index.js',
+            path: path.resolve(__dirname, 'lib'), // lib放发布npm仓库的最终代码
+            libraryTarget: 'commonjs2' // 输出的代码符合CommonJs模块化规范，供其他模块导入使用
+        },
+        // 注册在运行环境中的全局变量访问，不能被打包进输出代码中，防止出现多次
+        externals: /^(react|babel-runtime)/,
+        module: {
+            rules: [
+                {
+                    test: /\.js$/,
+                    use: ['babel-loader'],
+                    exclude: path.resolve(__dirname, 'node_modules')
+                },
+                {
+                    test: /\.css/,
+                    use: ExtractTextPlugin.extract({
+                        use: ['css-loader']
+                    })
+                }
+            ]
+        },
+        plugins: [
+            new ExtractTextPlugin({
+                filename: 'index.css' // 输出的css文件名称
+            })
+        ],
+        devtool: 'source-map'
+    }
+    ```
+    ```js
+    // package.json
+    {
+        "main": "lib/index.js", // 代码入口文件
+        "jsnext:main": "src/index.js" // ES6编写的模块入口文件所在位置，为了实现tree sharking
+    }
+    ``` 
+#### 6.构建离线应用
+1. 离线应用
+    1. 无网络情况下也能打开网页
+    2. 从本地加载，加快网页加载速度
+    3. AppCache, 已被web标准废弃
+    4. Service Workers, 是web worker的一部分，通过拦截网络请求实现离线缓存，是构建PWA应用的关键技术
+2. Service Workers
+    
+3.    
