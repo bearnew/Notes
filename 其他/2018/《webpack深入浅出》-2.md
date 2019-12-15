@@ -419,5 +419,361 @@
     3. AppCache, 已被web标准废弃
     4. Service Workers, 是web worker的一部分，通过拦截网络请求实现离线缓存，是构建PWA应用的关键技术
 2. Service Workers
-    
-3.    
+    1. Service Workers是一个在浏览器后台运行的脚本，生命周期完全独立于网页
+    2. 无法直接访问dom, 可通过postMessage接口发送消息来和UI进程通信
+    3. Service Workders可拦截网络请求，离线缓存，编译响应，过滤响应
+    4. 判断浏览器是否支持Service Workers
+        ```js
+        // main.js
+        if (navigator.serviceWorker) {
+            window.addEventListener('DOMContentLoaded',function() {
+                // 调用 serviceWorker.register 注册，参数 /sw.js 为脚本文件所在的 URL 路径
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
+        ```
+    5. 注册Service Workers
+        ```js
+        // sw.js
+        var serviceWorkerOption = {
+            "assets": [
+                "/app.js",
+                "/app.css",
+                "/index.html"
+            ]
+        };
+
+        var cacheKey = new Date().toISOString();
+
+        // 当前缓存白名单，在新脚本的 install 事件里将使用白名单里的 key
+        var cacheWhitelist = [cacheKey];
+
+        // 需要被缓存的文件的 URL 列表
+        var cacheFileList = global.serviceWorkerOption.assets;
+
+        // 监听 install 事件
+        self.addEventListener('install', function (event) {
+            // 等待所有资源缓存完成时，才可以进行下一步
+            event.waitUntil(
+                caches.open(cacheKey).then(function (cache) {
+                // 要缓存的文件 URL 列表
+                return cache.addAll(cacheFileList);
+                })
+            );
+        });
+
+        // 拦截网络请求
+        self.addEventListener('fetch', function (event) {
+            event.respondWith(
+                // 去缓存中查询对应的请求
+                caches.match(event.request).then(function (response) {
+                // 如果命中本地缓存，就直接返回本地的资源
+                if (response) {
+                    return response;
+                }
+                // 否则就去用 fetch 下载资源
+                return fetch(event.request);
+                }
+                )
+            );
+        });
+
+        // 新 Service Workers 线程取得控制权后，将会触发其 activate 事件
+        self.addEventListener('activate', function (event) {
+            event.waitUntil(
+                caches.keys().then(function (cacheNames) {
+                return Promise.all(
+                    cacheNames.map(function (cacheName) {
+                    // 不在白名单的缓存全部清理掉
+                    if (cacheWhitelist.indexOf(cacheName) === -1) {
+                        // 删除缓存
+                        return caches.delete(cacheName);
+                    }
+                    })
+                );
+                })
+            );
+        });
+        ```
+    6. 搭建webpack
+        ```js
+        // webpack.config.js
+        const ServiceWorkerWebpackPlugin = require('serviceworker-webpack-plugin');
+
+        module.exports = {
+            plugins: [
+                new ServiceWorkerWebpackPlugin({
+                    // 自定义的 sw.js 文件所在路径
+                    // ServiceWorkerWebpackPlugin 会把文件列表注入到生成的 sw.js 中
+                    entry: path.join(__dirname, 'sw.js'),
+                }),
+            ],
+            devServer: {
+                // Service Workers 依赖 HTTPS，使用 DevServer 提供的 HTTPS 功能。
+                https: true
+            }
+        }
+        ```
+    7. 启动chrome需忽略证书验证
+        ```js
+        chrome.exe --user-data-dir=./tmp --ignore-certificate-errors --unsafely-treat-insecure-origin-as-secure=https://localhost:8080
+        ```
+#### 7.npm script
+1. npm script的底层原理是通过shell去运行脚本命令
+```js
+{
+    "script": {
+        "dev": "webpack-dev-server --open",
+        "dist": "NODE_ENV=production webpack --config webpack.prod.config.js",
+        "pub": "npm run dist && rsync dist"
+    }
+}
+```
+#### 8.检查代码
+1. eslint-loader
+2. tslint-loader
+3. stylelint-webpack-plugin
+4. 使用husky为项目接入git hook
+```js
+// package.json
+{
+    "scripts": {
+        "precommit": "npm run lint", // 执行git commit前会执行的脚本
+        "prepush": "lint", // 执行git push前会执行的脚本
+        "lint": "eslint && stylelint"
+    }
+}
+```
+#### 9.DevServer的实现原理
+1. webpack-dev-middlerware实现devServer
+2. webpack-hot-middleware实现模块热替换
+```js
+const express = require('express');
+const webpack = require('webpack');
+const webpackMiddleware = require('webpack-dev-middleware');
+
+// 从webpack.config.js中读取配置
+const config = require('./webpack.config.js');
+const app = express();
+
+// 用读取到的webpack配置实例化一个compiler
+const compiler = webpack(config);
+// 为app注册webpackMiddleware中间件
+app.use(webpackMiddleware(compiler));
+app.use(require('webpack-hot-middleware')(compiler));
+app.listen(3000);
+```
+#### 10.加载图, 文件
+1. `file-loader`可以将js和css中导入图片的语句换成正确的地址，同时将文件输出到对应的位置
+```js
+module.exports = {
+    module: {
+        rules: [
+            {
+                test: /\.png$/,
+                use: ['file-loader']
+            }
+        ]
+    }
+}
+``` 
+2. `url-loader`可以将文件内容经过`base64`编码后注入js或css中
+```js
+module.exports = {
+    module: {
+        rules: [
+            {
+                test: /\.(png|svg)$/,
+                use: [{
+                    loader: 'url-loader',
+                    options: {
+                        // 30kb以下的文件采用url-loader
+                        limit: 1024 * 30
+                        // 否则采用file-loader
+                        fallback: 'file-loader'
+                    }
+                }]
+            }
+        ]
+    }
+}
+```
+3. 通过`imagemin-webpack-plugin`压缩图片
+4. 通过`webpack-spritesmith`制作雪碧图
+5. 使用`https://tinypng.com/`无损压缩图片
+6. 使用`raw-loader`将文件内容读取出来，注入到js中
+7. `svg-inline-loader`将文件内容读取出来，压缩后注入到js中
+#### 11.source map
+1. devtool的选项列表 
+| devtool                 | 含义                                                                        |
+| :---------------------- | :-------------------------------------------------------------------------- |
+| 空                      | 不生成source map                                                            |
+| eval                    | 每个module会封装在eval里包裹起来执行                                        |
+| source-map              | 额外生成一个单独的source map文件                                            |
+| hidden-source-map       | 和source-map类似，但不会在js文件的末尾追加/# sourcemappingurl=bundle.js.map |
+| inline-source-map       | 将source map转成base64编码内嵌到js中                                        |
+| eval-source-map         | 将source map转换成base64编码内嵌到eval语句中                                |
+| cheap-source-map        | 生成的source map没有列信息，生成速度更快                                    |
+| cheap-module-source-map | 和cheap-source-map类似，但会包含loader生成的source map                      |
+
+## 二、webpack优化
+#### 1.缩小文件搜索范围
+1. 优化loader配置
+    1. 配置test, include, exclude三个配置缩小命中范围，让尽可能少的文件被loader处理
+2. 优化resolve.modules配置
+    1. 指明存放第三方模块的绝对路径，减少寻找
+    ```js
+    module.exports = {
+        resolve: {
+            // __dirname表示当前工作目录，也就是项目根目录
+            modules: [path.resolve(__dirname, 'node_modules')]
+        }
+    }
+    ``` 
+3. 优化resolve.mainFields配置
+    1. 固定mainFields入口文件描述字段，减少搜索步骤
+    ```js
+    module.exports = {
+        resolve: {
+            mainFields: ['main']
+        }
+    }
+    ```
+4. 优化resolve.alias配置
+    1. 配置alias，减少耗时的递归解析操作
+    2. 配置了alias，会影响tree-sharking去除无效代码
+    ```js
+    module.exports = {
+        resolve: {
+            alias: {
+                'react': path.resolve(__dirname, './node_modules/react/dist/react.min.js')
+            }
+        }
+    }
+    ``` 
+5. 优化resolve.extensions配置
+    1. extensions中的配置列表要尽可能的少
+    2. 出现频率高的文件后缀要优先放前面
+    3. 导入语句要尽可能的带上后缀
+6. 优化module.noParse配置
+    1. 配置noParse忽略对该文件的递归解析处理
+    2. 被忽略的文件不应该包含import, require, define等语句
+    ```js
+    module.exports = {
+        module: {
+            noParse: [/react\.min\.js$/]
+        }
+    }
+    ``` 
+#### 2.使用DLLPlugin
+1. DLL
+    1. 将依赖的基础模块抽离出来，打包到一个个单独的动态链接库中，在一个动态链接库中可以包含多个模块
+    2. 动态链接库只会被编译一次
+2. 接入webpack
+    1. DLLPlugin, 构建出动态链接库文件
+        ```js
+        // webpack.dll.config.js
+        const DllPlugin = require('webpack/lib/DllPlugin');
+        module.exports = {
+            output: {
+                filename: '[name].dll.js',
+                path: path.resolve(__dirname, 'dist'),
+                // 存放动态链接库的全局变量名称
+                library: '_dll_[name]'
+            },
+            plugins: [
+                new DllPlugin({
+                    name: '_dll_[name]', // 动态链接库的全局变量名称
+                    path: path.join(__dirname, 'dist', '[name].manifest.json')
+                })
+            ]
+        }
+        ```
+    2. DLLReferencePlugin, 使用动态链接库文件
+        ```js
+        // webpack.config.js
+        const DllReferencePlugin = require('webpack/lib/DllReferencePlugin');
+        module.exports = {
+            // dllreferencePlugin会从manifest.json文件中读取name的值
+            plugins: new DllReferencePlugin({
+                // 描述react动态链接库的内容
+                manifest: require('./dist/react.manifest.json')
+            })
+        }
+        ``` 
+#### 3.使用happyPack
+1. 多进程处理loader，较少构建时间
+    ```js
+    const HappyPack = require('happypack');
+    const happyThreadPool = HappyPack.ThreadPool({ size: 5 });
+
+    module.exports = {
+        module: {
+            rules: [
+                {
+                    test: /\.js$/,
+                    use: ['happypack/loader?id=babel']
+                }
+            ]
+        }
+        plugins: [
+            new HappyPack({
+                id: 'babel',
+                loaders: ['babel-loader?cacheDirectory'],
+                threadPool: happyThreadPool
+            })
+        ]
+    }
+    ```
+#### 4.使用ParallelUglifyPlugin
+1. 开启多个子进程，对文件进行压缩
+```js
+const ParallelUglifyPlugin = require('webpack-parallel-uglify-plugin');
+
+module.exports = {
+    plugins: [
+        new ParallelUglifyPlugin({
+            uglifyJS: {
+                output: {
+
+                },
+                compress: {
+
+                }
+            }
+        })
+    ]
+}
+```  
+#### 5.使用自动刷新
+1. webpack自带的文件监听
+```js
+module.exports = {
+    watch: true,
+    watchOptions: {
+        ignored: /node_modules/,
+        aggregateTimeout: 300, // 监听文件变化后300ms再去执行操作，截流
+        poll: 1000 // 每秒轮询1000次
+    }
+}
+```
+2. webpack-dev-server负责刷新浏览器
+    * 通过关闭inline, 让网页只注入一个代理客户端
+    ```js
+    webpack-dev-server --inline false
+    ``` 
+3. 开启热模块替换
+    ```js
+    webpack-dev-server --hot
+    ```
+    ```js
+    // webpack.config.js
+    const NameModulesPlugin = require('webpack/lib/NameModulesPlugin');
+
+    module.exports = {
+        plugins: [
+            // 显示出被替换模块的名称
+            new NameModulesPlugin()
+        ]
+    }
+    ```
