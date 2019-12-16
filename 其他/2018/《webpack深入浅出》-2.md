@@ -777,3 +777,470 @@ module.exports = {
         ]
     }
     ```
+#### 6.区分环境
+```js
+module.exports = {
+    plugins: [
+        // 定义当前config文件NODE_ENV环境变量为production
+        new DefinePlugin({
+            'process.env': {
+                'NODE_ENV': JSON.stringify('production')
+            }
+        })
+    ]
+}
+```
+#### 7.压缩
+1. 使用`ParallelUglifyPlugin`
+```js
+const UglifyJSPlugin = require('webpack/lib/optimize/UglifyJsPlugin');
+
+module.exports = {
+    plugins: [
+        new UglifyJSPlugin({
+            compress: {
+                // 删除没有用到的代码时，不输出警告
+                warning: false,
+                // 删除所有console语句
+                drop_console: true,
+                // 内嵌已定义，但是只用到一次的变量
+                collapse_vars: true,
+                // 提取出现了多次但没有定义成变量的静态值
+                reduce_vars: true
+            },
+            output: {
+                // 不保留空格和制表符
+                beautify: false,
+                // 删除所有的注释
+                comments: false
+            }
+        })
+    ]
+}
+```
+2. 开启`css-loader`的`minimize`选项压缩css
+```js
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+
+module.exports = {
+    module: {
+        rules: [
+            {
+                test: /\.css/,
+                use: ExtractTextPlugin.extract({
+                    use: ['css-loader?minimize']
+                })
+            }
+        ]
+    },
+    plugins: [
+        new ExtractTextPlugin({
+            filename: `[name]_[contenthash:8].css`
+        })
+    ]
+}
+```
+#### 8.CDN加速
+1. CDN是将资源部署到世界各地，使用户访问时按就近原则从最近的服务器获取资源，加快获取资源的速度
+2. 业界使用CDN的正确方式
+    1. 针对HTML文件，不使用CDN服务，同时关闭自己服务器上的缓存
+    2. 针对js, css, 图片，开启CDN和缓存，用hash值判断文件内容是否变化
+    3. 浏览器对同一域名的资源请求有限制（大概4个），将静态资源分散到不同的CDN服务上
+3. Webpack接入CDN
+    1. 在output.publicPath中设置js的地址
+    2. 在css-loader.publicPath中设置css中导入的资源的地址
+    3. 在webplugin.stylePublicPath设置css文件的地址
+    ```js
+    const ExtractTextPlugin = require('extract-text-webpack-plugin');
+    const { WebPlugin } = require('web-webpack-plugin');
+
+    module.exports = {
+        output: {
+            filename: '[name]_[chunkhash:8].js',
+            path: path.resolve(__dirname, './dist'),
+            // 指定js文件的CDN目录URL
+            publicPath: '//js.cdn.com/id/'
+        },
+        module: {
+            rules: [
+                {
+                    test: '/\.css/',
+                    use: ExtractTextPlugin.extract({
+                        use: ['css-loader?minimize'],
+                        // 指定存放css中导入的资源（图片）的CDN目录的URL
+                        publicPath: '//img.cdn.com/id/'
+                    })
+                }
+            ]
+        },
+        plugins: [
+            new WebPlugin({
+                template: './template.html',
+                filename: 'index.html',
+                // 指定存放css文件的CDN目录的URL
+                stylePublicPath: '//css.cdn.com/id/'
+            })
+        ]
+    }
+    ```
+#### 9.使用tree shaking
+1. 用来剔除js中用不上的死代码，依赖ES6的模块化语法
+2. 接入webpack
+    1. 关闭babel中的模块转换功能
+    2. 配置第三方包采用ES6模块化语法
+    ```js
+    // .babelrc
+    {
+        "presets": [
+            [
+                "env",
+                {
+                    "modules": false
+                }
+            ]
+        ]
+    }
+    ```
+    ```js
+    // webpack.config.js
+    module.exports = {
+        resolve: {
+            // 针对第三方模块优先采用jsnext:main中指向es6的模块化语法
+            mainFields: ['jsnext:main', 'browser', 'main']
+        }
+    }
+    ```
+#### 10.提取公共代码
+1. 提取公共代码的优点
+    1. 减少网络传输流量，降低服务器成本
+    2. 第一次打开网站得不到优化，之后访问其他页面的速度将大大提升
+2. webpack提取公共代码
+```js
+module.exports = {
+    optimization: {
+        splitChunks: {
+            // 缓存组
+            cacheGroups: {
+                vendors: {
+                    test: /react/,
+                    name: 'vendors'
+                },
+                common: {
+                    // chunks(chunk){
+                    //     return chunk.name.includes('common')
+                    // }
+                    chunks: 'all',
+                    minSize: 0, // 压缩前的最小模块大小
+                    minChunks: 6, // 被引用的次数
+                    name: 'common'
+                }
+            }
+        }
+    }
+}
+```
+#### 11.分割代码按需加载
+1. 按需加载原因
+    1. 将网站分割成一个个小功能
+    2. 将每一类合并成Chunk, 按需加载对应的Chunk
+    3. 对不依赖大量代码的功能点进行按需加载，例Chart.js, flv.js
+2. webpack按需加载
+    ```js
+    npm i -D babel-plugin-syntax-dynamic-import
+    ``` 
+    ```js
+    // .babelrc
+    {
+        "presets": [
+            "env",
+            "react"
+        ],
+        "plugins": [
+            "syntax-dynamic-import"
+        ]
+    }
+    ```
+    ```js
+    // webpack.config.js
+    module.exports = {
+        entry: {
+            main: './main.js'
+        },
+        output: {
+            // 为entry中配置生成的chunk配置输出文件的名称
+            filename: '[name].js',
+            // 为动态加载的chunk配置输出文件的名称
+            chunkFilename: '[name].js'
+        }
+    }
+    ```
+    ```js
+    // 根组件
+    function App() {
+        return (
+            <HashRouter>
+                <Route path='/about' component={getAsyncComponent(
+                    () => import('./pages/about')
+                )}
+            </HashRouter>
+        )
+    }
+    ```
+    ```js
+    import React, { PureComponent, createElement } from 'react';
+
+    // 异步加载组件
+    function getAsyncComponent(load) {
+        return class AsyncComponent extends PureComponent {
+            componentDidMount() {
+                load().then(({ default: component }) => {
+                    this.setState({
+                        component
+                    })
+                }) 
+            }
+
+            render() {
+                const { component } = this.state || {};
+
+                // component是React.Component类型，需要React.createElement生产一个组件实例
+                return component ? createElement(component) : null;
+            }
+        }
+    }
+    ```
+#### 12.使用prepack
+1. prepack是激进的方法，会改变源代码的运行逻辑，输出性能更好的js代码
+2. prepack实际是一个部分求值器，编译代码时会提前将计算结果放到编译后的代码中，而不是在代码中运行时才去求值
+3. prepack还不能识别DOM API和部分Node.js API
+4. 接入webpack
+```js
+const PrepackWebpackPlugin = require('prepack-webpack-plugin').default;
+
+module.exports = {
+    plugins: [
+        new PrepackWebpackPlugin()
+    ]
+}
+```
+#### 13.开启Scope Hoisting(作用域提升)
+1. Scope Hoisting的好处
+    1. 代码体积更小，因为函数声明语句会产生大量的代码
+    2. 函数作用域变少了，内存开销变小了
+3. 接入webpack
+    ```js
+    const ModuleConcatenationPlugin = require('webpack/lib/optimize/ModuleConcatenationPlugin');
+
+    module.exports = {
+        plugins: [
+            // 开启scope hoisting，依赖源码时需采用ES6模块化语法
+            new ModuleConcatenationPlugin()
+        ],
+        resolve: {
+            // 第三方模块优先使用ES6模块化语法
+            mainFields: ['jsnext:main', 'browser', 'main']
+        }
+    }
+    ``` 
+#### 14.输出分析
+1. 使用官方的webpack Analyse, 是一个在线的web应用
+2. 使用webpack-bundle-analyzer
+
+## 二、原理
+
+#### 1. webpack
+1. __webpack_require__.e 加载需要异步加载的Chunk对应的文件
+2. webpackJsonp 用于从异步加载的文件中安装模块
+
+#### 2. loader
+1. loader的职责是单一的
+2. loader都会链式的顺序执行
+3. 简单的loader源码
+```js
+const sass = require('node-sass');
+const loaderUtils = require('loader-utils');
+
+module.exports = function(source) {
+    // 获取当前loader传入的options
+    const options = loaderUtils.getOptions(this);
+    return sass(source);
+}
+```
+4. loader返回除了内容之外的东西
+```js
+module.exports = function(source) {
+    // 通过this.callback告诉webpack返回的结果
+    this.callback(null, source, sourceMaps);
+    return;
+}
+
+// this.callback传参
+this.callback(
+    err: Error | null,
+    content: string | Buffer,
+    sourceMap?: SourceMap // 用于通过转换后的内容得出原内容的source map, 方便调试
+    // 返回AST语法树
+    abstractSyntaxTree?: AST
+)
+```
+5. loader异步处理
+```js
+module.exports = function(source) {
+    var callback = this.async();
+    someAsyncOperation(source, function(err, result, sourceMaps, ast) {
+        // 通过callback返回异步执行后的结果
+        callback(err, result, sourceMaps, ast);
+    })
+}
+```
+6. Loader API
+* `this.context`: 当前处理的文件所在的目录，loader处理的文件为/src/main.js, this.context为/src
+* `this.resource`: 当前处理的文件的完整请求路径，包括querystring, 例如/src/main.js?name=1
+* `this.resourcePath`: 当前处理的文件的路径，例如/src/main.js
+* `this.resourceQuery`: 当前处理的文件的querystring
+* `this.target`: 等于webpack配置中的target
+* `this.loadModule`: `this.loadModule(request: string, callback: function(err, source, sourceMap, nodule))`获取request对应的文件的处理结果
+* `this.resolve`: 像require语句一样获得指定文件的完整路径，使用方法为`resolve(context: string, request: string, callback: function(err, result: string))`
+* `this.addDependency`: 为当前处理的文件添加其依赖的文件，以便依赖的文件发生变化时，重新调用Loader处理该文件，使用方法为`addDependency(file: string)`
+* `this.addContextDependency`: 为当前处理的文件添加其依赖的文件目录，使用方法为`addContextDependency(directory: string)`
+* `this.clearDependencies`: 清除当前正在处理的文件的所有依赖，使用方法为`clearDependencies()`
+* `this.emitFile`: 输出一个文件，使用方法为`emitFile(name: string, content: Buffer|string, sourceMap: {...})`
+
+7. 加载本地loader
+    1. 方法1: npm link
+        1. 在本地的Npm模块根目录下执行`npm link`, 将本地模块注册到全局
+        2. 在项目根目录，执行`npm link loader-name`, 将注册到全局的本地npm模块链接到项目的node_modules下，loader-name是指本地NPM模块的`package.json`文件中配置的模块名称
+    2. 方法2: resolveLoader
+        ```js
+        // webpack.config.js
+        module.exports = {
+            resolveLoader: {
+                // 去哪些目录下寻找loader
+                modules: ['node_modules', './loaders/']
+            }
+        }
+        ```
+8. 手写loader
+    ```js
+    // txt文件
+    test loader output from [name]
+    ```
+    ```js
+    // webpack.config.js
+    module.exports = {
+        module: {
+            rules: [
+                {
+                    test: /\.txt$/,
+                    use: {
+                        loader: path.resolve(__dirname, './txt-loader.js'),
+                        options: {
+                            name: 'txt-loader'
+                        }
+                    }
+                }
+            ]
+        }
+    }
+    ```
+    ```js
+    // txt-loader.js
+    const utils = require('loader-utils');
+
+    module.exports = function(source) {
+        const options = utils.getOptions(this);
+        source = source.replace(/\[name\]/g, options.name);
+
+        return `export default ${JSON.stringify({
+            content: source,
+            filename: this.resourcePath
+        }) }
+        }`
+    }
+    ```
+    ```js
+    import test from './test.txt';
+
+    // {
+    //     content: 'test loader output from txt-loader',
+    //     filename: "/Users/xx/test-loader/src/test.txt"
+    // }
+    test;
+    ```
+3. 编写Plugin
+    1. compiler, 包含options, loaders, plugins等webpack环境的所有配置信息
+    2. compilation, 包含当前的模块资源、编译生成资源、变化的文件，每次文件发生变化，就有新的compilation被创建
+    3. plugin基础代码
+    ```js
+    // BasicPlugin.js
+    class BasicPlugin {
+        // 在构造函数中获取用户为该插件传入的配置
+        constructor(options) {
+
+        }
+
+        // webpack会调用BasicPlugin实例的apply方法为插件实例传入compiler对象
+        apply(compiler) {
+            compiler.plugin('compilation', function(compilation) {
+
+            })
+        }
+    }
+    module.exports = BasicPlugin;
+    ```
+    ```js
+    // webpack.config.js
+    const BasicPlugin = require('./BasicPlugin.js');
+    module.exports = {
+        plugins: [
+            // 初始化1个BasicPlugin并获得其实例
+            // 调用basicPlugin.apply(compiler)为插件实例传入compiler对象
+            // 通过compiler.plugin监听广播的事件
+            new BasicPlugin(options)
+        ]
+    }
+    ```
+    4. 编写一个页面加载前的loading
+    ```js
+    class LoadingPlugin {
+        constructor(options) {}
+        apply(compiler) {
+            compiler.plugin('compilation', function(compilation) {
+                compilation.plugin('html-webpack-plugin-before-html-processing', (htmlData, callback) => {
+                    htmlData.html = htmlData.html.replace(
+                        `<div>loading</div>`
+                    );
+                    callback(null, htmlData);
+                })
+            })
+        }
+    }
+    module.exports = LoadingPlugin;
+    ```
+    ```js
+    class TestPlugin {
+        constructor(options) {}
+        apply(compiler) {
+            compiler.plugin('compilation', function(compilation) {
+                compilation.plugin('after-optimize-chunks', (chunks) => {
+                    console.log('2222', chunks.length)
+                })
+            })
+        }
+    }
+    module.exports = TestPlugin;
+    ```
+    ```js
+    // webpack.config.js
+    const HtmlWebpackPlugin = require('html-webpack-plugin');
+    const LoadingPlugin = require('./LoadingPlugin');
+
+    module.exports = {
+        new HtmlWebpackPlugin({}),
+        plugins: [
+            new HtmlWebpackPlugin({}),
+            new LoadingPlugin(),
+            new TestPlugin()
+        ]
+    }
+    ```
