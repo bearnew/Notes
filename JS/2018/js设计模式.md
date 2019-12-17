@@ -17,7 +17,9 @@
 * 每一个类都应该降低成员的访问权限
 ###### 6.接口隔离原则
 * 类1对类2的依赖应该建立在最小接口上
-* #### 1. 单例模式
+###### 7.将不变的事物和变化的事物分离开来r
+
+#### 1. 单例模式
 ---
 ###### 模式作用
 1. 模块间通信
@@ -151,7 +153,7 @@ alert(a === b); // true
 a.bang = "123";
 alert(b.bang); // 123
 ```
-* #### 2. 策略模式
+#### 2. 策略模式
 ---
 ###### 模式作用
 1. 减少大量的if语句
@@ -197,7 +199,7 @@ const calculateBonus = function(func, salary) {
 
 calculateBonus(A, 10000) // 30000
 ```
-* #### 3. 构造函数模式
+#### 3. 构造函数模式
 ---
 ###### 模式作用
 1. 用于创建特定类型的对象
@@ -217,7 +219,7 @@ function Door(lock, style) {
 var door = new Door('fingerprint lock', 'pure color');
 alert(door.create());
 ```
-* #### 4. 建造者模式
+#### 4. 建造者模式
 ---
 ###### 模式作用
 1. 分步创建一个复杂对象
@@ -275,7 +277,7 @@ baogongtou.jianfangzi(gongren);
 var myfangzi = gongren.jiaofang();
 console.log(myfangzi);
 ```
-* #### 5. 工厂模式
+#### 5. 工厂模式
 ---
 ###### 模式作用
 1. 对象的构建十分复杂
@@ -299,7 +301,7 @@ var test2 = createObject('mike',25,'engineer');//第二个实例
 alert(test1.move());
 alert(test2.move());
 ```
-* #### 6. 代理模式
+#### 6. 代理模式
 ---
 ###### 模式作用
 1. 远程代理（一个对象将不同空间的对象进行局部代理）
@@ -336,29 +338,35 @@ Proxy.sendFlower(SchoolGirl);
 * __方法2__
 ```js
 var myImage = (function(){
+    // var imgNode = new Image();
     var imgNode = document.createElement("img");
     document.body.appendChild(imgNode);
-    return function(src){
-        imgNode.src = src; 
+    return {
+        setSrc: function(src){
+           imgNode.src = src; 
+        }
     }
 })();
+
 // 代理模式
 var ProxyImage = (function(){
     var img = new Image();
     img.onload = function(){
-        myImage(this.src);
+        myImage.setSrc(this.src);
     };
-    return function(src) {
-                // 占位图片loading
-                myImage("http://img.lanrentuku.com/img/allimg/1212/5-121204193Q9-50.gif");
-        img.src = src;
+    return {
+        setSrc: function(src) {
+            // 占位图片loading
+            myImage.setSrc("http://img.lanrentuku.com/img/allimg/1212/5-121204193Q9-50.gif");
+            img.src = src;
+        }
     }
 })();
 // 调用方式
 
-ProxyImage("https://img.alicdn.com/tps/i4/TB1b_neLXXXXXcoXFXXc8PZ9XXX-130-200.png"); // 真实要展示的图片
+ProxyImage.setSrc("https://dimg04.c-ctrip.com/images/a10i1a0000018yc4e4CF6.jpg"); // 真实要展示的图片
 ```
-* #### 7. 命令模式
+#### 7. 命令模式
 ---
 ###### 模式作用
 1. 将函数的封装，调用，请求结合为一体
@@ -426,4 +434,233 @@ CarManager.execute = function ( name ) {
 console.log(CarManager.execute( "arrangeViewing", "Ferrari", "14523" ));
 console.log(CarManager.execute( "requestInfo", "Ford Mondeo", "54323" ));
 console.log(CarManager.execute( "buyVehicle", "Ford Escort", "34232" ));
+```
+* __方法3__
+```js
+// 撤销命令
+var waiter = {
+    timer: {},
+    book: function(dish, customerId) {
+        this.timer[customerId] = setTimeout(() => {
+            console.log(`complete: ${dish} for ${customerId}`);
+        }, 3000);
+    },
+    cancel: function(dish, customerId) {
+        if (this.timer[customerId]) {
+            clearTimeout(this.timer[customerId]);
+            console.log(`cancel: ${dish} for ${customerId}`)
+        } else {
+            console.log(`You haven't book`);
+        }
+    }
+}
+
+waiter.excute = function() {
+    waiter[arguments[0]].apply(waiter, [].slice.call(arguments, 1));
+}
+
+// cancel: vegetable for 1
+// complete: meat for 2
+waiter.excute('book', 'vegetable', 1)
+setTimeout(() => {
+    waiter.excute('cancel', 'vegetable', 1)
+}, 2000);
+
+waiter.excute('book', 'meat', 2)
+```
+* __方法4__
+```html
+<html>
+    <body>
+        <button id="replay">播放录像</button>
+    </body>
+    <script>
+        // 重做命令  
+        var Ryu = {
+            attack: function(){
+                console.log( '攻击' );
+            },
+            defense: function(){
+                console.log( '防御' );
+            },
+            jump: function(){
+                console.log( '跳跃' );
+            },
+            crouch: function(){
+                console.log( '蹲下' );
+            }
+        };
+   
+        var makeCommand = function(receiver, state) { // 创建命令
+            return function(){
+                receiver[state]();
+            }
+        };
+   
+        var commands = {
+            "119": "jump", // W
+            "115": "crouch", // S
+            "97": "defense", // A
+            "100": "attack" // D
+        };
+        var commandStack = []; // 保存命令的堆栈
+
+        document.onkeypress = function(ev) {
+            var keyCode = ev.keyCode,
+            command = makeCommand(Ryu, commands[keyCode]);
+            if (command){
+                command(); // 执行命令
+                commandStack.push(command); // 将刚刚执行过的命令保存进堆栈
+            }
+        };
+   
+        document.getElementById( 'replay' ).onclick = function(){ // 点击播放录像
+            var command;
+            while( command = commandStack.shift() ){ // 从堆栈里依次取出命令并执行
+                command();
+            }
+        };
+    </script>
+</html> 
+```
+#### 8.迭代器模式
+1. 提供一种方法顺序的访问一个聚合对象中的各个元素
+```js
+$.each(['a', 'b', 'c'], function(index, value) {
+    console.log(index + ':' + value);
+})
+
+$('li').each(function(index) {
+    console.log(index + ':' + $())
+})
+```
+
+#### 9.观察者模式（发布-订阅模式）
+* 实现简单的广播通信
+```js
+// 订阅
+document.body.addEventListener('click', function(){
+    alert(2);
+}, false);
+
+document.body.addEventListener('click', function(){ 
+    alert(3);
+}, false);
+
+document.body.addEventListener('click', function(){
+    alert(4);
+}, false);
+
+// 发布
+document.body.click();
+```
+```js
+//通用代码
+var observer = {
+    //订阅
+    addSubscriber: function (callback) {
+        this.subscribers[this.subscribers.length] = callback;
+    },
+    //退订
+    removeSubscriber: function (callback) {
+        for (var i = 0; i < this.subscribers.length; i++) {
+            if (this.subscribers[i] === callback) {
+                delete (this.subscribers[i]);
+            }
+        }
+    },
+    //发布
+    publish: function (msg) {
+        for (var i = 0; i < this.subscribers.length; i++) {
+            if (typeof this.subscribers[i] === 'function') {
+                this.subscribers[i](msg);
+            }
+        }
+    },
+    // 将对象o具有观察者功能
+    make: function (o) { 
+        // Object.setPrototypeOf(o, observer);
+        o.__proto__ = observer;
+        o.subscribers = [];
+    }
+};
+
+var blogger = {
+    recommend: function(msg) {
+        this.publish(msg);
+    }
+}
+
+var user = {
+    receive: function(msg) {
+        console.log(`user receive: ${msg}`);
+    }
+}
+
+observer.make(blogger);
+
+blogger.addSubscriber(user.receive);
+blogger.recommend('new news!'); // ser receive: new news!
+
+blogger.removeSubscriber(user.receive);
+blogger.recommend('can you receive message?'); // 无
+```
+
+#### 10.装饰者模式
+```js
+var Car = function() {}
+Car.prototype.drive = function() {
+    console.log('normal drive');
+}
+
+var AutoPilotDecorator = function(car) {
+    this.car = car;
+}
+
+AutoPilotDecorator.prototype.drive = function() {
+    this.car.drive();
+    console.log('start auto drive');
+}
+
+var car = new Car();
+car = new AutoPilotDecorator(car);
+
+// normal drive
+// start auto drive
+car.drive();
+```
+```js
+// ES7
+// 方法装饰器
+// target-Car, 装饰的类
+// key-drive, 修改的属性的名称
+// descriptor, 被修改的属性描述符
+// {
+//   value: drive,
+//   enumerable: false,
+//   configurable: true,
+//   writable: true
+// };
+function autopilotDecorator(target, key, descriptor) {
+    const method = descriptor.value;
+    
+    descriptor.value = () => {
+        method.apply(target);
+        console.log('start auto drive');
+    }
+    
+    return descriptor;
+}
+
+class Car {
+    @autopilotDecorator
+    drive() {
+        console.log('normal drive');
+    }
+}
+
+let car = new Car();
+// normal drive
+// start auto drive
+car.drive();
 ```
