@@ -1049,9 +1049,79 @@ module.exports = {
 ## 二、原理
 
 #### 1. webpack
-1. __webpack_require__.e 加载需要异步加载的Chunk对应的文件
-2. webpackJsonp 用于从异步加载的文件中安装模块
+1. webpack编译流程
+    1. 初始化参数，从配置文件和shell语句中读取与合并参数，得出最终的参数
+    2. 开启编译，用上一步得到的参数初始化`Compiler`对象，加载所有配置的插件，通过执行对象的run方法开始执行编译
+    3. 确定入口，根据配置中的`entry`找出所有的入口文件
+    4. 编译模块，从入口文件出发，调用所有配置的`loader`对模块进行翻译，再找出该模块依赖的模块，递归，直到所有入口依赖的文件都经过本步骤处理
+    5. 完成模块编译，`loader`翻译完所有模块后，得到了每个模块被翻译后的最终内容和依赖关系
+    6. 输出资源，根据入口和模块之间的依赖关系，组装成一个个包含多个模块的chunk, 再将每个chunk转换成1个单独的文件，加入到输出列表中
+    7. 输出完成，确定好输出内容后，根据`output`配置的输出路径和文件名，将文件内容写入文件系统中
+2. webpack构建流程
+    1. 初始化，启动构建，读取和合并配置参数，加载`Plugin`, 实例化`Compiler`
+    2. 编译，从Entry发出，针对每个`Module`串行调用对应的`Loader`去翻译文件的内容，再找到该`Module`依赖的`Module`，递归的进行编译处理
+    3. 输出，将编译后的`Module`组合成`Chunk`，将`Chunk`转换成文件，输出到文件系统中
+3. webpack初始化阶段
 
+| 事件名 | 解释 |
+|:-------|:------|
+|初始化参数|从配置文件和shell语句中读取和合并参数，得出最终参数，在这个过程中还会执行配置文件中的插件实例化语句`new Plugin`|
+|实例化`Compiler`|用上一步的参数初始化`Compiler`实例，`Compiler`负责文件监听和启动编译，在`Compiler`实例中包含了完整的`webpack`配置，全局只有1个`Compiler`实例|
+|加载插件|依次调用插件的`apply`方法，让插件可以监听后续的所有事件节点。同时向插件传入`compiler`实例的引用，以方便插件通过`compiler`调用webpack提供的API|
+|`environment`|开始应用Node.js风格的文件系统到compiler对象，以方便后续的文件寻找和读取|
+|entry-options|读取配置的`Entrys`,为每个`Entry`实例化一个对应的EntryPlugin, 为后面的该Entry的递归解析工作做准备|
+|after-plugins|调用完所有内置的和配置的插件的apply方法|
+|after-resolvers|根据配置初始化resolver，resolver负责在文件系统中寻找指定路径的文件|
+
+4. webpack编译阶段
+* 编译阶段
+
+|事件名| 解释 |
+|:----|:-----|
+|run | 启动一次新的编译 |
+|watch-run|和run类似，区别在于它是在监听模式下启动编译，在这个事件中可以获取是哪些文件发生了变化从而导致重新启动一次新的编译|
+|compile|该事件告诉插件一次新的编译将要启动，同时会给插件带上compiler对象|
+|compilation|当webpack以开发模式运行时，每当检测到文件的变化，便有一次新的compilation被创建。一个compilation对象包含了当前的模块资源、编译生成资源、变化的文件等。compilation对象也提供了很多事件回调给插件进行扩展|
+|make|一个新的Compilation创建完毕，即将从Entry开始读取文件，根据文件的类型和配置的loader对文件进行编译，编译完成后再找出该文件依赖的文件，递归地编译和解析|
+|after-compile|一次Compilation执行完成|
+|invalid|当遇到文件不存在、文件编译错误等异常时会触发该事件，该事件不会导致webpack退出|
+
+* Compilation阶段发生的小事件
+
+|事件名|解释|
+|:----|:----|
+|build-module|使用对应的loader去转换一个模块|
+|normal-module-loader|在用loader转换完一个模块后，使用acorn解析转换后的内容，输出对应的抽象语法树（AST）,以方便Webpack在后面对代码进行分析|
+|program|从配置的入口模块开始，分析其AST，当遇到require等导入其他模块的语句时，便将其加入依赖的模块列表中，同时对新找出的依赖模块递归分析，最终弄清楚所有的模块的依赖关系|
+|seal|所有的模块及其依赖的模块都通过loader转换完成，根据依赖关系开始生成Chunk|
+
+5. webpack输出阶段
+
+|事件名|解释|
+|:----|:----|
+|should-emit|所有需要输出的文件已经生成，询问插件有哪些文件需要输出，有哪些不需要输出|
+|emit|确定好要输出哪些文件后，执行文件输出，可以在这里获取和修改输出的内容|
+|after-emit|文件输出完毕|
+|done|成功完成一次完整的编译和输出流程|
+|failed|如果在编译和输出的流程中遇到异常，导致webpack退出，就会直接跳转到本步骤，插件可以在本事件中获取具体的错误原因|
+
+6. 输出文件分析
+    1. __webpack_require__.e 加载需要异步加载的Chunk对应的文件, 和require相似
+    2. webpackJsonp 用于从异步加载的文件中安装模块
+    3. modules为存放所有模块的数组，数组中的每个元素都是函数
+    4. moduleId为要加载模块在数组中index
+    5. bundle.js就是一个立即执行函数
+    ```js
+    (function(modules) {
+        // 模拟require语句
+        function __webpack_require__() {
+
+        }
+
+        // 执行存放所有模块数组中的第0个模块
+        __webpack_require__(0);
+    })
+    ```
 #### 2. loader
 1. loader的职责是单一的
 2. loader都会链式的顺序执行
@@ -1167,80 +1237,80 @@ module.exports = function(source) {
     // }
     test;
     ```
-3. 编写Plugin
-    1. compiler, 包含options, loaders, plugins等webpack环境的所有配置信息
-    2. compilation, 包含当前的模块资源、编译生成资源、变化的文件，每次文件发生变化，就有新的compilation被创建
-    3. plugin基础代码
-    ```js
-    // BasicPlugin.js
-    class BasicPlugin {
-        // 在构造函数中获取用户为该插件传入的配置
-        constructor(options) {
+#### 3.编写Plugin
+1. compiler, 包含options, loaders, plugins等webpack环境的所有配置信息
+2. compilation, 包含当前的模块资源、编译生成资源、变化的文件，每次文件发生变化，就有新的compilation被创建
+3. plugin基础代码
+```js
+// BasicPlugin.js
+class BasicPlugin {
+    // 在构造函数中获取用户为该插件传入的配置
+    constructor(options) {
 
-        }
+    }
 
-        // webpack会调用BasicPlugin实例的apply方法为插件实例传入compiler对象
-        apply(compiler) {
-            compiler.plugin('compilation', function(compilation) {
+    // webpack会调用BasicPlugin实例的apply方法为插件实例传入compiler对象
+    apply(compiler) {
+        compiler.plugin('compilation', function(compilation) {
 
+        })
+    }
+}
+module.exports = BasicPlugin;
+```
+```js
+// webpack.config.js
+const BasicPlugin = require('./BasicPlugin.js');
+module.exports = {
+    plugins: [
+        // 初始化1个BasicPlugin并获得其实例
+        // 调用basicPlugin.apply(compiler)为插件实例传入compiler对象
+        // 通过compiler.plugin监听广播的事件
+        new BasicPlugin(options)
+    ]
+}
+```
+4. 编写一个页面加载前的loading
+```js
+class LoadingPlugin {
+    constructor(options) {}
+    apply(compiler) {
+        compiler.plugin('compilation', function(compilation) {
+            compilation.plugin('html-webpack-plugin-before-html-processing', (htmlData, callback) => {
+                htmlData.html = htmlData.html.replace(
+                    `<div>loading</div>`
+                );
+                callback(null, htmlData);
             })
-        }
+        })
     }
-    module.exports = BasicPlugin;
-    ```
-    ```js
-    // webpack.config.js
-    const BasicPlugin = require('./BasicPlugin.js');
-    module.exports = {
-        plugins: [
-            // 初始化1个BasicPlugin并获得其实例
-            // 调用basicPlugin.apply(compiler)为插件实例传入compiler对象
-            // 通过compiler.plugin监听广播的事件
-            new BasicPlugin(options)
-        ]
-    }
-    ```
-    4. 编写一个页面加载前的loading
-    ```js
-    class LoadingPlugin {
-        constructor(options) {}
-        apply(compiler) {
-            compiler.plugin('compilation', function(compilation) {
-                compilation.plugin('html-webpack-plugin-before-html-processing', (htmlData, callback) => {
-                    htmlData.html = htmlData.html.replace(
-                        `<div>loading</div>`
-                    );
-                    callback(null, htmlData);
-                })
+}
+module.exports = LoadingPlugin;
+```
+```js
+class TestPlugin {
+    constructor(options) {}
+    apply(compiler) {
+        compiler.plugin('compilation', function(compilation) {
+            compilation.plugin('after-optimize-chunks', (chunks) => {
+                console.log('2222', chunks.length)
             })
-        }
+        })
     }
-    module.exports = LoadingPlugin;
-    ```
-    ```js
-    class TestPlugin {
-        constructor(options) {}
-        apply(compiler) {
-            compiler.plugin('compilation', function(compilation) {
-                compilation.plugin('after-optimize-chunks', (chunks) => {
-                    console.log('2222', chunks.length)
-                })
-            })
-        }
-    }
-    module.exports = TestPlugin;
-    ```
-    ```js
-    // webpack.config.js
-    const HtmlWebpackPlugin = require('html-webpack-plugin');
-    const LoadingPlugin = require('./LoadingPlugin');
+}
+module.exports = TestPlugin;
+```
+```js
+// webpack.config.js
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const LoadingPlugin = require('./LoadingPlugin');
 
-    module.exports = {
+module.exports = {
+    new HtmlWebpackPlugin({}),
+    plugins: [
         new HtmlWebpackPlugin({}),
-        plugins: [
-            new HtmlWebpackPlugin({}),
-            new LoadingPlugin(),
-            new TestPlugin()
-        ]
-    }
+        new LoadingPlugin(),
+        new TestPlugin()
+    ]
+}
     ```
