@@ -1221,11 +1221,8 @@ module.exports = function(source) {
         const options = utils.getOptions(this);
         source = source.replace(/\[name\]/g, options.name);
 
-        return `export default ${JSON.stringify({
-            content: source,
-            filename: this.resourcePath
-        }) }
-        }`
+        const content = JSON.stringify({ content: source, filename: this.resourcePath });
+        return `export default ${content}`
     }
     ```
     ```js
@@ -1240,7 +1237,8 @@ module.exports = function(source) {
 #### 3.编写Plugin
 1. compiler, 包含options, loaders, plugins等webpack环境的所有配置信息
 2. compilation, 包含当前的模块资源、编译生成资源、变化的文件，每次文件发生变化，就有新的compilation被创建
-3. plugin基础代码
+3. `compiler.hooks`上存在webpack本身的事件钩子
+4. plugin基础代码
 ```js
 // BasicPlugin.js
 class BasicPlugin {
@@ -1251,9 +1249,9 @@ class BasicPlugin {
 
     // webpack会调用BasicPlugin实例的apply方法为插件实例传入compiler对象
     apply(compiler) {
-        compiler.plugin('compilation', function(compilation) {
-
-        })
+        compiler.hooks.compilation.tap('BasicPlugin', compilation => {
+        
+        });
     }
 }
 module.exports = BasicPlugin;
@@ -1275,8 +1273,13 @@ module.exports = {
 class LoadingPlugin {
     constructor(options) {}
     apply(compiler) {
-        compiler.plugin('compilation', function(compilation) {
-            compilation.plugin('html-webpack-plugin-before-html-processing', (htmlData, callback) => {
+        compiler.hooks.compilation.tap('LoadingPlugin', compilation => {
+
+            const [HtmlWebpackPlugin] = compiler.options.plugins.filter(
+                (plugin) => plugin.constructor.name === 'HtmlWebpackPlugin');
+            const hook = HtmlWebpackPlugin.constructor.getHooks(compilation).beforeEmit;
+
+            hook.tapAsync('html-webpack-plugin-before-html-processing', (htmlData, callback) => {
                 htmlData.html = htmlData.html.replace(
                     `<div>loading</div>`
                 );
@@ -1288,29 +1291,28 @@ class LoadingPlugin {
 module.exports = LoadingPlugin;
 ```
 ```js
-class TestPlugin {
-    constructor(options) {}
-    apply(compiler) {
-        compiler.plugin('compilation', function(compilation) {
-            compilation.plugin('after-optimize-chunks', (chunks) => {
-                console.log('2222', chunks.length)
-            })
-        })
-    }
-}
-module.exports = TestPlugin;
-```
-```js
 // webpack.config.js
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const LoadingPlugin = require('./LoadingPlugin');
 
 module.exports = {
-    new HtmlWebpackPlugin({}),
     plugins: [
         new HtmlWebpackPlugin({}),
-        new LoadingPlugin(),
-        new TestPlugin()
+        new LoadingPlugin()
     ]
 }
-    ```
+```
+5. 其他
+```js
+class TestPlugin {
+    constructor(options) {}
+    apply(compiler) {
+        compiler.hooks.compilation.tap('TestPlugin', compilation => {
+            compilation.plugin('finishModules', (data, callBack) => {
+                console.log('all modules complete!')
+            })
+        });
+    }
+}
+module.exports = TestPlugin;
+```
