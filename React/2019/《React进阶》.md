@@ -15,6 +15,15 @@
     const element = React.createElement('div', { className: 'foo' }, 'Hello, React');
     ```
 3. 通过`PropTypes`对组件进行属性校验
+    * `PropTypes.string`
+    * `PropTypes.number`
+    * `PropTypes.bool`
+    * `PropTypes.func`
+    * `PropTypes.object`
+    * `PropTypes.array`
+    * `PropTypes.symbol`
+    * `PropTypes.element`, React元素
+    * `PropTypes.node`, 可被渲染的节点
     ```js
     import PropTypes from 'prop-types';
 
@@ -24,7 +33,22 @@
 
     PostItem.propTypes = {
         post: PropTypes.object,
-        onVote: PropTypes.func
+        onVote: PropTypes.func,
+        style: PropTypes.shape({
+            color: PropTypes.string,
+            fontSize: PropTypes.number
+        }),
+        sequence: PropTypes.arrayOf(PropTypes.number),
+        onVote: PropTypes.func.isRequired
     }
     ```
 4. 定义组件默认属性
+    ```js
+    function Welcome(props) {
+        return <h1>welcome</h1>
+    }
+
+    Welcome.defaultProps = {
+        name: 'Stranger'
+    }
+    ```
