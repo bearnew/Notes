@@ -1,5 +1,6 @@
 #### 函数节流(throttle)
 > 指定时间间隔内只会执行一次任务
+
 ```js
 function throttle(fn, interval = 300) {
     let canRun = true;
@@ -19,6 +20,7 @@ function throttle(fn, interval = 300) {
 ```
 #### 函数防抖(debounce)
 > 任务频繁触发的情况下，只有任务触发的间隔超过指定间隔的时候，任务才会执行。
+
 ```js
 function debounce(fn, interval = 300) {
     let timeout = null;
@@ -33,17 +35,25 @@ function debounce(fn, interval = 300) {
 ```
 
 #### example
+
 ```js
 function log(val) {
     console.log(val)
 }
 
-window.addEventListener('scroll', throttle(() => {
+// 123 * 20
+window.addEventListener('scroll', () => {
     log(123)
+})
+
+// 456 * 4
+window.addEventListener('scroll', throttle(() => {
+    log(456)
 }))
 
+// 789
 window.addEventListener('scroll', debounce(() => {
-    log(123)
+    log(789)
 }))
 ```
 
@@ -51,6 +61,7 @@ window.addEventListener('scroll', debounce(() => {
 > 与函数截流功能一致，不同的是，函数截流为被动调用，分时函数为主动调用
 
 > 应用场景: 避免Js一次性执行太多的任务，使用分时函数，每一段时间执行一次任务，直到所有的任务执行完。
+
 ```js
 //  arr: 源数据
 //  process: 处理函数
@@ -58,7 +69,7 @@ window.addEventListener('scroll', debounce(() => {
 function chunk (arr, process, count){
     setTimeout(function(){
         console.log('++++++++++')
-        for(var i = 0; i < Math.min(count, arr.length); i++) {
+        for(var i = 0; i < Math.min(count, arr.length + 1); i++) {
             process(arr.shift());
         }
         if(arr.length > 0) {
@@ -67,7 +78,18 @@ function chunk (arr, process, count){
     }, 100);
 }
 
-const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+// ++++++++++
+// 1
+// 2
+// 3
+// ++++++++++
+// 4
+// 5
+// 6
+// ++++++++++
+// 7
+// 8
+const arr = [1, 2, 3, 4, 5, 6, 7, 8]
 const process = number => {
     console.log(number)
 }
