@@ -17,25 +17,71 @@
         * babel接受得到AST并通过`babel-traverse`对其进行深度优先遍历，在此过程中对节点进行添加、更新及移除操作
     3. 生成
         * 将AST通过`babel-generator`转换成js代码
-2. babel插件
+2. babel自定义插件
+    * 可以使用 [astexplorer.net](https://astexplorer.net/#/KJ8AjD6maa) 创建1个插件
+    * 可以使用 [generator-babel-plugin](https://github.com/babel/generator-babel-plugin) 生成1个插件模板
     ```js
-    var babel = require('babel-core');
-    var t = require('babel-types');
-    
-    // visitor是对各类型的AST节点做处理的地方
-    const visitor = {
-        BinaryExpression(path) {
-            // 把表达式节点替换成number字面量
-            path.replaceWith(t.numericLiteral(123));
-        }
-    }
-
-    module.exports = function (babel) {
+    // 一个插件就是一个函数
+    export default function ({types: t}) {
         return {
-            visitor
+            visitor: {
+                Identifier(path) {
+                    let name = path.node.name; // reverse the name: JavaScript -> tpircSavaJ
+                    path.node.name = name.split('').reverse().join('');
+                }
+            }
         };
     }
     ```
+3. babel配置
+    ```js
+    module.exports = function (api) {
+        api.cache(true);
+
+        // presets的执行顺序是从后往前执行的
+        const presets = ["pluginA", ["pluginA"], ["pluginA", {}]];
+        // plugins的执行顺序是从前往后执行的
+        const plugins = [ ... ];
+
+        return {
+            presets,
+            plugins
+        };
+    }
+    ```
+4. `preset`是`babel`插件的组合
+    1. stage
+        * Stage-0, 设想
+        * Stage-1, 建议
+        * Stage-2, 草案
+        * Stage-3, 候选
+        * Stage-4, 完成
+    2. Babel 提供了 "loose" 选项，用以在特定的转换情况下在符合规范、文件大小和速度之间做折中。
+        ```js
+        {
+            "presets": [
+                ["@babel/preset-env", {
+                "loose": true,
+                "modules": false
+                }]
+            ]
+        }
+        ``` 
+5. `@babel/polyfill`
+    1. 用于业务项目中，而非库/工具中
+    2. 使用`babel-node`时，`polyfill`将被自动加载
+    3. `polyfill`会被添加到全局作用域中，以及原生prototype上
+    4. 应该用`@babel/preset-env`和`useBuiltIns options`来使用`polyfill`
+    5. `useBuiltIns`
+        * usage
+            * 不需要在`webpack.config.js`的`entry`和源码的文件顶部引入`@babel/polyfill`
+        * entry
+            * 需要在入口文件的顶部引入`@babel/polyfill`
+        * false
+            * 需要在`webpack.config.js`的入口文件中引入`@babel/polyfill`
+    6. 
+6. `transform-runtime`
+7. `register`
 
 ## babel实战
 * 对es6+语法以及api的编译只需要用到```@babel/preset-env```
