@@ -1,5 +1,45 @@
-## babel
+## babel学习
+1. babel的工作流程
+    1. 解析
+        * 将代码解析成抽象语法树（AST）,每个JS引擎都有自己的AST解析器
+        * 词法分析和语法分析
+            * 词法分析将字符串的形式转换成令牌流（AST节点）
+            * 语法分析将令牌流转换成AST
+        ```js
+        {
+            "type": "Program",
+            "start": 0,
+            "end": 52,
+            "body": [...]
+        }
+        ```
+    2. 转换
+        * babel接受得到AST并通过`babel-traverse`对其进行深度优先遍历，在此过程中对节点进行添加、更新及移除操作
+    3. 生成
+        * 将AST通过`babel-generator`转换成js代码
+2. babel插件
+    ```js
+    var babel = require('babel-core');
+    var t = require('babel-types');
+    
+    // visitor是对各类型的AST节点做处理的地方
+    const visitor = {
+        BinaryExpression(path) {
+            // 把表达式节点替换成number字面量
+            path.replaceWith(t.numericLiteral(123));
+        }
+    }
+
+    module.exports = function (babel) {
+        return {
+            visitor
+        };
+    }
+    ```
+
+## babel实战
 * 对es6+语法以及api的编译只需要用到```@babel/preset-env```
+* babel的`preset`只是针对语法，对于函数、方法的babel，需要使用`babel-polyfill`（core-js2.0）或者`core-js@3`
 * 用react加上```@babel/preset-react```
     ```js
     {
