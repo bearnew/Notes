@@ -34,6 +34,7 @@
     }
     ```
 3. babel配置
+    * 安装`@babel/core`和`@babel/cli`
     ```js
     module.exports = function (api) {
         api.cache(true);
@@ -50,13 +51,7 @@
     }
     ```
 4. `preset`是`babel`插件的组合
-    1. stage
-        * Stage-0, 设想
-        * Stage-1, 建议
-        * Stage-2, 草案
-        * Stage-3, 候选
-        * Stage-4, 完成
-    2. Babel 提供了 "loose" 选项，用以在特定的转换情况下在符合规范、文件大小和速度之间做折中。
+    1. Babel 提供了 "loose" 选项，用以在特定的转换情况下在符合规范、文件大小和速度之间做折中。
         ```js
         {
             "presets": [
@@ -67,7 +62,7 @@
             ]
         }
         ```
-    3. options
+    2. options
         * targets
             * 定义项目需要支持的环境, 使用[browserlist](https://github.com/browserslist/browserslist) 参数
                 ```js
@@ -139,7 +134,6 @@
             * 需要在入口文件的顶部引入`@babel/polyfill`
         * false
             * 需要在`webpack.config.js`的入口文件中引入`@babel/polyfill`
-    6. 
 6. `transform-runtime`
     1. `@babel/plugin-transform-runtime`
         1. 通过复用帮助函数来减少包的大小
@@ -263,19 +257,28 @@
                 ]
             }
             ``` 
-        * 
+    4. 最佳实践 
         ```js
         {
+            "presets": [
+                '@babel/preset-env',
+                {
+                    modules: 'commonjs',
+                    // targets: 'since 2014',
+                    // useBuiltIns: 'usage',
+                    // corejs: 3
+                }
+            ],
             "plugins": [
                 [
                     "@babel/plugin-transform-runtime",
                     {
-                        "absoluteRuntime": true,
-                        "corejs": false,
-                        "helpers": true,
-                        "regenerator": true,
-                        "useESModules": false,
-                        "version": "^7.4.4"
+                        // 配置corejs-3,不仅实例方法还是全局方法，都不会污染全局环境，还可以动态引入polyfill
+                        'corejs': 3, // npm i @babel/runtime-corejs3 --save
+                        'helpers': true, // 使用帮助函数
+                        'regenerator': true, // 引入regeneratorRuntime, 处理async await
+                        'useESModules': false, // 使用 es modules helpers, 减少 commonJS 语法代码
+                        'absoluteRuntime': true // 是否跨项目引用 runtime
                     }
                 ]
             ]
