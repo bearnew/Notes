@@ -34,6 +34,7 @@
     }
     ```
 3. babel配置
+    * 安装`@babel/core`和`@babel/cli`
     ```js
     module.exports = function (api) {
         api.cache(true);
@@ -50,13 +51,7 @@
     }
     ```
 4. `preset`是`babel`插件的组合
-    1. stage
-        * Stage-0, 设想
-        * Stage-1, 建议
-        * Stage-2, 草案
-        * Stage-3, 候选
-        * Stage-4, 完成
-    2. Babel 提供了 "loose" 选项，用以在特定的转换情况下在符合规范、文件大小和速度之间做折中。
+    1. Babel 提供了 "loose" 选项，用以在特定的转换情况下在符合规范、文件大小和速度之间做折中。
         ```js
         {
             "presets": [
@@ -66,7 +61,67 @@
                 }]
             ]
         }
-        ``` 
+        ```
+    2. options
+        * targets
+            * 定义项目需要支持的环境, 使用[browserlist](https://github.com/browserslist/browserslist) 参数
+                ```js
+                {
+                    "targets": "> 0.25%, not dead"
+                }
+                {
+                    "targets": {
+                        "chrome": "58",
+                        "ie": "11"
+                    }
+                }
+                ```
+            * `targets.esmodules`, 指定该属性，browsers属性将被忽略, 只支持支持ES模块的浏览器
+                ```js
+                {
+                    "presets": [
+                        [
+                            "@babel/preset-env",
+                            {
+                                "targets": {
+                                "esmodules": true
+                                }
+                            }
+                        ]
+                    ]
+                }
+                ```
+            * `targets.node`, string|"current"|true
+                * 根据当前node版本编译
+            * `targets.safari`, "tp"
+                * 编译支持safari的开发版本
+        * spec
+            * 默认false, 编译出更符合规范的代码，但是编译速度会变慢
+        * loose
+            * 默认false, 是否开启松散转换
+        * modules
+            * 'amd'|'umd'|'systemjs'|'commonjs'|'cjs'|'auto'|false
+            * 默认为auto
+            * 设置为false不会对模块进行转换
+        * debug
+            * 默认为false, 将targets和plugins的相关信息通过console.log输出
+        * include
+            * 需要包含的插件数组
+        * exclude
+            * 需要排除的插件数组
+        * useBuiltIns
+            * 'usage'|'entry'|false
+        * forceAllTransforms
+            * 默认false, 是否对所有的运行代码进行转换
+        * configPath
+            * string, 默认process.cwd()
+            * 从哪个路径开始查找 browserslist的配置文件
+        * ignoreBrowserslistConfig
+            * boolean, 默认false
+            * 是否使用browsersList的配置文件
+        * shippedProposals
+            * boolean, 默认false
+            * 是否启用对浏览器中提供的内置函数/功能提议进行支持
 5. `@babel/polyfill`
     1. 用于业务项目中，而非库/工具中
     2. 使用`babel-node`时，`polyfill`将被自动加载
@@ -79,9 +134,162 @@
             * 需要在入口文件的顶部引入`@babel/polyfill`
         * false
             * 需要在`webpack.config.js`的入口文件中引入`@babel/polyfill`
-    6. 
 6. `transform-runtime`
+    1. `@babel/plugin-transform-runtime`
+        1. 通过复用帮助函数来减少包的大小
+        2. 创建1个沙盒环境，不会污染全局变量
+        ```js
+        // 原始js
+        var sym = Symbol();
+        var promise = Promise.resolve();
+        var check = arr.includes("yeah!");
+        console.log(arr[Symbol.iterator]());
+        ```
+        ```js
+        // 被transform-runtime编译后的js
+        import _getIterator from "@babel/runtime-corejs3/core-js/get-iterator";
+        import _includesInstanceProperty from "@babel/runtime-corejs3/core-js-stable/instance/includes";
+        import _Promise from "@babel/runtime-corejs3/core-js-stable/promise";
+        import _Symbol from "@babel/runtime-corejs3/core-js-stable/symbol";
+
+        var sym = _Symbol();
+        var promise = _Promise.resolve();
+        var check = _includesInstanceProperty(arr).call(arr, "yeah!");
+        console.log(_getIterator(arr));
+        ```
+    2. installation
+        * transform-runtime只运行在开发环境
+            `npm install --save-dev @babel/plugin-transform-runtime`
+        * runtime运行在部署环境, 将被编译到代码中
+            `npm install --save @babel/runtime`
+    3. usage
+        * corejs
+
+        |corejs option | install command | size|
+        |:-------------|:----------------|:----|
+        |false(default)|npm install --save @babel/runtime| 2k|
+        |2|npm install --save @babel/runtime-corejs2|14k|
+        |3|npm install --save @babel/runtime-corejs3|22k|
+
+        * helpers
+            * true(default), 是否使用helpers对方法名进行替换
+            ```js
+            // 源码
+            class Person {}
+            ```
+            ```js
+            "use strict";
+
+            var _classCallCheck2 = require("@babel/runtime/helpers/classCallCheck");
+            var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+            function _interopRequireDefault(obj) {
+                return obj && obj.__esModule ? obj : { default: obj };
+            }
+            var Person = function Person() {
+                (0, _classCallCheck3.default)(this, Person);
+            };
+            ```
+        * regenerator
+            * true(default), 是否使用`regenerator runtime`对generator函数进行转换
+            ```js
+            function* foo() {}
+            ```
+            ```js
+            var _regenerator = require("@babel/runtime/regenerator");
+            var _regenerator2 = _interopRequireDefault(_regenerator);
+
+            function _interopRequireDefault(obj) {
+                return obj && obj.__esModule ? obj : { default: obj };
+            }
+
+            var _marked = [foo].map(_regenerator2.default.mark);
+
+            function foo() {
+                return _regenerator2.default.wrap(
+                    function foo$(_context) {
+                    while (1) {
+                        switch ((_context.prev = _context.next)) {
+                        case 0:
+                        case "end":
+                            return _context.stop();
+                        }
+                    }
+                    },
+                    _marked[0],
+                    this
+                );
+            }
+            ```
+        * useESModules
+            * false(default)
+            ```js
+            // false
+            exports.__esModule = true;
+            exports.default = function(instance, Constructor) {
+                if (!(instance instanceof Constructor)) {
+                    throw new TypeError("Cannot call a class as a function");
+                }
+            };
+            ```
+            ```js
+            export default function(instance, Constructor) {
+                if (!(instance instanceof Constructor)) {
+                    throw new TypeError("Cannot call a class as a function");
+                }
+            }
+            ```
+        * absoluteRuntime
+            * 是否开启绝对路径引用Runtime, 允许用户在整个项目中使用runtime
+            * 包括npm link的模块，或者用于项目外的模块
+        * version
+            ```js
+            {
+                "plugins": [
+                    [
+                        "@babel/plugin-transform-runtime",
+                        {
+                            "absoluteRuntime": false,
+                            "corejs": 2,
+                            "version": "^7.4.4"
+                        }
+                    ]
+                ]
+            }
+            ``` 
+    4. 最佳实践 
+        ```js
+        {
+            "presets": [
+                '@babel/preset-env',
+                {
+                    modules: 'commonjs',
+                    // targets: 'since 2014',
+                    // useBuiltIns: 'usage',
+                    // corejs: 3
+                }
+            ],
+            "plugins": [
+                [
+                    "@babel/plugin-transform-runtime",
+                    {
+                        // 配置corejs-3,不仅实例方法还是全局方法，都不会污染全局环境，还可以动态引入polyfill
+                        'corejs': 3, // npm i @babel/runtime-corejs3 --save
+                        'helpers': true, // 使用帮助函数
+                        'regenerator': true, // 引入regeneratorRuntime, 处理async await
+                        'useESModules': false, // 使用 es modules helpers, 减少 commonJS 语法代码
+                        'absoluteRuntime': true // 是否跨项目引用 runtime
+                    }
+                ]
+            ]
+        }
+        ```
 7. `register`
+    1. `@babel/register`，将自身绑定到node的`require`模块上，并在运行时编译
+        ```js
+        require('@babel/register');
+        ```
+    2. node后续通过require进来的.es6, .es, .jsx, .mjs, .js将由babel自动转换
 
 ## babel实战
 * 对es6+语法以及api的编译只需要用到```@babel/preset-env```

@@ -106,6 +106,51 @@
             }
         }
         ```
+10. 表单
+    1. 受控组件
+        ```js
+        class LoginForm extends React.Component {
+            handleChange(event) {
+                const target = event.target;
+                this.setState({
+                    [target.name]: target.value
+                })
+            }
+            render() {
+                return (
+                    <input
+                        type="text"
+                        name="name"
+                        value={this.state.name}
+                        onChange={this.handleChange}
+                    />
+                )
+            }
+        }
+        ```
+        ```js
+        <select value={this.state.value} onChange={this.handleChange}></select>
+        ```
+        ```js
+        <input checked={this.state.redux} onChange={this.handleChange} />
+        ```
+    2. 非受控组件
+        * 使用ref来获取表单的值
+        ```js
+        class SimpleForm extends Component {
+            handleSubmit(event) {
+                console.log(this.input.value);
+            }
+            render() {
+                return (
+                    <form onSubmit={this.handleSubmit}>
+                        <input defaultValue="something" ref={input => this.input = input} />
+                        <input type="checkbox" defaultChecked={true} />
+                    </form>
+                )
+            }
+        }
+        ```
 ##### 2. React 16特性
 1. render
     1. render支持新的返回类型，数组和字符串
@@ -324,4 +369,4 @@
     4. React推荐组件的状态是不可变对象
         1. 避免修改了原对象而导致的错误
         2. 当组件的状态都是不可变对象时，可以避免不必要的渲染 
-5. 
+
