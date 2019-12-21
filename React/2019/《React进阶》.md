@@ -672,4 +672,183 @@
         * 打印出render方法中不必要的调用
 #### 3.高阶组件
 > 实现组件逻辑的抽象和复用
-1. 基本概念 
+1. 基本概念
+    * 接收React组件作为参数，并返回1个新的React组件
+    * 高阶组件的本质也是1个函数
+    * 高阶组件的实现方式，本质上是装饰者模式
+    ```js
+    import React, { Component } from 'react';
+
+    function withPersistentData(WrappedComponent) {
+        return class extends Component {
+            componentWillMount() {
+                let data = localStorage.getItem('data');
+                this.setState({ data });
+            }
+            render() {
+                return <WrappedComponent
+                            data={this.state.data}
+                            {...this.props}
+                        />
+            }
+        }
+    }
+    ```
+    ```js
+    class MyComponent extends Component {
+        render() {
+            return <div>{this.props.data}</div>
+        }
+    }
+    export default withPersistentData(MyComponent)
+    ``` 
+2. 使用场景
+    1. 操纵props
+        * 高阶组件可以先拦截props, 对props进行增加、删除、修改的操作，然后将处理后的props传递给被包装的组件
+    2. 通过ref访问组件实例
+        * 适用于复用逻辑需要包装组件的方法支持时
+        ```js
+        function withRef(wrappedComponent) {
+            return class extends React.Component {
+                someMethod() {
+                    this.wrappedInstance.someMethodInWrappedComponent();
+                }
+                render() {
+                    return <WrappedComponent
+                                ref={instance => { this.wrappedInstance = instance }}
+                                {...this.props}
+                            />
+                }
+            }
+        }
+        ``` 
+    3. 组件状态提升
+        ```js
+        function withControlledState(WrappedComponent) {
+            return class extends React.Component {
+                constructor(props) {
+                    super(props);
+                    this.state = {
+                        value: ''
+                    };
+                    this.handleValueChange =
+                        this.handleValueChange.bind(this);
+                }
+                handleValueChange(event) {
+                    this.setState({
+                        value: event.target.value
+                    });
+                }
+                render() {
+                    // newProps 保存受控组件需要使用的属性和事件处理函数
+                    const newProps = {
+                        controlledProps: {
+                            value: this.state.value,
+                            onChange: this.handleValueChange
+                        }
+                    };
+                    return <WrappedComponent {...this.props}
+                        {...newProps} />
+                }
+            }
+        }
+        ```
+        ```js
+        class SimpleControlledComponent extends React.Component {
+            render() {
+                //此时的SimpleControlledComponent为无状态组件，状态由高阶组件维护
+                return <input name="simple"
+                    {...this.props.controlledProps} />
+            }
+        }
+        const ComponentWithControlledState = withControlledState(SimpleControlledComponent);
+        ```
+    4. 用其他元素包装组件 
+        ```js
+        function withRedBackground(WrappedComponent) {
+            return class extends React.Component {
+                render() {
+                    return (
+                        <div style={{ backgroundColor: 'red' }}>
+                            <WrappedComponent {...this.props} />
+                        </div>
+                    )
+                }
+            }
+        }
+        ```
+3. 参数传递
+    1. 接收除组件外1个额外的参数
+        ```js
+        function withPersistentData(WrappedComponent, key) {
+            return class extends Component {
+
+            }
+        }
+        ```
+        ```js
+        const MyComponent1WithPersistentData = withPersistentData(MyComponent, 'data');
+        const MyComponent2WithPersistentData = withPersistentData(MyComponent, 'name');
+        ```
+    2. 高阶组件外套高阶函数
+        ```js
+        import React, { Component } from 'react'
+        function withPersistentData = (key) => (WrappedComponent) => {
+            return class extends Component {
+                componentWillMount() {
+                    let data = localStorage.getItem(key);
+                    this.setState({ data });
+                }
+                render() {
+                    // 通过{...this.props} 把传递给当前组件的属性继续传递给被包装的组件
+                    return <WrappedComponent data={this.state.data}
+                        {...this.props} />
+                }
+            }
+        }
+        class MyComponent extends Component {
+            render() {
+                return <div>{this.props.data}</div>
+            }
+        }
+        // 获取key=’data’的数据
+        const MyComponent1WithPersistentData = withPersistentData('data')(MyComponent);
+        // 获取key=’name’的数据
+        const MyComponent2WithPersistentData = withPersistentData('name')(MyComponent);
+        ```
+        ```js
+        // react-redux 的connect也是使用这种函数式编程
+        connect(mapStateToProps, mapDispatchToProps)(WrappedComponent);
+        ```
+4. 继承方式实现高阶组件
+    ```js
+    // 通过继承传入的组件实现
+    function withAuth(WrappedComponent) {
+        return class extends WrappedComponent {
+            render() {
+                // 当用户处于登录状态，才进行渲染
+                if (this.props.loggedIn) {
+                    return super.render();
+                } else {
+                    return null;
+                }
+            }
+        }
+    }
+    ``` 
+5. 注意事项
+    1. 不要在render中使用高阶组件，因为每次render，高阶组件都会卸载然后重新挂载
+        ```js
+        // 需要将高阶组件定义到组件外部
+        render() {
+            // 每次render，enhance都会创建一个新的组件，尽管被包装的组件没有变
+            const EnhancedComponent = enhance(MyComponent);
+            // 因为是新的组件，所以会经历旧组件的卸载和新组件的重新挂载
+            return <EnhancedComponent />;
+        }
+        ```
+    2. 高阶组件返回的组件不会返回组件的静态方法
+    3. refs不会被传递给包装组件
+
+### 三、实战
+#### 1.Redux
