@@ -319,6 +319,38 @@
     }))
     ```
 3. state的更新是1个合并的过程
+    ```js
+    class Example extends React.Component {
+        constructor() {
+            super();
+            this.state = {
+                val: 0
+            };
+        }
+  
+        componentDidMount() {
+            // isBatchingUpdates被设置成了true
+            this.setState({val: this.state.val + 1});
+            console.log(this.state.val);    // 0
+
+            this.setState({val: this.state.val + 1});
+            console.log(this.state.val);    // 0
+
+            // isBatchingUpdates被设置成了false
+            setTimeout(() => {
+                this.setState({val: this.state.val + 1});
+                console.log(this.state.val);  // 2
+
+                this.setState({val: this.state.val + 1});
+                console.log(this.state.val);  // 3
+            }, 0);
+        }
+
+        render() {
+            return null;
+        }
+    };
+    ``` 
 4. state与不可变对象
     1. 状态的类型是不可变类型（number, string, boolean, null, undefined）, 直接赋新值
         ```js
@@ -369,4 +401,192 @@
     4. React推荐组件的状态是不可变对象
         1. 避免修改了原对象而导致的错误
         2. 当组件的状态都是不可变对象时，可以避免不必要的渲染 
+5. 组件与服务器通信
+    1. 组件挂载阶段通信
+        1. 一般选择在`componentWillMount`或者`componentDidMount`中通信
+        2. componentDidMount能保证DOM处于挂载阶段，操作DOM是安全的
+        3. 服务端渲染时，`componentWillMount`会被调用2次
+    2. 组件通信阶段通信
+        1. 选择在`componentWillReceiveProps`中通信
+        ```js
+        componentWillReceiveProps(nextProps) {
+            if (nextProps.category !== this.props.category) {
+                // 服务器请求代码
+            }
+        }
+        ``` 
+6. 组件通信
+    1. 父子组件通信
+        1. 父组件向子组件通信
+            ```js
+            // 父组件通过props传递给子组件
+            <UserList users={this.state.users} />
 
+            // 子组件
+            {
+                this.props.users.map(user => (
+                    <li>user</li>
+                ))
+            }
+            ```
+        2. 子组件向父组件通信
+            ```js
+            // 子组件通过调用回调函数
+            handleClik() {
+                this.props.onAddUser('test');
+            }
+
+            // 父组件
+            handleAddUser(name) {
+                //
+            }
+            <UserList onAddUser={this.handleAddUser} />
+            ``` 
+    2. 兄弟组件通信
+        1. 将状态提升到最近的公共父组件，完成通信
+        2. A组件调用父组件传递的回调函数改变状态，父组件将状态传给B组件
+    3. context
+        ```js
+        // theme-context.js
+        export const themes = {
+            light: {
+                background: '#eee'
+            },
+            dark: {
+                background: '#222'
+            }
+        }
+
+        export const ThemeContext = React.createContext(
+            theme.dark // 默认值
+        );
+        ```
+        ```js
+        // theme-button.js
+        import { ThemeContext } from './theme-context';
+
+        class ThemedButton extends React.Component {
+            render() {
+                let theme = this.context;
+
+                return (
+                    <button style={{ backgroundColor: theme.background }} />
+                )
+            }
+        }
+
+        ThemedButton.contextType = ThemeContext;
+
+        export default ThemedButton;
+        ```
+        ```js
+        // app.js
+        import { ThemeContext, themes } from './theme-context';
+        import ThemedButton from './themed-button';
+
+        // 使用ThemedButton的中间组件
+        function Toolbar(props) {
+            return (
+                <ThemedButton onClick={props.changeTheme}>
+                    Change Theme
+                </ThemeButton>
+            )
+        }
+
+        class App extends React.Component {
+            constructor(props) {
+                super(props);
+
+                this.state = {
+                    theme: themes.light
+                }
+
+                this.toggleTheme = () => {
+                    this.setState(preState => ({
+                        theme: preState.theme === thems.dark ? themes.light : thems.dark
+                    }))
+                }
+            }
+
+            render() {
+                return (
+                    <Page>
+                        <ThemeContext.Provider value={this.state.theme}>
+                            <Toolbar changeTheme={this.toggleTheme} />
+                        </ThemeContext.Provider>
+                        <Section>
+                            <ThemedButton>
+                        </Section>
+                    </Page>
+                )
+            }
+        }
+
+        ReactDOM.render(<App />, document.root); 
+        ``` 
+7. Ref
+    1. 在DOM元素上使用Ref
+        ```js
+        class AutoFocusTextInput extends React.Component {
+            componentDidMount() {
+                // 通过ref让input自动获取焦点
+                this.textInput.focus();
+            }
+
+            blur() {
+                this.textInput.blur();
+            }
+
+            render() {
+                return (
+                    <div>
+                        <input
+                            type="text"
+                            ref={input => { this.textInput = input }}
+                        />
+                    </div>
+                )
+            }
+        }
+        ```
+    2. 在组件上使用ref(不能在函数组件上使用ref)
+        ```js
+        class Container extends React.Component {
+            handleClick = () => {
+                // 失去焦点
+                this.inputInstance.blur();
+            }
+            render() {
+                return (
+                    <div>
+                        <AutoFocusTextInput
+                            ref={input => { this.inputInstance = input }}
+                        />
+                        <button onClick={this.handleClick}>失去焦点</button>
+                    </div>
+                )
+            }
+        }
+        ```
+    3. 父组件访问子组件的DOM节点
+        ```js
+        function Children(props) {
+            return (
+                <div>
+                    <input ref={props.inputRef} />
+                </div>
+            )
+        }
+        ```
+        ```js
+        class Parent extends React.Component {
+            render() {
+                return (
+                    <Children
+                        inputRef={el => this.inputElement = el}
+                    />
+                )
+            }
+        }
+        ``` 
+#### 2.虚拟DOM和性能优化
