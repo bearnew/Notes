@@ -590,3 +590,86 @@
         }
         ``` 
 #### 2.虚拟DOM和性能优化
+1. 虚拟DOM
+    1. 每一次对DOM的修改都会引起对浏览器的重新布局和重新渲染
+    2. 虚拟DOM使用普通的js对象来描述DOM元素
+    3. React元素本身就是一个虚拟DOM节点
+    ```js
+    // React
+    <div className="foo">
+        <h1>Hello React</h1>
+    </div>
+    ```
+    ```js
+    // 虚拟dom js对象
+    {
+        type: 'div',
+        props: {
+            className: 'foo',
+            children: {
+                type: 'h1',
+                props: {
+                    children: 'Hello React'
+                }
+            }
+        }
+    }
+    ``` 
+2. Diff算法
+    1. 每次render方法都会返回1个新的虚拟DOM对象
+    2. 每次render. React会使用Diff算法比较前后2次render返回的虚拟DOM的差异部分，更新到真实DOM上
+    3. Diff算法
+        1. 当根节点是不同类型时，会把整个虚拟DOM树拆掉重建，重建后，将虚拟DOM整体更新到真实DOM上
+            * 旧的React组件的实例的`componentWillUnmount`会被调用
+            * 新的React组件的实例的`componentWillMount`和`componentDidMount`方法会被调用
+        2. 当根节点是相同类型的DOM元素，只是元素属性发生了变化，React会更新虚拟DOM树和真实DOM树中对应节点的这一属性
+        3. 当根节点是相同的组件类型, 同步变化的属性到虚拟DOM上，然后更新真实DOM
+            * 组件实例会调用`componentWillReceiveProps`和`componentWillUpdate` 
+        4. React会根据Key匹配子节点，只要子节点的key没有变化，React认为这是同一节点，从而提高Diff算法的效率
+3. 性能优化
+    1. 使用生产环境版本的库
+    2. 使用`shouldComponentUpdate`减少不必要的渲染
+        1. `React.PureComponent`具有`shouldComponentUpdate`的逻辑
+        2. `React.PureComponent`是使用的浅比较，如果直接修改数据，组件不会直接渲染
+        ```js
+        import React from 'react';
+
+        export default class NumberList extends React.PureComponent {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    numbers: [1, 2, 3, 4]
+                };
+                this.handleClick = this.handleClick.bind(this);
+            }
+            // numbers中新加一个数值
+            handleClick() {
+                const numbers = this.state.numbers;
+                // 直接修改numbers对象
+                numbers.push(numbers[numbers.length - 1] + 1);
+                this.setState({ numbers: numbers });
+            }
+            render() {
+                // 点击了button，没有重新渲染
+                console.log('render')
+                return (
+                    <div>
+                        <button onClick={this.handleClick} />
+                        {this.state.numbers.map(item => <div>{item}</div>)}
+                    </div>
+                );
+            }
+        }
+        ``` 
+4. 使用key
+    * React根据key索引元素，可以减少DOM操作，提高DOM更新效率
+5. 性能检测工具
+    * React Developer Tools for Chrome
+        * 通过 React Developer Tools 可以看到组件之间的嵌套关系以及每个组件的事件、属性、状态等信息
+    * Chrome Performance Tab
+        * 观察组件的挂载、更新、卸载过程以及各阶段使用的时间
+    * why-did-you-update
+        * 打印出render方法中不必要的调用
+#### 3.高阶组件
+> 实现组件逻辑的抽象和复用
+1. 基本概念 
