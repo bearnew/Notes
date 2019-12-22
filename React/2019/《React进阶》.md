@@ -851,4 +851,153 @@
     3. refs不会被传递给包装组件
 
 ### 三、实战
-#### 1.Redux
+#### 1.React-Router
+1. 单页面应用和前端路由
+    1. 后端路由
+        * 服务器根据URL返回1个HTML页面
+        * 1个URL对应1个HTML页面
+        * 1个web应用包含很多HTML页面
+    2. 前端路由
+        * 单页应用，无论URL如何变化，对应的HTML都是同1个
+        * 对SEO支持不太好
+2. React-Router(安装以下2个包，会自动依赖react-router)
+    * react-router-dom（在浏览器中使用）
+    * react-router-native（在react-native中使用）
+3. 路由器
+    1. React Router通过Router和Route两个组件完成路由功能
+    2. 一个应用需要1个Router实例,Router相当于路由器
+    3. Route定义为Router的子组件
+    4. Router的实例
+        1. BrowserRouter
+            * 使用HTML5的`history API`(pushState, replaceState)实现UI和URL的同步
+            * `http://example.com/some/path`
+            * 需要配置服务器，让服务器能够处理所有的URL
+            * React Router中提供的其他组件可以通过context获取history对象
+            * Router中只能包含唯一的1个元素
+                ```js
+                ReactDOM.render((
+                    <BrowserRouter>
+                        <App />
+                    <BrowserRouter>
+                ), document.getElementById('root'))
+                ``` 
+        2. HashRouter 
+            * HashRouter使用URL的hash实现应用的UI和URL的同步
+            * `http://example.com/#/some/path`
+4. 路由配置
+    1. path
+        1. 每个Route都需要定义1个path属性
+        2. 使用`BrowserRouter`时，path用来描述Route匹配的URL的pathname
+            ```js
+            // 匹配http://example.com/foo
+            // Route中定义的组件会被渲染出来
+            <Route path='/foo' />
+            ```
+        3. 使用`HashRouter`时，path用来匹配URL的hash
+    2. match
+        1. URL和Route匹配时，Route会创建一个match对象作为props的一个属性传给被渲染的组件
+        2. params
+            * Route的path可以包含的参数
+                ```js
+                // Route包含1个参数id
+                <Route path='/foo/:id'>
+
+                // params就是从url中解析出的参数
+                // params = { id: 1 }
+                URL = 'http://example.com/foo/1';
+                ``` 
+        3. isExact
+            * 当URL完全匹配时，值为true
+            * 当URL部分匹配时，值为false
+            ```js
+            path = '/foo';
+            // 完全匹配
+            URL = 'http://example.com/foo';
+            // 部分匹配
+            URL = 'http://example.com/foo/1';
+            ```
+        4. path
+            * 构建嵌套路由时会使用到
+        5. url
+            * URL的匹配部分
+    3. Route渲染组件的方式
+        1. component
+            * 当URL和Route匹配时，component属性定义的组件就会被渲染
+            ```js
+            // 当URL为http://example.com/foo时，Foo会被渲染
+            <Route path='/foo' component={Foo}>
+            ``` 
+        2. render
+            * render的值是1个函数，函数返回React元素
+            * 为待渲染的组件传递额外的属性
+            ```js
+            <Route path='/foo' render={props => (
+                <Foo {...props} data={extraProps} />
+            )}>
+            ```
+        3. children
+            * 函数返回要渲染的React元素
+            * 无论匹配是否成功，children返回的组件都会被渲染
+            * 匹配不成功时，match属性为null
+            ```js
+            <Route path='/foo' children={props => (
+                <div className={props.match ? 'active' : ''}>
+                    <Foo />
+                </div>
+            )}>
+            ``` 
+    4. Switch和exact
+        * 把Route包到1个Switch组件中，让第1个匹配的Route渲染
+        * 使用Route的exact属性，URL和Route完全匹配，Route才渲染
+        ```js
+        <Router>
+            <Switch>
+                <Route exact path='/' component={Home} />
+                <Route path='/posts' component={Posts} />
+                <Route path='/:user' component={User} />
+            </Switch>
+        </Router>
+        ``` 
+    5. 嵌套路由
+        * Route渲染的组件内部，定义新的Route
+        ```js
+        const Posts = ({ match }) => {
+            return (
+                <div>
+                    // match.url为/posts
+                    <Route path={`${match.url}/:id`} component={PostDetail} />
+                    <Route exact path={match.url} component={PostList} />
+                </div>
+            )
+        }
+        ```
+5. 链接Link
+    * Link是React Router提供的链接组件，1个Link组件定义了点击Link时，页面该如何路由
+    * to声明要导航的url地址
+        ```js
+        const Navigation = () => (
+            <header>
+                <nav>
+                    <ul>
+                        <li><Link to='/'>Home</Link></li>
+                        <li><Link to='/posts'>Posts</Link></li>
+                    </ul>
+                </nav>
+            </header>
+        )
+        ```
+    * to可以是object对象，对象可以包含pathname, search, hash, state
+        ```js
+        <Link to={{
+            pathname: '/posts',
+            search: '?sort=name',
+            hash: '#the-hash',
+            state: { fromHome: true }
+        }}/>
+        ``` 
+    * 通过history.push(path, [state])导航，浏览器会新增1条记录
+        `history.push('/posts')`
+    * 通过history.replace(path, [state])导航，新记录替换当前记录
+        `history.push('/posts')`
+#### 2.Redux
+#### 3.Mobx
