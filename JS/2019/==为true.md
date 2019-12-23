@@ -1,5 +1,6 @@
 ## ==为true
 * example
+
 ```js
 [] == ![]; // true
 [] == !{}; // true
@@ -32,6 +33,7 @@ console.log(b == []) // false
 console.log([] == a) // true
 ```
 * rule
+
 ```js
 1. undefined == null，结果是true。且它俩与所有其他值比较的结果都是false。
 
