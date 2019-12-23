@@ -2,14 +2,15 @@
 * example
 
 ```js
-[] == ![]; // true
-[] == !{}; // true
+[] == ![]; // true, ![]为false, [] == false, '' == false, 0 == 0
+[] == !{}; // true, !{}为false, [] == false, '' == false, 0 == 0
 NaN == !NaN; // true
 NaN === !NaN; // true
+NaN == 0; // false
 null == undefined; // true
-[1] == '1'; // true
+[1] == '1'; // true, '1' == '1'
 {} == {}; // false, ({}).valueOf() == ({}).valueOf() 为true
-{} == !{}; //false, !{}为false, {}为true
+{} == !{}; //false, {} == false, Number({}) == Number(false), NaN == 0, false
 
 Object.defineProperty(window, 'a', {
     get: function () {
@@ -28,9 +29,9 @@ var b = {
     },
 }
 
-console.log(b == a) // true
-console.log(b == []) // false
-console.log([] == a) // true
+console.log(b == a) // true, b == '', b.valueOf() == '', true
+console.log(b == []) // false, 比较栈中的地址，为false
+console.log([] == a) // true, [] == '', [].toString() == '', false
 ```
 * rule
 
@@ -42,4 +43,6 @@ console.log([] == a) // true
 3. String/Boolean == Number，需要String/Boolean转为Number。
 
 4. Object == Primitive，需要Object转为Primitive(具体通过valueOf和toString方法)。
+
+5. Object == Object, 直接比较`Object`在栈中地址
 ```
