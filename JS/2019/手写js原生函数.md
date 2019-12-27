@@ -114,6 +114,50 @@ window.JSON.parse = function(json) {
 #### 4.call
 #### 5.apply
 #### 6.bind
+* 创建1个新函数，新函数的this被指定为bind()的第一个参数，其余参数作为新函数的参数
+```js
+const module = {
+  x: 42,
+  getX: function() {
+    return this.x;
+  }
+}
+
+const boundGetX = unboundGetX.bind(module);
+console.log(boundGetX());
+// expected output: 42
+```
+* `bind()`使函数拥有预设的初始参数
+```js
+function addArguments(arg1, arg2) {
+    return arg1 + arg2
+}
+
+var addThirtySeven = addArguments.bind(null, 37);
+
+// 第2个参数被忽略
+var result = addThirtySeven(5, 10);
+console.log(result); // 42
+```
+* 实现bind
+```js
+if (!Function.prototype.myBind) (function() {
+    Function.prototype.myBind = function() {
+        var thatFunc = this;
+        var bindObj = arguments[0];
+        var bindArgs = Array.prototype.slice.call(arguments, 1);
+
+        if (typeof thatFunc !== 'function') {
+            throw new Error("The object calling bind must be function")
+        }
+
+        return function() {
+            var args = bindArgs.concat(Array.prototype.slice.call(arguments))
+            return thatFunc.apply(bindObj, args);
+        }
+    }
+})()
+``` 
 #### 7.继承
 * https://github.com/bearnew/Notes/blob/master/JS/2018/JS%E5%AF%B9%E8%B1%A1%E7%BB%A7%E6%89%BF.md
 #### 8.js函数柯里化
@@ -125,3 +169,4 @@ window.JSON.parse = function(json) {
 * https://github.com/bearnew/Notes/blob/master/JS/2018/js%E9%98%B2%E6%8A%96%26%E6%88%AA%E6%B5%81.md
 #### 12.promise
 * https://github.com/bearnew/Notes/blob/master/JS/2019/%E6%89%8B%E5%86%99promise.md
+#### 13.await async
