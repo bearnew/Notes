@@ -112,7 +112,71 @@ window.JSON.parse = function(json) {
 }
 ```
 #### 4.call
+```js
+function addArguments(y) {
+    return this.x + y;
+}
+
+var obj = {
+    x: 1
+}
+
+var result = addArguments.myCall(obj, 2);
+
+console.log(result); // 3
+```
+```js
+if (!Function.prototype.myCall) (function () {
+    Function.prototype.myCall = function () {
+        var callObj = arguments[0];
+        var callArgs = Array.prototype.slice.call(arguments, 1);
+
+        if (typeof this !== 'function') {
+            throw new Error("The object calling call must be function")
+        }
+
+        const fn = Symbol('fn');
+        callObj[fn] = this;
+
+        var result = callObj[fn](...callArgs);
+        delete callObj[fn];
+        return result;
+    }
+})()
+```
 #### 5.apply
+```js
+function addArguments(y) {
+    return this.x + y;
+}
+
+var obj = {
+    x: 1
+}
+
+var result = addArguments.myApply(obj, [2]);
+
+console.log(result); // 3
+```
+```js
+if (!Function.prototype.myApply) (function () {
+    Function.prototype.myApply = function () {
+        var callObj = arguments[0];
+        var callArgs = arguments[1];
+
+        if (typeof this !== 'function') {
+            throw new Error("The object calling call must be function")
+        }
+
+        const fn = Symbol('fn');
+        callObj[fn] = this;
+
+        var result = callObj[fn](...callArgs);
+        delete callObj[fn];
+        return result;
+    }
+})()
+```
 #### 6.bind
 * 创建1个新函数，新函数的this被指定为bind()的第一个参数，其余参数作为新函数的参数
 ```js
@@ -158,15 +222,74 @@ if (!Function.prototype.myBind) (function() {
     }
 })()
 ``` 
-#### 7.继承
+#### 7.instanceof
+* 检测构造函数的prototype属性是否出现在实例对象的原型链上
+```js
+function Car() { }
+const car = new Car();
+
+console.log(myInstanceof(car, Car)); // true
+console.log(myInstanceof(car, Object)); // true
+
+function myInstanceof(instance, obj) {
+    const Proto = obj.prototype;
+    let chain = instance.__proto__;
+
+    while (true) {
+        if (chain === null) return false;
+        if (chain === Proto) return true;
+        chain = chain.__proto__;
+    }
+}
+```
+#### 8.Object.create
+* 创建1个新对象，使用现有对象来提供新创建对象的__proto__
+```js
+Object.myCreate = function (proto, propertiesObject) {
+    if (typeof proto !== 'object' && typeof proto !== 'function') {
+        throw new TypeError('Object prototype may only be an Object')
+    }
+    if (proto === null) {
+        throw new Error('Object prototype can not be an null');
+    }
+
+    function Tmp() { };
+    Tmp.prototype = proto;
+    var o = new Tmp();
+
+    if (propertiesObject !== undefined) {
+        for (var key in propertiesObject) {
+            Object.defineProperty(o, key, propertiesObject[key])
+        }
+    }
+
+    return o;
+}
+
+const person = {
+    x: 1,
+    y: 2
+};
+
+const me = Object.myCreate(person, {
+    z: {
+        writable: true,
+        configurable: true,
+        value: 3
+    }
+});
+
+console.log(me); // { z: 3 }
+console.log(me.x); // 1
+```
+#### 8.await async
+#### 9.继承
 * https://github.com/bearnew/Notes/blob/master/JS/2018/JS%E5%AF%B9%E8%B1%A1%E7%BB%A7%E6%89%BF.md
-#### 8.js函数柯里化
+#### 10.js函数柯里化
 * https://github.com/bearnew/Notes/blob/master/JS/2018/JS%E5%87%BD%E6%95%B0%E6%9F%AF%E9%87%8C%E5%8C%96.md
-#### 9.instanceof
-#### 10.js深拷贝
+#### 11.js深拷贝
 * https://github.com/bearnew/Notes/blob/master/JS/2019/%E6%B7%B1%E6%8B%B7%E8%B4%9D%26%E6%B5%85%E6%8B%B7%E8%B4%9D.md
-#### 11.防抖与节流
+#### 12.防抖与节流
 * https://github.com/bearnew/Notes/blob/master/JS/2018/js%E9%98%B2%E6%8A%96%26%E6%88%AA%E6%B5%81.md
-#### 12.promise
+#### 13.promise
 * https://github.com/bearnew/Notes/blob/master/JS/2019/%E6%89%8B%E5%86%99promise.md
-#### 13.await async

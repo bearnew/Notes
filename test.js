@@ -1,27 +1,36 @@
-if (!Function.prototype.myBind) (function () {
-    Function.prototype.myBind = function () {
-        var thatFunc = this;
-        var bindObj = arguments[0];
-        var bindArgs = Array.prototype.slice.call(arguments, 1);
+Object.myCreate = function (proto, propertiesObject) {
+    if (typeof proto !== 'object' && typeof proto !== 'function') {
+        throw new TypeError('Object prototype may only be an Object')
+    }
+    if (proto === null) {
+        throw new Error('Object prototype can not be an null');
+    }
 
-        if (typeof thatFunc !== 'function') {
-            throw new Error("The object calling bind must be function")
-        }
+    function Tmp() { };
+    Tmp.prototype = proto;
+    var o = new Tmp();
 
-        return function () {
-            var args = bindArgs.concat(Array.prototype.slice.call(arguments))
-            return thatFunc.apply(bindObj, args);
+    if (propertiesObject !== undefined) {
+        for (var key in propertiesObject) {
+            Object.defineProperty(o, key, propertiesObject[key])
         }
     }
-})()
 
-function addArguments(arg1, arg2) {
-    return arg1 + arg2
+    return o;
 }
 
-var addThirtySeven = addArguments.myBind(null, 37);
+const person = {
+    x: 1,
+    y: 2
+};
 
-// 第2个参数被忽略
-var result = addThirtySeven(5, 10);
-console.log(result); // 42
+const me = Object.myCreate(person, {
+    z: {
+        writable: true,
+        configurable: true,
+        value: 3
+    }
+});
 
+console.log(me); // { z: 3 }
+console.log(me.x); // 1
