@@ -293,3 +293,62 @@ console.log(me.x); // 1
 * https://github.com/bearnew/Notes/blob/master/JS/2018/js%E9%98%B2%E6%8A%96%26%E6%88%AA%E6%B5%81.md
 #### 13.promise
 * https://github.com/bearnew/Notes/blob/master/JS/2019/%E6%89%8B%E5%86%99promise.md
+#### 14.jsonp
+```js
+var jsonp = function(url, param, callback){
+    var callbackSuffix = Math.random().toString().replace('.', '');
+    // console.log(callbackSuffix);  // 07626840955849186
+    var callbackName = "callback_function" + callbackSuffix;
+    // console.log(callbackName); // callback_function07626840955849186
+    window[callbackName] = callback;
+    var queryString = url.indexOf('?') == -1 ? "?" : '&';
+    // console.log(queryString); // ?
+    for(var key in param){
+        queryString += key + '=' + param[key] + '&';
+    }
+    // console.log(queryString); // ?count=10&start=15&
+    queryString += 'callback=' + callbackName;
+    // console.log(queryString); // ?count=10&start=15&callback=callback_function07626840955849186
+    var scriptElement = document.createElement('script');
+    scriptElement.src = url + queryString;
+    document.body.appendChild(scriptElement);
+};
+window.$jsonp = jsonp;
+
+$jsonp('http://api.douban.com/v2/movie/in_theaters', {count:10, start:15}, function(data){
+            document.getElementById('result').innerHTML = JSON.stringify(data);
+});
+```
+```js
+// nodejs
+//通过require将http库包含到程序中
+var http = require('http');
+//引入url模块解析url字符串
+var url = require('url');
+//引入querystring模块处理query字符串
+var querystring = require('querystring');
+//创建新的HTTP服务器
+var server = http.createServer();
+//通过request事件来响应request请求
+server.on('request',function(req, res){
+    var urlPath = url.parse(req.url).pathname;
+    var qs = querystring.parse(req.url.split('?')[1]);
+    if(urlPath === '/jsonp' && qs.callback){
+        res.writeHead(200,{'Content-Type':'application/json;charset=utf-8'});
+        var data = {
+            "name": "Monkey"
+        };
+        data = JSON.stringify(data);
+        var callback = qs.callback+'('+data+');';
+        res.end(callback);
+    }
+    else{
+        res.writeHead(200, {'Content-Type':'text/html;charset=utf-8'});
+        res.end('Hell World\n');    
+    }    
+});
+//监听8080端口
+server.listen('8080');
+//用于提示我们服务器启动成功
+console.log('Server running!');
+```  

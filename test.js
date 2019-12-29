@@ -1,48 +1,28 @@
-const data = [
-    {
-        name: 'a',
-        children: [
-            { name: 'b', children: [{ name: 'e' }] },
-            { name: 'c', children: [{ name: 'f' }] },
-            { name: 'd', children: [{ name: 'g' }] },
-        ],
-    },
-    {
-        name: 'a2',
-        children: [
-            { name: 'b2', children: [{ name: 'e2' }] },
-            { name: 'c2', children: [{ name: 'f2' }] },
-            { name: 'd2', children: [{ name: 'g2' }] },
-        ],
-    }
-]
-
-// 深度遍历, 使用递归
-function getName(data) {
-    const result = [];
-    data.forEach(item => {
-        const map = data => {
-            result.push(data.name);
-            data.children && data.children.forEach(child => map(child));
+// 手动实现jsonp跨域
+; (function (window, name) {
+    var jsonp = function (url, param, callback) {
+        var callbackSuffix = Math.random().toString().replace('.', '');
+        // console.log(callbackSuffix);  // 07626840955849186
+        var callbackName = "callback_function" + callbackSuffix;
+        // console.log(callbackName); // callback_function07626840955849186
+        window[callbackName] = callback;
+        var queryString = url.indexOf('?') == -1 ? "?" : '&';
+        // console.log(queryString); // ?
+        for (var key in param) {
+            queryString += key + '=' + param[key] + '&';
         }
-        map(item);
-    })
-    return result.join(',');
-}
+        // console.log(queryString); // ?count=10&start=15&
+        queryString += 'callback=' + callbackName;
+        // console.log(queryString); // ?count=10&start=15&callback=callback_function07626840955849186
+        var scriptElement = document.createElement('script');
+        scriptElement.src = url + queryString;
+        document.body.appendChild(scriptElement);
+    };
+    window.$jsonp = jsonp;
+})(window, document);
 
-// 广度遍历, 创建一个执行队列, 当队列为空的时候则结束
-function getName2(data) {
-    let result = [];
-    let queue = data;
-    while (queue.length > 0) {
-        [...queue].forEach(child => {
-            queue.shift();
-            result.push(child.name);
-            child.children && (queue.push(...child.children));
-        });
-    }
-    return result.join(',');
-}
-
-console.log(getName(data)); // a,b,e,c,f,d,g,a2,b2,e2,c2,f2,d2,g2
-console.log(getName2(data)); // a,a2,b,c,d,b2,c2,d2,e,f,g,e2,f2,g2
+(function () {
+    $jsonp('www.baidu.com', { count: 10, start: 15 }, function (data) {
+        document.getElementById('inner').innerHTML = JSON.stringify(data);
+    });
+})();
