@@ -1008,5 +1008,16 @@
         * 不能直接更改应用状态，只能发送action进行更改
     * 应用状态的改变通过纯函数完成
         * reducer是1个纯函数，不能直接修改原来的状态对象，需要创建1个新的状态对象返回
-
+3. Redux主要由action, reducer, store这三部分组成
+    1. action
+        * action是store唯一的信息来源
+        * action发送给store，必须通过store的dispatch方法
+        * action必须有1个type属性描述action的类型
+        ```js
+        export function addTodo(text) {
+            return { type: 'ADD_TODO', text }
+        }
+        ``` 
+    2. 
+4. 
 #### 3.Mobx
