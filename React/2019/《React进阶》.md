@@ -1018,6 +1018,285 @@
             return { type: 'ADD_TODO', text }
         }
         ``` 
-    2. 
-4. 
+    2. reducer
+        * reducer是纯函数，接收两个参数，当前state和action, 返回新的state
+        * reducer返回的state需要是新的对象，不能改变原有对象
+        ```js
+        // Object.assign也行
+        function todoApp(state = initialState, action) {
+            switch (action.type) {
+                case SET_VISIBILITY_FILTER:
+                    return { ...state, visibilityFilter: action.filter }
+                default:
+                    return state
+            }
+        }
+        ```
+        * 可拆分多个reducer, 使用`combineReducers`合并
+        ```js
+        import { combineReducers } from 'redux'
+        const todoApp = combineReducers({
+            todos,
+            visibilityFilter
+        })
+        ``` 
+    3. store
+        * store是action和reducer之间的桥梁
+        * 保存应用状态
+        * 通过方法`getState()`访问应用状态
+        * 通过方法`dispatch(action)`发送更新状态的意图
+        * 通过方法`subscribe(listener)`注册监听函数，监听应用状态的改变
+        ```js
+        // 监听
+        let unsubscribe = store.subscribe(() => {
+            console.log(store.getState())
+        })
+        // 取消监听
+        unsubscribe();
+        ```
+        * 一个Redux应用只有1个store，store保存唯一数据源
+        ```js
+        import { createStore } from 'redux';
+        import todoApp from './reducers';
+
+        let store = createStore(todoApp, initialState);
+        ```  
+        * `store.getState`获取当前应用的状态state
+        ```js
+        const state = store.getState();
+        ```
+        * `store.dispatch`发送action
+        ```js
+        function addTodo(text) {
+            return {
+                type: 'ADD_TODO',
+                text
+            }
+        }
+
+        store.dispatch(addTodo('learn about actions'));
+        ```  
+4. React中使用react-redux
+    1. 展示组件和容器组件
+        * presentational components, 负责应用的UI展示
+        * container components，负责应用逻辑的处理
+    2. connect
+        * react-redux提供了一个connect函数，用于把react组件和redux的store连接起来
+        * 生成一个容器组件，负责数据管理和业务逻辑
+        ```js
+        import { connect } from 'react-redux';
+        import TodoList from './TodoList';
+
+        const VisibleTodoList = connect(
+            mapStateToProps, // 负责从全局状态state中取出所需数据, 映射到展示组件的props上
+            mapDispatchToProps // 负责把需要用到的action映射到展示组件的props上
+        )(TodoList);
+        ``` 
+    3. mapStateToProps
+        * store中的state更新，mapStateToProps就会重新执行，重新计算传递给展示组件的props, 从而触发组件的重新渲染
+        * store中的state更新，一定会导致mapStateToProps重新执行，
+            但是如果mapStateToProps新返回的对象和之前的对象浅比较相等，组件的shouldComponentUpdate就会返回false,
+            组件的render方法就不会再次被触发, 这是react-redux的一个重要优化
+        * mapStateToProps接收第2个参数，代表容器组件的props对象
+            ```js
+            // ownProps是组件的props对象
+            function mapStateToProps(state, ownProps){
+                return {
+                    user: state.auth
+                }
+            }
+            ``` 
+    4. mapDispatchToProps
+        * mapDispatchToProps接收store.dispatch方法作为参数，返回展示组件用来修改state的函数
+        ```js
+        function toggleTodo(id) {
+            return { type: 'TOGGLE_TODO', id }
+        }
+
+        // ownProps代表容器组件的props
+        function mapDispatchToProps(dispatch, ownProps) {
+            return {
+                onTodoClick: function(id) {
+                    dispatch(toggleTodo(id));
+                }
+            }
+        }
+        // 展示组件调用this.props.onTodoClick(id)发送action
+        ```
+        * `bindActionCreators`, 使用store的dispatch方法把参数对象中包含的action, creator包裹起来
+            这样就不需要显示的去用dispatch发送action了，而是直接调用action
+            ```js
+            const mapDispatchToProps = dispatch => {
+                return {
+                    someActionCreator: () => {}
+                }
+            }
+
+            // 组件中
+            this.props.dispatch(this.props.someActionCreator())
+            ```
+            ```js
+            const mapDispatchToProps = dispatch => {
+                return {
+                    someActionCreator: bindActionCreators(someActionCreator, dispatch)
+                }
+            }
+
+            // 组件中
+            this.props.someActionCreator();
+            ```  
+    5. Provider组件
+        * Provider的实现
+            ```js
+            class Provider extends Component {
+                getChildContext() {
+                    return {
+                        store: this.props.store
+                    }
+                }
+
+                render() {
+                    return this.props.children;
+                }
+            }
+
+            Provider.childContextTypes = {
+                store: React.PropTypes.object
+            }
+            ```
+        * Provider内层的任意组件都可以从context中获取store对象
+            ```js
+            // provider为最外层组件
+            // container中的组件通过connect把组件和store相关联
+            // 组件内部通过props调用state和action
+            import { createStore } from 'redux';
+            import { Provider } from 'react-redux';
+            import todoApp from './reducers';
+            import App from './components/App';
+
+            let store = createStore(todoApp);
+
+            render() {
+                <Provider store={store}>
+                    <App/>
+                <Provider>,
+                document.getElementById('root')
+            }
+            ```  
+5. 中间件和异步操作
+    1. 中间件
+        * 中间件就如同管道一般，前一个中间件的输出是下一个中间件的输入
+        * redux的中间件增强了store的功能，在action到达reducer前增加一些通用功能(日志输出，异常捕获)
+        * 中间件原理
+            ```js
+            let next = store.dispatch;
+            store.dispatch = function dispatchAndLog(action) {
+                console.log('dispatching', action);
+                let result = next(action);
+
+                console.log('next state', store.getState());
+                return result;
+            }
+            ```
+        * 中间件使用
+            ```js
+            import { applyMiddleware, createStore } from 'redux';
+            import logger from 'redux-logger';
+            import reducer from './reducers';
+
+            const store = createStore(
+                reducer,
+                applyMiddleware(logger)
+            )
+            ```
+        * applyMiddleware
+            * applyMiddleware把接收到的中间件放入数组chain中
+            * 通过`compose(...chain)(store.dispatch)`定义加强版的dispatch方法
+            * compose是工具函数，compose(f, g, h)等价于(...args) => f(g(h(args)))
+            * 每一个中间件都接收包含getState和dispatch的参数对象
+            ```js
+            export default function applyMiddleware(...middlewares) {
+                return (createStore) => (...args) => {
+                    const store = createStore(...args);
+                    let dispatch = store.dispatch;
+                    let chain = [];
+
+                    const middlewareAPI = {
+                        getState: store.getState,
+                        dispatch: (...args) => dispatch(...args)
+                    }
+
+                    chain = middlewares.map(middleware => middleware(middlewareAPI));
+                    dispatch = compose(...chain)(store.dispatch);
+
+                    return {
+                        ...store,
+                        dispatch
+                    }
+                }
+            }
+            ``` 
+    2. 异步操作
+        * redux-thunk是处理异步操作最常用的中间件
+        * 使用redux-thunk
+        ```js
+        import { createStore, applyMiddleware } from 'redux';
+        import thunk from 'redux-thunk';
+        import reducer from './reducers';
+
+        const store = createStore(
+            reducer,
+            applyMiddleware(thunk)
+        )
+        ```
+        * store.dispatch只能接收普通js对象代表的action, 使用redux-thunk,store.dispatch能接收函数作为参数了
+        ```js
+        store.dispatch(getData("http://xxx"));
+
+        function getData(url) {
+            return function (dispatch) {
+                dispatch({type:'FETCH_DATA_REQUEST'});
+                return fetch(url).then(
+                    response => response.json(),
+                    error => {
+                        console.log('An error occured.', error);
+                        dispatch({type:'FETCH_DATA_FAILURE', error});
+                    }
+                )
+                .then(json =>
+                    dispatch({type:'FETCH_DATA_SUCCESS', data: json});
+                )
+            }
+        }
+        ```
+6. 使用`Redux DevTools`调试`redux`应用
+7. 性能优化
+    1. 创建高阶组件重写组件的shouldComponentUpdate方法
+    ```js
+    export default function connectRoute(WrappedComponent) {
+        return class extends React.Component {
+            shouldComponentUpdate(nextProps) {
+                return nextProps.location !== this.props.location;
+            }
+
+            render() {
+                return <WrappedComponent {...this.props} />
+            }
+        }
+    }
+    ```
+    ```js
+    // 使用connectRoute包裹
+    // app依赖的store中的state变化就不会再导致Route内组件的render方法重新执行了
+    const AsyncHome = connectRoute(asyncComponent(() => import('../Home')));
+    ```
+    2. 使用`Immutable.js`更加高效的方式创建不可变的对象
+        * 通过`Immutable.js`创建的对象在任何情况都无法被修改
+        * `Immutable.js`提供了丰富的api创建不同类型的不可变对象如Map, List, Set, Record
+            还提供了大量API操作这些不可变对象，如get, set, sort, filter
+        * 使用不可变对象会涉及大量的复制操作，影响性能，`Immutable.js`做了大量的优化，降低性能损耗
+        * 使用immer来搭配redux使用`Immutable.js`
+    3. Reselect
+        * 使用`selector`，对state进行计算，但是state的任意值发生变化，会导致所有使用到的selector重新计算
+        * `Reselect`创建具有记忆功能的selectors, 当selectors计算使用的参数未发生变化时，不会再次计算, 而是直接使用上次缓存的结果  
 #### 3.Mobx
