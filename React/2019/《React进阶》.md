@@ -1300,3 +1300,55 @@
         * 使用`selector`，对state进行计算，但是state的任意值发生变化，会导致所有使用到的selector重新计算
         * `Reselect`创建具有记忆功能的selectors, 当selectors计算使用的参数未发生变化时，不会再次计算, 而是直接使用上次缓存的结果  
 #### 3.Mobx
+1. 简介
+    1. Mobx响应式管理状态，整体是一个观察者模式的架构
+    2. 存储state的store是被观察者，使用store的组件是观察者
+    3. Mobx可以有多个store对象
+    4. Mobx比Redux更轻量
+    5. 和redux一样，使用action改变应用的state,state的改变去影响views更新
+    6. Mobx包含state(状态), computed value(计算值), reaction(响应), action(动作)
+    7. computed value和reaction会自动根据state的改变做最小化的更新, 并且更新是同步的
+    8. action改变state, state是立即被获取的，computed value采用的是延迟更新，computed value被使用时，才会重新计算
+    9. computed value必须时纯函数，不能使用它修改state
+    10. 使用`babel-plugin-transform-decorators-legacy`支持装饰器写法
+        ```js
+        // vscode配置，避免装饰器写法报错
+        {
+            "compilerOptions": {
+                "experimentalDecorators": true
+            }
+        }
+        ```
+    11. example
+    ```js
+    import { observable, computed } from 'mobx';
+
+    class TodoList {
+        @observable todos = [];
+
+        @computed get unfinishedTodoCount() {
+            return this.todos.filter(todo => !todo.finished).length;
+        }
+    }
+    ```
+    ```js
+    import { observer } from 'mobx-react';
+    import { action } from 'mobx';
+
+    // 创建observer装饰器创建reaction 
+    @observer
+    class TodoListView extends Component {
+        render() {
+            return (
+                <div>
+                    <ul>
+                        {this.props.todoList.todos.map(todo => (
+                            <TodoView todo={todo} key={todo.id} />
+                        ))}
+                    </ul>
+                </div>
+            )
+        }
+    }
+    ``` 
+2. 
