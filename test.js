@@ -1,33 +1,23 @@
-import React, { Component } from "react";
-import ReactDOM from "react-dom";
-import { observer, inject, Provider } from "mobx-react";
-import { observable } from "mobx";
-@observer
-@inject("store") // inject 从context中取出store对象，注入到组件的props中
-class App extends Component {
-    render() {
-        const { store } = this.props;
-        return (
-            <div>
-                <ul>
-                    {store.map(todo => <TodoView todo={todo} key={todo.id} />)}
-                </ul>
-            </div>
-        );
-    }
-}
-const TodoView = observer(({ todo }) => {
-    return <li>{todo.title}</li>;
-});
+const list = [4, 5, 2, 3, 1];
+console.log(insertionSort(list)); // [1, 2, 3, 4, 5]
 
-// 构造store及其初始数据
-const todos = observable([]);
-todos.push({ id: 1, title: "Task1" });
-todos.push({ id: 2, title: "Task2" });
-ReactDOM.render(
-    {/* Provider向context中注入store对象 */ }
-    < Provider store = { todos } >
-    <App />
-    </Provider >,
-    document.getElementById("root")
-);
+function insertionSort(arr) {
+    var length = arr.length;
+    var j, temp;
+
+    for (var i = 1; i < length; i++) {
+        j = i;
+        temp = arr[i];
+        while (j > 0 && arr[j - 1] > temp) {
+            arr[j] = arr[j - 1];
+            j--;
+        }
+        arr[j] = temp;
+    }
+
+    return arr;
+}
+
+function swap(arr, index1, index2) {
+    [arr[index1], arr[index2]] = [arr[index2], arr[index1]];
+}
