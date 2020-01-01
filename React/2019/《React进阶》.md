@@ -1351,4 +1351,321 @@
         }
     }
     ``` 
-2. 
+2. 主要组成
+    1. state
+        1. 普通对象(Plain Object)
+            * 只有当前普通对象已经存在的属性才会转成可观测的，后面添加的新属性不会自动变成可观测的 
+            * 属性的getter会自动转换成computed value, 效果和@computed相同
+            * observable会递归遍历整个对象，遇到的对象的属性值还是一个对象时，属性值会继续被observable转换
+            * 如果已有的属性被赋予一个新对象，新对象会自动被转换成可观测的对象
+            ```js
+            // mobx根据普通对象创建一个可观测的新对象
+            import { observable, autorun } from 'mobx';
+
+            var person = observable({
+                name: 'Jack',
+                age: 20,
+                address: {
+                    province: 'Shanghai'
+                },
+                get labelText() {
+                    return `name:${person.name}, age:${person.age}`;
+                }
+            })
+
+            // mobx.autorun会创建1个reaction自动响应state的变化
+            // autorun(() => {
+                // console.log(`name:${person.name}, age:${person.age}`)
+            // })
+            autorun(() => {
+                console.log(person.labelText);
+            })
+
+            person.name = 'Tom'; // 输出: name: Tom, age: 20
+            person.age = 25; // 输出: name: Tom, age: 25
+
+            person.address.province = 'chengdu'; // 输出: name: Tom, age: 25
+            person.district = 'Changning'; // 没有输出
+
+            // 给可观测属性address赋新值
+            person.address = {
+                province: "Beijing",
+                district: "Xicheng"
+            }; // 输出: name: Tom, age: 25
+
+            person.address.district = "Pudong"; // 输出: name: Tom, age: 25
+            ```
+            ```js
+            class Person {
+                @observable name = 'Jack';
+                @observable age = 20;
+            }
+            var person = new Person();
+            ```
+        2. ES6 Map
+            * 返回新的可观测的Map对象
+            * 向Map对象中添加或删除新元素的行为也是可观测的
+            ```js
+            import { observable, autorun } from 'mobx';
+
+            // 每一个元素代表Map对象中的一个键值对
+            var map = new Map([['name', 'Jack'], ['age', 20]]);
+            var person = observable(map);
+
+            autorun(() => {
+                console.log(`name: ${person.get('name')}, age: ${person.get('age')}, address: ${person.get('address')}`)
+            })
+
+            person.set('address', 'Shanghai');
+            // 输出：name: Jack, age: 20, address: Shanghai
+            ``` 
+        3. 数组
+            * 新的可观测数组，数组元素的增加或减少都会自动观测
+            * observable作用数组类型时，也会递归数组中的每个元素对象
+            ```js
+            import { observable, autorun } from "mobx";
+
+            var todos = observable([
+                { text: "Learn React", finished: false },
+                { text: "Learn Redux", finished: false }
+            ]);
+
+            autorun(() => console.log(`todo 1 : ${todos[0].text}, finished: ${todos[0].finished}`));
+
+            todos[0].finished = true;
+            // 输出: todo 1 : Learn React, finished: true
+            ``` 
+        4. 非普通对象
+            * `observable`会返回一个特殊的boxed values类型的可观测对象
+            * `boxed values`是保存一个指向原对象的引用, 对原对象的访问和修改需要通过新对象的get()和set()方法操作
+            ```js
+            import { observable, autorun } from 'mobx';
+
+            function Person(name, age) {
+                this.name = name;
+                this.age = age;
+            }
+
+            var person = observable(new Person('Jack', 20));
+            autorun(() => console.log(`name: ${person.get().name}, age: ${person.get().age}`));
+
+            person.get().age = 25; // 没有输出, 因为person对象的属性不可观测
+
+            // 引用发生变化，可观测
+            // 输出: name: jack, age: 20
+            person.set(new Person('jack', 20));
+            ```
+            * 将非普通对象转换成可观测的自定义构造函数的正确实现方式
+            ```js
+            import { observable, autorun } from 'mobx';
+
+            class Person {
+                @observable name;
+                @observable age;
+
+                constructor(name, age) {
+                    this.name = name;
+                    this.age = age;
+                }
+            }
+
+            var person = new Person('jack', 20);
+            autorun(() => console.log(`name: ${person.name}, age: ${person.age}`));
+
+            // 输出: name:jack, age: 25
+            person.age = 25;
+            ```  
+        5. 基础数据类型 
+            * observable将接收的基础数据类型转换成可观测的`boxed values`类型的对象
+            ```js
+            import { observable, autorun } from 'mobx';
+
+            const name = observable('jack');
+
+            autorun(() => console.log(`name:${name.get()}`));
+
+            name.set('Tom'); // 输出 name:Tom
+            ```  
+    2. computed value
+        * computed value是根据state衍生出的新值
+        * computed value采用延迟更新策略，只有被使用时才会自动更新
+        * computed一般接收一个函数，用于修饰class的getter方法
+        ```js
+        import { observable, computed, autorun } from 'mobx';
+
+        class Person {
+            @observable name;
+            @observable age;
+
+            @computed get isYoung() {
+                return this.age < 25;
+            }
+
+            constructor(name, age) {
+                this.name = name;
+                this.age = age;
+            }
+        }
+
+        var person = new Person('jack', 20);
+        autorun(() => console.log(`name:${person.name}, isYoung: ${person.isYoung}`));
+
+        person.age = 25; // 输出: name:Jack, isYoung: false
+        ``` 
+    3. reaction
+        * 自动响应state变化有副作用的函数，例如打印信息、发送网络请求、根据react组件树更新dom
+        * observer/@observer
+            ```js
+            @observer class MyComponent extends React.Component { ... }
+            ```
+        * autorun
+            * autorun接收到的函数会立即执行一次，以后的执行就依赖state的变化
+            * autorun会返回一个清除函数disposer, 可以调用disposer清除副作用
+            ```js
+            var numbers = observable([1, 2, 3]);
+            var sum = computed(() => numbers.reduce((a, b) => a + b, 0));
+
+            var disposer = autorun(() => console.log(sum.get())); // 输出: 6
+            numbers.push(4); // 输出: 10
+
+            disposer();
+            numbers.push(5); // 没有输出
+            ```
+        * reaction
+            * 接收2个函数，第1个函数返回被观测的state, 这个返回值同时是第2个函数的输入值
+            * 第1个函数的返回值发生变化时，第2个函数才会被执行
+            * 第3个参数options提供可选的参数
+            * `reaction`也会返回1个disposer
+            ```js
+            const todos = observable([
+                {
+                    title: 'Learn React',
+                    done: true
+                },
+                {
+                    title: 'Learn Mobx',
+                    done: false
+                }
+            ])
+
+            const reaction1 = reaction(
+                () => todos.length,
+                length => console.log('reaction1:', todos.map(todo => todo.title).join(", "))
+            );
+
+            const reaction2 = reaction(
+                () => todos.map(todo => todo.title),
+                titles => console.log('reaction2:', titles.join(", "))
+            );
+
+            // 输出: reaction1: learn react , learn mobx, learn redux
+            // 输出: reaction2: learn react , learn mobx, learn redux
+            todos.push({ title: 'learn redux', done: false });
+
+            // 输出: reaction2: learn Something , learn mobx, learn redux
+            todos[0].title = 'learn something';
+            ``` 
+        * when
+            * condition会自动响应它使用的任何state的变化, condition返回true时，sideEffect会执行,只执行一次
+            * when也会返回一个清除函数disposer
+            ```js
+            when(() => condition, () => { sideEffect })
+            ```
+            ```js
+            class MyResource {
+                constructor() {
+                    when(
+                        () => !this.isVisible,
+                        () => this.dispose()
+                    )
+                }
+
+                @computed get isVisible() {
+                    // 判断某个元素是否可见
+                }
+
+                disposer() {
+                    // 清除逻辑
+                }
+            }
+            ``` 
+        *  
+    4. action
+        * action时用来修改state的函数
+        * 函数内部多次修改state时，action会执行批处理操作，只有当所有的修改都执行完成，
+            才会通知相关的computed value和reaction
+        ```js
+        @action fetchPostList(url) {
+            this.pendingRequestCount++;
+            return fetch(url).then(
+                action(data => {
+                    this.pendingRequestCount--;
+                    this.posts.push(data);
+                })
+            );
+        }
+        ```
+        * mobx提供了@action.bound帮助完成this绑定的工作      
+        ```js
+        class Ticker {
+            @observable tick = 0;
+
+            @action.bound
+            increment() {
+                this.tick++;
+            }
+        }
+
+        const ticker = new Ticker();
+        setInterval(ticker.increment, 1000);
+        ``` 
+3. mobx的常见误区
+    * mobx追踪属性的访问来追踪值的变化，而不是直接追踪值的变化
+    * mobx只追踪同步执行过程中的数据
+    * observer创建的组件，只有当前组件的render方法中直接使用的数据才会被追踪
+4. mobx-react, 在react中使用Mobx
+    * Provider
+        * 是1个React组件，利用React的context机制把应用所需的state传递给子组件
+        * 和Redux的react-redux提供的Provider组件相同 
+    * inject
+        * 是1个高阶组件，和Provider结合使用
+        * 从Provider提供的state选取所需的数据，作为props传递给目标组件
+    * example
+    ```js
+    import React, { Component } from "react";
+    import ReactDOM from "react-dom";
+    import { observer, inject, Provider } from "mobx-react";
+    import { observable } from "mobx";
+    @observer
+    @inject("store") // inject 从context中取出store对象，注入到组件的props中
+    class App extends Component {
+        render() {
+            const { store } = this.props;
+            return (
+                <div>
+                    <ul>
+                        {store.map(todo => <TodoView todo={todo} key={todo.id} />)}
+                    </ul>
+                </div>
+            );
+        }
+    }
+    const TodoView = observer(({ todo }) => {
+        return <li>{todo.title}</li>;
+    });
+
+    // 构造store及其初始数据
+    const todos = observable([]);
+    todos.push({ id: 1, title: "Task1" });
+    todos.push({ id: 2, title: "Task2" });
+    ReactDOM.render(
+        {/* Provider向context中注入store对象 */ }
+        <Provider store={ todos } >
+            <App />
+        </Provider >,
+        document.getElementById("root")
+    );
+    ```
+5. 其他
+    * observer/@observer相当于重写了组件的`shouldComponentUpdate`, 尽可能的多使用，可以提高组件的渲染效率
+    * 使用oberver/@observer的组件难以在不使用mobx的项目中复用组件
