@@ -1,40 +1,52 @@
 const list = [4, 2, 6, 5, 7, 3, 1];
-console.log(mergeSort(list)); // [1, 2, 3, 4, 5, 6, 7]
+console.log(heapSort(list)); // [1, 2, 3, 4, 5, 6, 7]
 
-function mergeSort(arr) {
-    var length = arr.length;
-    if (length === 1) {
-        return arr;
+function heapSort(arr) {
+    var heapSize = arr.length;
+    buildMaxHeap(arr);
+
+    while (heapSize > 1) {
+        heapSize--;
+        swap(arr, 0, heapSize);
+        heapify(arr, heapSize, 0);
     }
-    var mid = Math.floor(length / 2),
-        left = arr.slice(0, mid),
-        right = arr.slice(mid, length);
-
-    return merge(mergeSort(left), mergeSort(right));
+    return arr;
 }
 
-function merge(left, right) {
-    var result = [];
-    var leftIndex = 0;
-    var rightIndex = 0;
+// 构建大顶堆
+function buildMaxHeap(arr) {
+    var heapSize = arr.length;
+    for (var i = Math.floor(arr.length / 2); i >= 0; i--) {
+        heapify(arr, heapSize, i);
+    }
+}
 
-    console.log(left, right)
-    while (leftIndex < left.length && rightIndex < right.length) {
-        if (left[leftIndex] < right[rightIndex]) {
-            result.push(left[leftIndex++]);
-        } else {
-            result.push(right[rightIndex++]);
-        }
+// 堆调整
+// [4, 2, 6, 5, 7, 3, 1]
+// i为3(5), left为7, right为8, arr不变
+// i为2(6), left为5(3), right为6(1), largest不变，arr不变
+// i为1(2)，left为3(5)， right为4(7)，满足第1个if, largest为3(5), 满足第二个if, largest为4(7), swap后arr为[4, 7, 6, 5, 2, 3, 1]
+// i为0(4), left为1(7), right为2(6), 满足第1个if, largest位1（7），不满足第2个if, largest为1(7), swap后arr为[7, 4, 6, 5, 2, 3, 1], 继续递归
+// i为1(4), left为3(5), right为4(2), 满足第1个if, largest为3(5), swap后arr为[7, 5, 6, 4, 2, 3, 1]
+function heapify(arr, heapSize, i) {
+    var left = 2 * i + 1;
+    var right = 2 * i + 2;
+    var largest = i;
+
+    if (left < heapSize && arr[left] > arr[largest]) {
+        largest = left;
     }
 
-    while (leftIndex < left.length) {
-        result.push(left[leftIndex++]);
+    if (right < heapSize && arr[right] > arr[largest]) {
+        largest = right;
     }
 
-    while (rightIndex < right.length) {
-        result.push(right[rightIndex++]);
+    if (largest !== i) {
+        swap(arr, i, largest);
+        heapify(arr, heapSize, largest);
     }
+}
 
-    console.log(result)
-    return result;
+function swap(arr, index1, index2) {
+    [arr[index1], arr[index2]] = [arr[index2], arr[index1]];
 }
