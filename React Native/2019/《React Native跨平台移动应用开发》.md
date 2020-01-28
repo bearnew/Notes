@@ -177,6 +177,18 @@
     ``` 
 ## 7.混合开发基础篇
 1. IOS平台混合开发
-    * 
+    1. 建立原生语言模块（实现`RCTBridgeModule`协议Protocol的类）与`React Native`桥接
+    2. `React Native`到IOS原生代码的消息
+    ```js
+    // React Native的桥接工作
+    userPressAddressBook() {
+        // 导出接口变量
+        let ExampleInterface = require('react-native').NativeModules.ExampleInterface;
+        ExampleInterface.sendMessage('{\"msgType\": \"pickContact\"}');
+    }
+    ```
+    3. IOS到`React Native`代码的消息
+        1. 回调接口
+        2. 通过`eventDispatcher`向`React Native`模块发送事件 
 2. 
  
