@@ -376,3 +376,81 @@
             * 本组件的子组件范围内的事件，交给子组件处理
         * box-only, 本组件显示范围内的事件，全部由本组件处理
         * auto, 视组件的不同而不同
+3. Image组件
+    1. Image概述
+        1. RN可以从网址、本地文件或者项目资源文件中加载图片
+        2. RN支持jpg和png格式
+        3. png可以进行透明度设置，可以将png图片下的图像显示出来
+        4. jpg图片的速度要快于png的速度
+        5. IOS平台还支持GIF（显示动画）格式和WebP（压缩率更高）格式
+        6. 修改RN的工程设置，也能让android支持这2种格式
+        ```js
+        dependencies {
+            compile 'com.facebook.fresco:animated-gif:0.11.0' // 支持gif动画
+            compile 'com.facebook.fresco:webpsupport:0.11.0' // 支持webp格式
+            compile 'com.facebook.fresco:animated-webp:0.11.0' // 支持webp动画
+        }
+        ```
+        7.svg可以清晰的实现图片缩放
+            * 在RN的`WebView`中载入SVG图片
+            * 使用RN的插件支持SVG
+    2. 网络图片
+        1. 加载图片
+            ```js
+            return (
+                <View style={styles.container}>
+                    <Image
+                        style={styles.imageStyle}
+                        source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}}
+                    />
+                </View>
+            )
+            ```
+        2. IOS只允许图片使用HTTPS协议
+        3. 可以在source的headers中加入一些认证信息
+            ```js
+            let imageSource = {
+                uri: 'https://facebook.github.io/react/img/logo_og.png',
+                headers: {
+                    Authorization1: 'someAuthToken',
+                    Authorization2: 'someAuthToken'
+                }
+            }
+
+            return (
+                <View style={styles.container}>
+                    <Image
+                        style={styles.imageStyle}
+                        source={imageSource}
+                    />
+                </View>
+            )
+            ```
+        4. 可以使用`Image.getSize`获取指定URI地址图片的宽高，并且`getSize`会预加载图片
+            ```js
+            componentDidMount: function() {
+                let imageSource = {
+                    uri: 'https://facebook.github.io/react/img/logo_og.png'
+                }
+
+                Image.getSize(imageSource).then((width, height) => {
+                    // ...
+                }).catch(err => {
+                    console.error(err);
+                })
+            }
+            ```
+        5. 可以使用`Image.prefetch`来预下载网络图片
+            ```js
+            componentWillMount: function() {
+                let imageSource = {
+                    uri: 'https://facebook.github.io/react/img/logo_og.png'
+                }
+
+                Image.prefetch(imageSource).then(result => {
+                    // 预下载成功，返回值是true
+                }).catch(err => {
+                    console.error(err);
+                })
+            }
+            ```
