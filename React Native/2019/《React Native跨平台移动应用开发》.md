@@ -454,3 +454,104 @@
                 })
             }
             ```
+    3. 加载静态图片资源
+        1. `require`等同于`var`，等同于在代码顶部预先加载图片资源
+        2. RN在编译代码时处理所有的动态`require`声明，而不是在运行时动态的处理
+            ```r
+            <View styles={styles.container}>
+                <Image
+                    style={styles.icon}
+                    source={require('./image/redicon.png')}
+                />
+            </View>
+            ```
+    4. 加载资源文件中的图片
+        1. RN可以加载`Android`或者`IOS`项目中的图片资源文件
+        ```js
+        // 导入nativeImageSource函数
+        let nativeImageSource = require('nativeImageSource');
+        export default class LearnRN extends Component {
+            render() {
+                let ades = {
+                    ios: 'story-background',
+                    width: 60,
+                    height: 60
+                }
+
+                return (
+                    <View style={styles.container}>
+                        <Image
+                            style={styles.imageStyle}
+                            source={nativeImageSource(ades)}
+                        />
+                    </View>
+                )
+            }
+        }
+        ``` 
+    5. 动态加载手机中的图片资源
+        1. 使用`CameraRoll`组件，RN可以读取手机中存储的图片资源
+        2. RN还支持加载`base64`编码的图片
+    6. Image组件的样式
+        1. Image组件必须在样式中声明图片的宽和高，没有声明，则图片不会呈现在界面上
+        2. 根据分辨率精确的显示图片
+            ```js
+            let PixelRatio = require('PixelRatio');
+            let pixelRatio = PixelRatio.get();
+
+            perciseImageStyle: {
+                width: actualWidth / pixelRatio,
+                height: actualHeight / pixelRatio
+            }
+            ```
+        3. `resizeMode`可以作为Image组件的键值发挥作用，也可以作为Image组件的样式发挥作用
+            1. `cover`
+                * 要求填充整个`Image`定义的显示区域
+                * 可对图片进行放大或者缩小，超出显示区域的部分直接被丢弃
+            2. `contain`
+                * 无法填充`Image`的所有区域
+                * 可以图片进行等比放大或者缩小，然后居中显示图片，`Image`的上下侧或者左右侧会留下空白
+            3. `stretch`
+                * 填充整个`Image`的所有区域
+                * 对图片进行任意的缩放，不考虑保持原来图片的宽高比
+                * 图片有可能会出现失真
+            4. `center`
+                * 图片的实际宽高都小于`Image`的实际宽高，直接居中显示，四周会留下空白
+                * 图片的宽高有1个值或者都大于Image的宽高，会对图片进行等比缩小，
+                    直到缩小后图片的宽、高有一个等于`Image`的宽高，居中显示，在上下侧或者左右侧留下空白
+            5. `repeat`(IOS独有的模式)
+                * 用一张或者多张图片来填充整个`Image`定义的显示区域 
+        4. 其他样式键
+            1. `Image`组件还支持`backgroundColor`, `borderColor`, `borderWidth`, `overflow`, `opactiy`
+            2. `tintColor`是IOS的专有属性，可以让图片的非透明像素部分有一种被染色的效果
+            3. `overlayColor`是Android的专有属性，可以将需要圆角的部分使用指定的颜色填充，实现圆角的效果
+    7. Image组件的其他属性
+        * `onLoadStart`, 图片开始加载时调用
+        * `onLoad`, 图片加载完成时调用
+        * `onLoadEnd`, 图片加载结束后调用，无论成功或失败
+        * `onProgress`, IOS提供的加载进度的回调函数
+        * `onError`，发生错误时调用
+        * `onLayout`, 图片加载或者布局发生改变时调用
+    8. Image组件的缓存
+        1. RN支持对网络图片的缓存，访问一次图片，在一定时间内，会缓存在手机存储中
+        2. 在Android中，采用以图形文件名为同步标志的图片缓存机制，文件名不变，则一直使用这个缓存, 不管服务器侧该文件是否发生了改变
+        3. 在IOS中，RN要求移动应用在返回图片时，必须在`HTTPS`响应的`HTTP`头中，
+            有`Cache-Control`这个头, 对应的值为`max-age=36000000`
+        4. 在IOS中，如果`HTTPS`的响应中没有`HTTP`头，则IOS没有图片缓存机制
+        5. 在IOS中，如果使用`HTTP`协议获取图片，也没有图片缓存机制
+        6. 在`source`中加入`cache`键明确我们期望使用的图片缓存策略
+            * `default`, 使用平台默认策略
+            * `reload`, 数据将从原始地址加载，不使用现有的缓存数据
+            * `force-cache`, 总是使用缓存数据，没有则从原始地址加载
+            * `only-if-cached`, 总是使用缓存数据，没有则失败 
+            ```js
+            <Image
+                source={{
+                    uri: 'XXXXXX',
+                    cache: 'only-if-cached'
+                }}
+            />
+            ``` 
+    9. 尽量使用网络图片
+        * 热更新是全量更新，会将所有本地图片打入热更新包中
+        * 网络图片可使用RN的缓存机制   
