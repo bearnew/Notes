@@ -554,4 +554,65 @@
             ``` 
     9. 尽量使用网络图片
         * 热更新是全量更新，会将所有本地图片打入热更新包中
-        * 网络图片可使用RN的缓存机制   
+        * 网络图片可使用RN的缓存机制
+4. 可触摸组件
+    1. `TouchableNativeFeedback`
+        1. `Android`操作系统的专用组件
+        2. 实现`Android`特有的涟漪(`ripple`)的触摸效果
+            * `TouchableNativeFeedback.Ripple`接收2个参数
+            * 第1个参数是按下时按钮改变的颜色值
+            * 第2个参数涟漪效果是否被限制在`TouchableNativeFeedback`的显示区域 
+            ```js
+            <TouchableNativeFeedback
+                background={TouchableNativeFeedback.Ripple('red', false)}
+            >
+                <View style={styles.button} />
+            </TouchableNativeFeedback>
+            ``` 
+    2. `TouchableWithoutFeedback`
+        * 用户触摸时，没有反馈任何视觉效果
+    3. `TouchableOpacity`
+        1. 组件被触摸时变成半透明的组件
+        2. 组件遮盖的背景颜色图案将会透过它被显示出来
+        3. View组件，Image组件，Text组件都可以成为它的子组件
+        4. `activeOpacity`定义了透明度的值，取值为0-1，默认值是0.2
+        ```js
+        <TouchableOpacity
+            onPress={this._onPressButton}
+            activeOpacity={0.5}
+        >
+        ``` 
+    4. `TouchableHighlight`
+       1. 组件被触摸时产生变暗的效果
+       2. `activeOpacity`属性，默认值为0.8
+       3. `onShowUnderlay`, 回调函数，当下层开始被展现时（被触摸时）调用
+       4. `onHideUnderlay`, 回调函数，当下层不再被展现时被调用
+       5. `underlayColor`, 字符串，指定下层颜色
+    5. 其他属性
+        1. `TouchableHighlight`和`TouchableOpacity`都可以接受`TouchableWithoutFeedback`组件的属性
+        2. `onPress`
+            * 手指离开组件后马上被激活
+        3. `onPressIn`
+            * 手指接触组件`delayPressIn`毫秒后马上被激活
+        4. `onPressOut`
+            * 手指接触组件`delayPressOut`毫秒后马上被激活
+        5. `delayLongPress`
+            * 设置按了多少毫秒后，`onLongPress`事件被激活, 默认值为500ms
+        6. `delayPressIn`
+            * 设置手指接触屏幕多少毫秒后，`onPressIn`事件被激活，默认值为0
+        7. `delayPressOut` 
+            * 设置手指离开屏幕多少毫秒后，`onPressOut`事件被激活，默认值为0
+        8. `pressRetentionOffset`
+            * 是对象类型的属性，格式为
+                ```js
+                {
+                    top: number,
+                    left: number,
+                    bottom: number,
+                    right: number
+                }
+                ```
+            * 当前触摸组件的父组件不可滚动时，设置这个属性
+            * 定义手指移开距组件多远距离后，可触摸组件会变成不被触摸的状态
+            * 如果手指再次进入这个范围内，可触摸组件会再次变成触摸状态   
+5.     
