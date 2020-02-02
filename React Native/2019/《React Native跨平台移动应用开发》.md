@@ -791,4 +791,103 @@
         * ios中，height需大于fontSize的1.2倍，Text组件的下方空间才会随height的增大而变大
         * android中，height需大于fontSize的1.35倍，Text组件的下方空间才会随height的增大而变大
     4. `Text`组件设置边框，对android平台无效，需要在外层套一层View实现边框  
-3. 
+3. `TextInput`组件
+    1. `TextInput`样式
+        * 与`Text`类似, 组件内部的元素不使用`flexbox`布局, 而是采用文本布局
+        * 组件内部元素排列出组件末端时，会自动折叠添加新行
+    2. `TextInput`组件的属性
+        * 支持`View`的所有属性
+        * `autoCapitalize`
+            * `none`, 不自动转换成大写
+            * `sentence`, 每句话的首字母自动转换成大写
+            * `words`, 每个单词的首字母自动转换成大写
+            * `characters`, 每个英文字母自动转换成大写
+        * `autoCorrect`
+            * 是否自动更正用户输入的英语单词
+            * 默认值为`true`
+        * `autoFocus`
+            * 是否自动获取焦点
+            * 默认值为`false`
+        * `blurOnSubmit`
+            * 用户按下键盘上的回车会模糊化输入的文本并触发`onSubmitEditing`事件, 而不是在输入区域插入新行
+            * 默认值是`TextInput`组件的`multiline`属性的非值
+        * `defaultValue`
+            * 定义`TextInput`组件的默认值
+        * `editable`
+            * 是否允许用户修改
+        * `keyboardType`
+            * 字符串类型的属性, 定义`TextInput`获取焦点时，自动弹出哪种软键盘
+            * 属性取值
+                * `default`
+                * `numeric`
+                * `email-address`
+                * `ascii-capable`
+                * `numbers-and-punctuation`
+                * `url`
+                * `number-pad`
+                * `phone-pad`
+                * `name-phone-pad`
+                * `decimal-pad`
+                * `twitter`
+                * `web-search` 
+        * `maxLength`
+            * 定义`TextInput`组件最多允许用户输入多少个字符
+        * `multiline`
+            * true, TextInput可以是多行组件
+            * 默认值是false
+        * `placeholder`
+        * `placeholderTextColor`
+            * 定义`placeholder`字符串的颜色
+        * `returnKeyType`
+            * 定义回车键在键盘中的显示
+            * 通用属性
+                * `done`
+                * `go`
+                * `next`
+                * `search`
+                * `send`  
+            * Android支持的属性
+                * `none`
+                * `previous`
+            * Ios支持的属性
+                * `default`
+                * `google`
+                * `join`
+                * `route`
+                * `yahoo`
+                * `emergency-call`
+        * `secureTextEntry`和`password`
+            * 2个只需定义1个即可
+            * 定义当前`TextInput`组件是否用于输入密码
+        * `selectTextOnFocus`
+            * `TextInput`获取焦点时，组件中所有的文字都会被选中
+            * `selection`
+                * 设置`TextInput`组件中被选择字符的开始和结束位置
+                * 把开始和结束位置设为同一个值，可以达到设置输入光标至该位置的效果
+                ```js
+                {
+                    start: number,
+                    end: number
+                }
+                ``` 
+            * `selectionColor`
+                * 设置被选中的文字的高亮显示颜色
+                * Ios可用这个属性设置输入光标的颜色
+            * `value`
+            * `onSelectionChange`
+                * 输入框中的字符串发生改变时，回调函数被调用
+                * 用户移动光标时，回调函数被调用
+                ```js
+                {
+                    timeStamp: '', // 事件发生时的时间戳
+                    nativeEvent: {
+                        selection: {
+                            start: 0, // 用户选中的子字符串起点位置
+                            end: 10, // 用户选中的子字符串结束位置
+                        }
+                    }
+                }
+                ```  
+        * 
+    3. 
+4. 
