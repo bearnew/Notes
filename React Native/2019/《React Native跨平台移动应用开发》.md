@@ -615,4 +615,180 @@
             * 当前触摸组件的父组件不可滚动时，设置这个属性
             * 定义手指移开距组件多远距离后，可触摸组件会变成不被触摸的状态
             * 如果手指再次进入这个范围内，可触摸组件会再次变成触摸状态   
-5.     
+5. 使用导航栏的导航框架
+    ```js
+    import { Navigator } from 'react-native';
+
+    export default class NativeModule extends Component {
+        constructor(props) {
+            super(props);
+            this.renderScene = this.renderScene.bind(this);
+        }
+        configureScene(route) {
+            return Navigator.SceneConfigs.FadeAndroid;
+        }
+        renderScene(router, navigator) {
+            switch (router.name) {
+                case "Page1":
+                    return <Page1 navigator={navigator} />
+                case "Page2":
+                    return <Page2 navigator={navigator} />
+                case "Page3":
+                    return <Page3 navigator={navigator} />
+                case "Page4":
+                    return <Page4 navigator={navigator} />
+            }
+        }
+        render() {
+            return (
+                <Navigator
+                    initialRoute={{name: 'Page1'}}
+                    configureScene={this.configureScene}
+                    renderScene={this.renderScene}
+                />
+            )
+        }
+    }
+
+    AppRegistry.registerComponent('LearnRN', () => NativeModule);
+    ```
+## 9.Text, TextInput等相关知识
+1. Text组件
+    1. 样式设置
+        1. Text内部的元素不再使用`flexbox`布局，而是采用文本布局
+        2. Text组件的高度由Text的宽度，字符串长度，字符串大小共同动态决定
+        3. 字体样式
+            * `fontFamily`
+            * `fontStyle`
+                * `normal`, 正常字体
+                * `italic`， 斜体字体
+            * `fontSize`
+            * `fontWeight`
+        4. 通用样式属性
+            1. `textAlign`
+                * `auto`, 根据字符语言决定字符串如何排列
+                * `left`
+                * `right`
+                * `center`
+                * `justify`, 两端对齐，只在ios上有效，在android等同于left
+            2. `textDecorationLine`
+                * `none`, 没有装饰线
+                * `underline`, 下画线装饰
+                * `line-through`, 装饰线贯穿装饰
+                * `underline line-through`, 下画线贯穿装饰
+            3. `lineHeight`
+                * 用来定义每一行的高度
+            4. `textShadowOffset`
+            5. `textShadowRadius`
+            6. `textShadowColor`
+        5. ios平台独有的样式
+            * `fontVariant`, 定义小型大写字母的显示文本
+            * `letterSpacing`, 定义字符串之间的空间
+            * `writingDirection`
+                * auto, 由字符语言决定
+                * ltr, 从左到右
+                * rtl, 从右到左
+            * `textDecorationStyle`
+                * `solid`, 实线装饰风格
+                * `double`, 双实线装饰风格
+                * `dotted`,点状线装饰风格
+                * `dashed`, 虚线装饰风格
+            * `textDecorationColor`
+                * 字符串修饰的颜色
+            * `adjustsFontSizeToFit`
+                * 布尔类型
+                * true, Text组件会自动按比例缩小字体以适应样式限制
+            * `allowFontScaling`
+                * 布尔类型
+                * true, Text组件显示的字体会根据失能者的设置而改变
+            * `minimumFontScale`
+                * 定义`adjustsFontSizeToFit`的最小缩小比例，取值0.01-1.0
+            * `suppressHighlighting`
+                * 布尔类型，默认值为false
+                * false, Text组件被按下后，会突出显示一个灰色椭圆背景组件
+                * true, Text组件被按下后，不会有任何变化
+                * 只有Text设置了onPress和onLongPress才生效 
+        6. Android平台独有的样式
+            * `includeFontPadding`
+                * `true`, 允许上下字符之间留下空间
+                * `false`, 消除上下字符之间的空间
+            * `selectionColor`
+                * 定义文本被选中时突出显示的颜色
+            * `textAlignVertical`, 定义垂直方向上Text组件的字符如何对齐显示
+                * `auto`
+                * `top`
+                * `bottom`
+                * `center`
+            * `textBreakStrategy`, 定义英文文本的分段策略
+                * `balanced`, 分段策略，平衡行的长度
+                * `highQuality`, 分段策略，使用连字符分段
+                * `simple`, 使用简单的分段策略  
+        7. 其他属性
+            1. `ellipsizeMode`
+                * 定义Text组件无法全部显示字符串时，如何使用省略号修饰
+                * 与`numberOfLines`属性配合使用
+                * 属性
+                    * `head`, 省略号显示在头部
+                    * `middle`, 省略号显示在中间
+                    * `tail`, 省略号显示在尾部
+                    * `clip`, 不显示省略号，直接截断 
+            2. `numberOfLines`
+                * 设置Text组件的字符可以显示为多少行
+            3. `onLongPress`
+            4. `onPress`
+            5. `Selectable`
+                * 布尔类型
+                * Text组件中的文字是否可以被选择并被复制
+    2. Text组件的嵌套
+        1. Text组件可以进行嵌套
+        2. 子Text组件不能覆盖从父Text组件继承而来的样式
+        3. 只能增加父Text组件没有的样式
+        4. 如何试图子Text组件定义与父Text组件相同的样式，样式将不会生效
+    3. 文本显示的阴影效果
+        * `textShadowOffset`
+        * `textShadowRadius`
+        * `textShadowColor`
+    4. Text居中显示
+        ```js
+        <View style={styles.container}>
+            <View style={styles.viewForTextStyle}>
+                <Text style={styles.textStyle}>happy</Text>
+            </View>
+        </View>
+
+        var styles = StyleSheet.create({
+            container: {
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center'
+            },
+            viewForTextStyle: {
+                width: 200,
+                height: 100,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'gray',
+                margin: 5
+            },
+            textStyle: {
+                fontSize: 30
+            }
+        })
+        ```
+    5. 在字符串中插入图像
+        ```js
+        <Text>
+            Welcome to <Image source={{...}} style={style.imageInTextStyle} />
+        </Text>
+        ```  
+2. `Text`组件在两个平台上的不同表现
+    1. 只指定`height`, 不指定`fontSize`
+        * 不论`height`的值为何，`fontSize`都为13
+    2. `fontSize`等于`height`
+        * ios平台，字的上方还有空间，字的最下一部分没有显示出来
+        * android平台，情况更严重
+    3. `height`大于`fontSize`
+        * ios中，height需大于fontSize的1.2倍，Text组件的下方空间才会随height的增大而变大
+        * android中，height需大于fontSize的1.35倍，Text组件的下方空间才会随height的增大而变大
+    4. `Text`组件设置边框，对android平台无效，需要在外层套一层View实现边框  
+3. 
