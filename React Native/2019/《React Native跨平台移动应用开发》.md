@@ -888,6 +888,218 @@
                     }
                 }
                 ```  
-        * 
-    3. 
-4. 
+4. `TextInput`组件的IOS平台专有属性
+    * `clearButtonMode`, 什么时候在文本View的右侧显示清除按钮
+        * `never`
+        * `while-editing`
+        * `unless-editing`
+        * `always`
+    * `clearTextOnFocus`
+    * `enablesReturnKeyAutomatically`
+        * 布尔类型，默认值为false
+        * true, 文本区域没有输入文字时，键盘的回车键会失效，而有文字时，键盘的回车键又会失效
+    * `keyboardApperance`, 键盘颜色
+        * `default`, 默认
+        * `light`, 明亮
+        * `dark`, 偏暗
+    * `onKeyPress`
+        * 按键被按下时激活，传入按下键的键值
+        * 在`onChange`回调函数之前被调用
+    * `spellCheck`
+        * false, 会关闭自动拼写检查功能
+        * 默认值从`TextInput`组件的`autoCorrect`组件中继承而来 
+5. `TextInput`组件的Android平台专有属性
+    * `numberOfLines`
+        * 设置`TextInput`组件有多少行
+        * 将它与`multiline={true}`联合使用，可以让用户输入多行
+    * `disableFullscreenUI`
+        * false, 手机操作系统如果发现`TextInput`组件的空间小，会让用户进入一个全屏文本输入的模式
+    * `inlineImageLeft`
+        * 值必须是RN的Android工程中的一个图片资源的名称
+        * RN会把这张图片无缩放的显示在`TextInput`组件的左侧
+    * `inlineImagePadding`
+    * `returnKeyLabel`
+        * 将手机软键盘的回车键设为指定的字符串
+        * 属性的优先级高于`returnkeyType`
+    * `underlineColorAndroid`
+        * 用来定义输入提示下画线的颜色
+        * 设置成与`TextInput`组件的背景色一样，则可以隐藏输入提示下画线
+6. `TextInput`的成员函数
+    * `isFocused`, 判断`TextInput`组件是否获得焦点
+        ```js
+        this.refs.aTextInputRef.isFocused();
+        ``` 
+    * `clear`, 将`TextInput`组件中的字符串清空
+        ```js
+        this.refs.aTextInputRef.clear();
+        ``` 
+7. `TextInput`组件的生命周期
+    1. 获得焦点，触发`onFocus`属性
+    2. 用户输入，触发`onChange`和`onChangeText`
+    3. 用户按下提交键，触发`onSubmitEditing`
+        * `multiline={true}`, ios, `onSubmitEditing`永不会触发
+        * `multiline={true}`, android, 按回车键 会触发`onSubmitEditing`并增加一个回车换行，同时输入框保持住焦点
+    4. 失去焦点, 触发`onEndEditing`和`onBlur`回调函数
+    5. 字符串行数发生变化，触发`onContentSizeChange`
+    6. 组件被加载或者布局发生变化，触发`onLayout`
+    7. 组件卷动时，触发`onScroll`
+    8. 组件的选中字符被改变时，触发`onSelectionChange`
+8. 键盘事件
+    1. `addListener(eventName, callback)`
+        ```js
+        import { Keyboard } from 'react-native';
+
+        keyboardDidShowHandler(event) {
+            this.setState({
+                Keyboardshown: true
+            })
+        }
+        componentWillMount() {
+            this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardDidShowHandler.bind(this));
+        }
+        componentWillUnmount() {
+            if (this.keyboardDidShowListener) {
+                this.keyboardDidShowListener.remove();
+            }
+        }
+        onDismissKeyboard() {
+            Keyboard.dismiss();
+        }
+        ```
+    2. `removeListener(eventName, callback)`
+    3. `removeAllListener(eventName)`
+    4. `dismiss()` 
+9. 组件的引用
+    1. 定义组件的引用
+        ```js
+        <TextInput ref='aReferName'>
+        ```
+    2. 得到系统定义的组件引用
+        ```js
+        ...
+        {
+            this.aArray.map((aValue, aIndex) => (
+                <ComponentA
+                    ref={refName => { this.componentRefNames[aIndex] = refName; }}
+                />
+            ))
+        }
+        ...
+        ```
+    3. 重新设定组件的属性, `setNativeProps`
+        ```js
+        // 使文本输入框变成不可编辑
+        this.refs.textInputRefer.setNativeProps({
+            editable: false
+        })
+
+        // 改变样式
+        this.refs.text2.setNativeProps({
+            style: {
+                color: 'blue',
+                fontSize: 30
+            }
+        })
+        ```
+    4. 获取组件的位置
+        1. `onLayout`回调函数是获取组件的宽高与位置信息的好办法
+        2. 对代码生成的组件, `measure`函数是获取宽高与位置信息的唯一办法
+        ```js
+        // x y表示组件的相对位置
+        // pageX, pageY表示组件相对于屏幕的绝对位置
+        this.refs.aTextInputRef.measure((x, y, width, height, pageX, pageY) => {
+
+        })
+        ```  
+10. `StatusBar`状态栏组件
+    1. 通用属性
+        * `animated`, 布尔类型，设置样式改变时是否有动画效果
+        * `hidden`, 布尔类型，设定状态栏是否隐藏
+    2. `Android`特有属性
+        * `backgroundColor`, 设定状态栏的背景颜色
+        * `translucent`, 布尔类型，设定状态栏是否有半透明效果
+        * 静态常量`currentHeight`, 用`StatusBar.currentHeight`读取手机状态栏的高度
+    3. `Ios`特有属性
+        * `barStyle`
+            * `default`
+            * `light-content`
+        * `networkActivityIndicatorVisible`
+            * 是否在状态栏显示网络活动指示器
+            * 手机有网络数据交互时，网络活动指示器就会不停的旋转
+        * `showHideTransition`
+            * 决定用`hidden`属性来显示与隐藏状态栏时的效果
+            * 取值
+                * `fade`, 淡入淡出
+                * `slide`, 滑入滑出  
+11. `TextInput`组件高度自增长
+    ```js
+    class AutoExpandTextInput extends Component {
+        constructor(props) {
+            super(props);
+
+            this.state = {
+                text: '',
+                height: 0
+            }
+        }
+        _onChange = event => {
+            this.setState({
+                text: event.nativeEvent.text,
+                height: event.nativeEvent.contentSize.height
+            })
+        }
+
+        render() {
+            return (
+                <TextInput
+                    {...this.props}
+                    multiline={true}
+                    onChange={this._onChange}
+                    style={[styles.textInputStyle, {
+                        height: Math.max(35, this.state.height)
+                    }]}
+                    value={this.state.text}
+                />
+            )
+        }
+    }
+    ```
+12. 访问操作系统剪贴板
+    ```js
+    import { Clipboard } from 'react-native';
+
+    export default class learnRN extends Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                textFromClipboard: ''
+            }
+        }
+
+        pasteFromClipboard() {
+            Clipboard.getString().then(
+                textFromClipboard => {
+                    this.setState({
+                        textFromClipboard
+                    })
+                }
+            ).catch(err => {
+                console.error(err);
+            })
+        }
+
+        copyToClipboard() {
+            Clipboard.setString('ABCD 你好');
+        }
+
+        render() {
+            return (
+                <View>
+                    <Text>{this.state.textFromClipboard}</Text>
+                    <Text onPress={this.copyToClipboard}>copy</Text>
+                    <Text onPress={this.pasteFromClipboard}>paste</Text>
+                </View>
+            )
+        }
+    }
+    ```
