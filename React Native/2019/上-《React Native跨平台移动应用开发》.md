@@ -1103,3 +1103,120 @@
         }
     }
     ```
+## 10.组件生命周期，数据存储
+1. 组件生命周期
+    1. `constructor(props)`
+        * 构造函数，RN被加载前调用
+    2. `componentWillMount()`
+    3. `componentDidMount()`
+    4. `componentWillReceiveProps(nextProps)`
+    5. `shouldComponentUpdate(nextProps, nextState)`
+    6. `componentWillUpdate(nextProps, nextState)`
+    7. `componentDidUpdate(prevProps, prevState)`
+    8. `componentWillUnmount()`
+2. 数据持久化操作
+    1. `AsyncStorage`
+        * 简单的、异步的键值存储系统
+        * 数据会被保存到手机存储空间中
+    2. 写入数据
+        1. `setItem`
+            ```js
+            // 错误
+            // try catch无法捕获到任何错误
+            try {
+                AsyncStorage.setItem('name', 123);
+            } catch(err) {
+                console.error(err);
+            }
+            ```
+            ```js
+            // 正确
+            // 可以捕获任何异常
+            AsyncStorage.setItem('name', 123).then(() => {
+                // 操作成功的处理函数
+            }).catch(err => {
+                console.error(err);
+            })
+            ```
+        2. `multiSet`
+            ```js
+            AsyncStorage.multiSet([['1', '张三'], ['2', '李四']]).then(() => {
+                // 操作成功的处理函数
+            }).catch(err => {
+                console.error(err);
+            });
+            ```
+    3. 读取数据
+        1. `getItem` 
+            ```js
+            AsyncStorage.getAllKeys().then(keys => {
+                keys.map(key => {
+                    AsyncStorage.getItem(key).then(result => {
+                        // ...
+                    }).catch(err => {
+                        console.error(err);
+                    })
+                }) 
+            }).catch(err => {
+                console.error(err);
+            })
+            ```
+        2. `multiGet`
+            ```js
+            AsyncStorage.multiGet(['1', '2']).then(results => {
+                console.log(results[0][0]); // 打印出1
+                console.log(results[0][1]); // 打印出张三
+                console.log(results[1][0]); // 打印出2
+                console.log(results[1][1]); // 打印出李四
+            }).catch(err => {
+                console.error(err);
+            })
+            ```
+        3. 可使用`AsyncStorage.flushGetRequests`取消前面所有未执行完成的`multiGet`操作
+    4. `AsyncStorage`存储的数据时无序的
+    5. 删除数据
+        1. `removeItem`
+            ```js
+            AsyncStorage.removeItem('name').then(() => {
+                // 删除成功后的操作
+            }).catch(err => {
+                console.error(err);
+            })
+            ```
+        2. `multiRemove`
+            ```js
+            AsyncStorage.multiRemove(['1', '2']).then(() => {
+                // 删除成功后的操作
+            }).catch(err => {
+                console.error(err);
+            })
+            ```
+        3. `clear`
+            ```js
+            AsyncStorage.clear().then(() => {
+                // 删除所有的数据存储成功后的操作
+            }).catch(err => {
+                console.error(err);
+            })
+            ```
+    6. 修改数据
+        * `AsyncStorage.mergeItem(akey, aValue)`
+        * `AsyncStorage.multiMerge(aArray)`
+## 11.ScrollView和ListView
+1. `ScrollView`组件
+    1. `ScrollView`组件属性
+        * `contentContainerStyle`
+            * 定义`ScrollView`组件容器的样式
+        * `horizontal`
+            * true, `ScrollView`的所有子组件将会水平排列
+            * false, `ScrollView`的所有子组件将会垂直排列
+        * `keyboardDismissMode`, 定义子组件调出软键盘后，是否允许通过拉软键盘这个手势让软键盘消失
+            * `none`, 不允许， Android操作系统只支持`none`取值
+            * `on-drag`, 手势开始时，软键盘消失
+            * `interactive`, 键盘消失的动画会与手势进展交互对应，用户向上回拉，软键盘不会消失
+        * `KeyboardShouldPersistTaps`
+            * false, 文本输入框外触按屏幕，会使软键盘消失
+            * true, 不会消失
+        * 
+    2. 
+2. `ListView`组件
