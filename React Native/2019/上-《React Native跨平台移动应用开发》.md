@@ -1487,3 +1487,149 @@
         }
     }
     ```
+## 12.等待提示、进度条、Switch
+1. `ActivityIndicator`组件
+    > 在Android手机上展示一个转动的圆圈 
+    1. `ActivityIndicator`组件样式
+        * 支持View组件的所有样式
+    2. `ActivityIndicator`其他属性
+        * `color`, 指定等待提示的颜色
+        * `animating`, 布尔类型的属性，用来决定是否等待提示
+        * `size`
+            * 指定`ActivityIndicator`的大小
+            * 取值
+                * `small`
+                * `large` 
+        * `hidesWhenStopped`
+            * ios平台独有的属性
+            * true, 如果`animating`属性为false, 则等待提示组件会隐藏不可见 
+    3. example
+        ```js
+        import { ActivityIndicator } from 'react-native';
+
+        export default class LearnRN extends Component {
+            render() {
+                return (
+                    <ActivityIndicator
+                        animating={true}
+                        color="blue"
+                        size="large"
+                    />
+                )
+            }
+        }
+        ``` 
+2. iOS进度条组件
+    1. `ProgressViewIOS`组件
+        * `progress`
+            * 数值类型
+            * 设置进度条的进度，取值为0-1, 需要动态变化
+        * `progressImage`
+            * `Image.propTypes.source`类型的属性
+            * 指定一张可以拉伸的图片，用来取代默认的进度条/进度线
+        * `trackImage`
+            * `Image.propTypes.source`类型的属性
+            * 指定一张可以拉伸的图片，显示为进度条的背景图片
+        * `progressTintColor`
+            * 字符串类型的属性
+            * 指定进度条的颜色
+        * `trackTintColor`
+            * 字符串类型的属性
+            * 用来指定进度条背景图片可以渲染的侵蚀颜色
+    2. example
+        ```js
+        import { ProgressViewIOS } from 'react-native';
+
+        export default class LearnRN extends Component {
+            constructor(props) {
+                super(props);
+
+                this.state = {
+                    progress: 0
+                }
+                this.progressTimer = null;
+                this.updateProgress = this.updateProgress.bind(this);
+            }
+            componentDidMount() {
+                this.updateProgress();
+            }
+            componentWillUnmount() {
+                window.cancelAnimationFrame(this.progressTimer);
+            }
+            updateProgress() {
+                this.setState({
+                    progress: (this.state.progress + 0.0025) % 1
+                })
+
+                // 每1/60秒执行1次
+                this.progressTimer = window.requestAnimationFrame(() => this.updateProgress());
+            }
+
+            render() {
+                return (
+                    <ProgressViewIOS
+                        style={{top: 50}}
+                        progress={this.state.progress}
+                    />
+                )
+            }
+        }
+        ``` 
+3. Android平台进度条组件
+    1. `ProgressBarAndroid`
+        * `color`
+            * 颜色类型属性
+            * 指定等待提示条或者进度条的颜色
+        * `indeterminate`
+            * 布尔类型
+            * true, 表示当前的组件是等待提示条
+            * false, 表示当前的组件是有明确进度的进度条
+        * `progress`
+            * 数值类型
+            * 设置进度条的进度，取值为0-1, 需要动态变化
+        * `styleAttr`
+            * 指定`ProgressBar`的外形
+            * 取值
+                * `Horizontal`, 只能使用该属性  
+                * 其他属性用来构造旋转小圈的进度条，开发者应该使用`ActivityIndicator`组件
+    2. example
+        ```js
+        import { ProgressBarAndroid } from 'react-native';
+
+        // ...
+        render() {
+            return (
+                <ProgressBarAndroid
+                    styleAttr="Horizontal"
+                    indeterminate={false}
+                    style={{top: 50}}
+                    progress={this.state.progress}
+                />
+            )
+        }
+        // ...
+        ```
+4. `Switch`组件
+    1. `Switch`属性
+        * `disabled`
+            * 布尔类型
+            * true, 不能通过触摸开关组件来改变开关
+        * `onValueChange`
+            * 回调函数，检测用户改变开关组件的事件
+        * `value`
+            * 布尔类型
+            * 设置开关组件的值
+    2. `Switch`在ios平台独有的属性
+        * `iosonTintColor`
+            * 设置开关打开时的背景色
+        * `iosthumbTintColor`
+            * 设置开关的颜色
+        * `iostintColor`
+            * 设置开关关闭时的颜色
+    3. example
+        ```js
+        <Switch
+            onValueChange={this.onSwitchChanged}
+            value={this.state.aSwitch}
+        />
+        ``` 
