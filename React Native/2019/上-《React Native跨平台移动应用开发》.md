@@ -1217,6 +1217,145 @@
         * `KeyboardShouldPersistTaps`
             * false, 文本输入框外触按屏幕，会使软键盘消失
             * true, 不会消失
-        * 
-    2. 
+        * `onContentSizeChange`
+            * `ScrollView`组件的容器View宽、高被改变时，回调函数被执行
+        * `onScroll`
+            * `ScrollView`组件滑动时，每一帧的画面改变都会触发一次此函数
+            * 可以通过`scrollEventThrottle`属性控制回调的频率
+        * `pagingEnabled`
+            * true, `ScrollView`组件中显示的内容在滑过整数倍的`ScrollView`宽、高时会停止滑动，用来实现水平方向整页滑动
+            * 默认值为false
+        * `removeClippedSubviews`
+            * true(默认值),通过不处理不在屏幕范围内的子View而提高滑动效果体验 
+        * `scrollEnabled`
+            * false, `ScrollView`组件将不能卷动
+        * `showsHorizontalScrollIndicator`
+            * true, 水平方向的`ScrollView`组件会有一个滑动指示器
+        * `showsVerticalScrollIndicator`
+            * true, 垂直方向的`ScrollView`组件会有一个滑动指示器 
+    2. `ScrollView`组件Ios平台专有属性
+        * `alwaysBounceHorizontal`
+            * `horizontal`属性为true时，默认值为true, 否则为false
+            * true, `ScrollView`在手指滑动到尽头时会有一个弹动效果
+        * `alwaysBounceVertical`
+            * 控制垂直方向的滑动效果
+            * `horizontal`属性为false时，默认值为true, 否则为false
+        * `automaticallyAdjustContentInsets`
+            * `ScrollView`被放置在导航栏、分页栏、工具栏后，ios系统是否自动调整它的内容
+            * 默认值为true
+        * `bounces`
+            * true, 滑动到尽头，有一个弹动效果
+            * false, 不会有弹动效果，即使`alwaysBounceHorizontal`的值为true
+        * `bouncesZoom`
+            * true, 可通过手势操作使`ScrollView`缩放超过它设定的最大值/最小值，手势操作结束后，`ScrollView`会回到它允许的最大/最小值
+            * false, 不允许超过最大值/最小值
+        * `canCancelContentTouches`
+            * false, 如果`ScrollView`组件中的子组件处理了触摸事件，触摸事件不会交给`ScrollView`组件处理
+        * `centerContent`
+            * true, 如果`ScrollView`的显示内容的宽、高小于`ScrollView`的宽、高，`ScrollView`会自动将内容居中显示
+        * `centerInset`, 定义了`ScrollView`相对父View边框从哪里开始显示
+            * 默认值为{0, 0, 0, 0}
+            * 接受{top: number, left: number, bottom: number, right: number}
+        * `contentOffset`
+            * 手动设置开始滑动的偏移值, 默认值为{x: 0, y: 0}
+        * `decelerationRate`
+            * 定义手指离开屏幕时，`ScrollView`的滑动减速效果有多快
+            * 合理的设置区间为0.998(正常速度)-0.9（快速减速）
+        * `directionalLockEnabled`
+            * true, `ScrollView`只允许垂直（或水平）方向滑动
+        * `indicatorStyle`, 设置滚卷条的颜色
+            * `default`
+            * `black`
+            * `white`
+        * `maximumZoomScale`
+            * 设置允许最大的缩放比例，默认值为1.0
+        * `minimumZoomScale`
+            * 设置允许最小的缩放比例, 默认值为1.0
+        * `zoomScale`
+            * 设置当前`ScrollView`组件的缩放比例, 默认值为1.0
+        * `onScrollAnimationEnd`
+            * 回调函数，滑动动画效果结束时将被调用
+        * `scrollEventThrottle`
+            * 控制滑动事件的触发频率（每秒触发多少次）
+            * 默认值为0，表示滑动事件只在`ScrollView`被滑动时触发一次
+        * `scrollIndicatorInsets`
+            * 定义`ScrollView`滑动指示器相对于父View边框从哪里开始显示
+            * 接收{top: number, left: number, bottom: number, right: number}
+        * `scrollsToTop`
+            * true, 用户点击状态栏将使`ScrollView`回到顶部
+        * `snapToInterval`
+            * `Number`类型
+            * `ScrollView`每滑过整数倍的`SnapToInterval`宽 高时会停止滑动
+            * 可以给宽 高小于`ScrollView`宽高的子组件提供类似分页的效果
+        * `snapToAlignment`
+            * 当`snapToInterval`设定后，`snapToAlignment`定义停止滑动的行为
+            * 取值
+                * `start`, 分页的头部与`ScrollView`的头部对齐
+                * `center`, 中部对齐
+                * `end`, 底部对齐 
+        * `stickyHeaderIndices`
+            * 数值数组类型
+            * 设定哪个子组件会固定在屏幕上方而不会在滑动时滑出屏幕
+            * `stickyHeaderIndices={[0]}`, 将使第一个子组件固定在`ScrollView`的顶部
+            * 不能与`horizontal={true}`同时使用 
+    3. `ScrollView`的Android平台专有属性
+        * `endFillColor`
+            * 渲染`ScrollView`富余空间的颜色
+    4. `ScrollView`组件的公开成员函数
+        * `setNativeProps`
+        * `measure`
+        * `scrollTo`
+            ```js
+            aScrollViewRef.scrollTo({x: 0, y: 50, animated: true})
+            ``` 
+        * `scrollToEnd`
+    5. `RefreshControl`组件
+        * 给`ScrollView`组件的`refreshControl`赋值，当`ScrollView`被拉到顶部时(y: 0)时，会显示赋值的`RefreshControl`组件
+        * 属性
+            * `onRefresh`
+                * 当`ScrollView`拉到顶部时，这个函数会被执行
+            * `refreshing`
+                * 布尔类型，设置当前是否显示`RefreshControl`组件  
+    6. Android平台特有属性
+        * `colors`
+            * 数组类型，设定刷新指示器的颜色
+            * 数组中的每一个元素都应当是1个颜色值
+        * `enabled`
+            * 布尔类型，控制是否打开刷新功能
+        * `progressBackgroundColor`
+            * 设置刷新指示器的背景颜色
+        * `size`
+            * 设置刷新指示器的尺寸
+            * 默认值为`RefreshControl.SIZE.DEFAULT` 
+    7. iOS平台特有属性
+        * `tintColor`, 设置刷新指示器的颜色
+        * `title`, 设置刷新指示器下的字符串
+    8. `ScrollView`组件的用法
+        * `ScrollView`组件必须要有明确的高度值限制，这个限制要么在`ScrollView`组件的样式中设置，要么在它的父组件样式中设置
+        ```js
+        import { RefreshControl } from 'react-native';
+
+        <ScrollView
+            style={styles.scrollView}
+            onScroll={this.onScroll}
+            refreshControl={
+                <RefreshControl
+                    refreshing={true}
+                    onRefresh={this._onRefresh}
+                    tintColor="#ff0000"
+                    title="Loading..."
+                    colors={['#ff0000', '#00ff00', '#0000ff']}
+                    progressBackgroundColor="#ffff00"
+                />
+            }
+        >
+            <View style={styles.aView} />
+            <View style={styles.bView} />
+        </ScrollView>
+        ```        
 2. `ListView`组件
+> ListView能够高效的更改刷新列表中的数据
+> ListView能适应动态加载非常多的数据，让它的滚动尽可能的平滑
+> ListView继承了View组件和ScrollView组件的所有属性    
+    1. 
+3.  
