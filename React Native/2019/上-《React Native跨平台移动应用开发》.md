@@ -1632,4 +1632,153 @@
             onValueChange={this.onSwitchChanged}
             value={this.state.aSwitch}
         />
-        ``` 
+        ```
+## 13.导航组件Navigator与Modal
+1. `Navigator`的属性
+    1. `configureScene`
+        * 会接收1个导航路径参数，开发者可以根据导航路径中的各信息来决定场景切换使用何种效果
+        * 返回值
+            * `PushFromRight`
+            * `PushFromLeft`
+            * `FloatFromRight`
+            * `FloatFromLeft`
+            * `FloatFromBottom`
+            * `FloatFromBottomAndroid`
+            * `FadeAndroid`
+            * `HorizontalSwipeJump`
+            * `VerticalUpSwipeJump`
+            * `VerticalDownSwipeJump`
+            * `HorizontalSwipeJumpFromLeft`
+    2. `onDidFocus`
+        * 回调函数
+        * 导入新的场景时，或者新的场景切换完成时，回调函数被调用
+        * 接收一个保存有新场景路径信息的参数
+        * RN官方建议使用`navigationContext.addListener('didfocus', callback)`
+    3. `onWillFocus`
+        * 回调函数
+        * 导航组件准备进行场景切换前，回调函数将被调用
+        * RN官方建议使用`navigationContext.addListener('willfocus', callback)`
+    4. `renderScene`
+        * 用来为特定路径实现界面的渲染
+        * 当它被调用时，会提供一个`router`对象(导航路径)和1个`navigator`对象(导航器本身) 
+    5. `sceneStyle`
+        * style类型属性
+        * 设定的样式将被应用到每一个切换的场景中
+    6. `initialRoute`
+        * 如果`Navigator`组件有`initialRouteStack`属性，那么`initialRoute`必须时`initialRouteStack`的一个元素
+        * 如果提供了`initialRouteStack`但没有提供`initialRoute`, 那么`initialRouteStack`的最后一个元素将默认为`initialRoute`
+    7. `navigationBar`
+        * 返回1个可渲染的节点
+        * 节点可以用作所有界面的通用导航栏
+2. 导航器
+    * `getCurrentRoutes()`, 用来得到当前的路径列表
+    * `jumpBack()`, 退回到上一个界面而不卸载当前界面
+    * `jumpForward()`, 向前跳转一个界面而不卸载当前界面
+    * `jumpTo(route)`, 跳转到某个界面而不卸载任何界面
+    * `push(route)`, 导航组件在路径列表最前端添加一个新的界面，并马上跳转至这个界面
+    * `pop()`, 导航器退回一个界面并卸载原界面
+    * `replace(route)`, 导航器将当前界面用1个新的界面替代
+    * `replaceAtIndex(route, index)`, 使用一个新的界面替代路径列表中的第index个界面， 但不改变当前显示界面
+    * `replacePrevious(route)`, 将当前导航路径的上一个界面使用指定的界面替代
+    * `immediatelyResetRouteStack(routeStack)`, 使用给定的路径列表替换当前的路径列表
+    * `popToRoute(route)`, 导航器退回到指定的界面，并将回退过的界面都一一卸载
+    * `popToTop()`, 导航器会回到界面路径列表中的第一个界面，并且卸载其他所有界面
+    * `popN()`, 接收1个数值型参数，导航器会退回多个界面并卸载退回的多个界面 
+3. `NavigationBar`
+    ```js
+    // 这里可以使用react-navigation
+    import { Navigator } from 'react-native';
+    import NavigationBarRouteMapper from './NavigationBarRouteMapper';
+
+    export default class LearnRN extends Component {
+        constructor(props) {
+            super(props);
+            this.touchtime = 0;
+            this.switchSceneStyle = Navigator.SceneConfigs.PushFromRight;
+            this.initialRoute = {
+                UIIndex: 0,
+                cbForLeftButton: this.callbackforLeftButton
+            }
+
+            this.state = {
+                textPromp: '',
+                UIIndex: 0
+            }
+        }
+        renderScene(router, navigator) {
+            return (
+                <ImageDisplayer
+                    navigator={navigator}
+                    textForLeftButton={'新文字'}
+                    cbForLeftButton={this.callbackforLeftButton}
+                    UIIndex={this.state.UIIndex}
+                    textPrompt={this.state.textPrompt}
+                    callback={this.changeStateVarBeforeRoute}
+                />
+            )
+        }
+        callbackforLeftButton() {
+            console.log('call back function received number:' + aNumber);
+        }
+        configureScene(route) {
+            return this.switchSceneStyle;
+        }
+        changeStateVarBeforeRoute() {
+            this.touchtime++;
+            let textPromp;
+            switch (this.touchtime % 2) {
+                case 0:
+                    textPromp = 'PushFromRight';
+                    this.switchSceneStyle = Navigator.SceneConfigs.PushFromRight;
+                    break;
+                case 1:
+                    textPromp = 'FloatFromRight';
+                    this.switchSceneStyle = Navigator.SceneConfigs.FloatFromRight;
+                    break;
+            }
+            this.setState({
+                textPromp,
+                UIIndex: this.state.UIIndex + 1
+            })
+        }
+        render() {
+            return (
+                <Navigator
+                    initialRoute={this.initialRoute}
+                    configureScene={this.switchSceneStyle}
+                    navigationBar={<Navigator.NavigationBar routeMapper={NavigationBarRouteMapper}>}
+                    renderScene={this.renderScene}
+                >
+                </Navigator>
+            )
+        }
+    }
+
+    ```
+4. `Modal`组件
+    * `animationType`
+        * 控制`Modal`组件的呈现方式
+        * 属性
+            * `none`, 没有动画效果，直接呈现
+            * `slide`, 从底部滑上来
+            * `fade`, 代表淡入淡出 
+    * `onShow`
+        * `Modal`组件在屏幕上完成显示后，回调函数被执行
+    * `transparent`
+        * true, `Modal`组件浮现在原来的`View`上
+    * `visible`
+        * 布尔类型，决定`Modal`显示或者隐藏
+    * `onRequestClose`
+        * `Modal`显示时，用户按下返回键，这个函数将被调用
+        * 在`Android`平台，这个属性必须要有值
+    * `onOrientationChange`
+        * ios平台独有
+        * `Modal`显示时，手机的放置方向改变，回调函数将被调用 
+    * `supportedOrientations`
+        * ios平台独有，用来声明`Modal`组件支持的手机放置方向
+        * 取值
+            * `portrait`
+            * `portrait-upside-down`
+            * `landscape`
+            * `landscape-left`
+            * `landscape-right`  
