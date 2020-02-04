@@ -1354,8 +1354,136 @@
         </ScrollView>
         ```        
 2. `ListView`组件
-> ListView能够高效的更改刷新列表中的数据
-> ListView能适应动态加载非常多的数据，让它的滚动尽可能的平滑
-> ListView继承了View组件和ScrollView组件的所有属性    
-    1. 
-3.  
+    > ListView能够高效的更改刷新列表中的数据
+    > ListView能适应动态加载非常多的数据，让它的滚动尽可能的平滑
+    > ListView继承了View组件和ScrollView组件的所有属性    
+    1. `ListView`组件的回调函数
+        * `onEndReached`
+            * `ListView`所有行都被渲染在屏幕上，并且List被滑动到底部时被调用
+            * 底部可以通过`onEndReachedThreshold`这个数值定义一个以pt为单位的门限值
+        * `renderFooter`
+            * 回调函数用来渲染List的底栏
+            * 需要返回一个`renderable`组件
+            * 每一次重新渲染都会被调用
+        * `renderHeader`
+            * 回调函数用来渲染List的首栏
+            * 需要返回一个`renderable`组件
+            * 每一次重新渲染都会被调用
+        * `renderRow`
+            * 回调函数，用来渲染`List`的每一栏
+            * 接收4个参数
+                * `rowData`, 给`ListView`提供的数据
+                * `sectionID`, 开发者提供的
+                * `rowID`， 数据在列表中第几行
+                * `highlightRow`, 高亮显示列表中某行时的调用函数
+            * 返回1个`renderable`组件
+        * `renderScrollComponent`
+            * 提供一个可滑动的组件供list在其中渲染
+            * 接收props作为参数，并且需要返回一个可渲染的组件
+            * 默认的`renderScrollComponent`返回1个`ScrollView`组件
+        * `renderSectionHeader`
+            * 回调函数，用来渲染某一节的头部
+            * 接收2个参数
+                * `sectionData`
+                * `sectionID`
+            * 返回1个可渲染的组件
+        * `renderSeparator`
+            * 回调函数，用来在每一行下渲染一个分割单元
+            * 接收3个参数
+                * `sectionID`
+                * `rowID`
+                * `adjacentRowHighlighted` 
+            * 返回1个`renderable`组件
+        * `onChangeVisibleRows`
+            * 回调函数，通知哪些行为已经成为屏幕上的可见行, 而哪些行的可见性已经改变
+            * 接收2个参数
+                * `visibleRows`
+                    * map结构
+                    * 格式是`{sectionID: {rowID:true}}`, 记录当前屏幕上的所有可见ID
+                * `changedRows`
+                    * map结构
+                    * 格式是`{sectionID: {rowID:true|false}}`, 记录当前被改变行可见或者不可见  
+    2. `ListView`组件的其他属性
+        * `dataSource`
+            * 是1个`ListViewDataSource`类型的属性
+            * 用来描述列表的数据来源
+        * `initialListSize`
+            * 数值类型属性
+            * 定义多少行会在`ListView`挂接上时被渲染
+            * 使用这个属性用来保证第一屏的`List`会一次性被渲染
+        * `onEndReachedThreshold`
+            * 数值类型属性
+            * 结合`onEndReached`回调函数使用，以pt为单位
+        * `pageSize`
+            * 数值类型属性
+            * 定义在1个事件循环中，多少行会被渲染
+            * 默认值为1，即每次消息循环中只有一行会被渲染，这样把占用CPU耗时长的操作分散成多个耗时少的操作，让程序更加流畅
+        * `removeClippedSubviews`
+            * 布尔类型
+            * true, 不处理不在屏幕范围内的行，从而提高滑动体验
+        * `scrollRenderAheadDistance`
+            * 定义了列表行距出现在屏幕最下方还有多少px时，该列表行开始渲染
+        * `automaticallyAdjustContentInsets`
+            * 布尔类型
+            * false, 调整`ListView`与上一个组件之间的奇怪空格 
+    3. `ListView`组件的成员函数
+        * `scrollTo(destY, destX)`  
+3. `ListView`组件的实现
+    ```js
+    import { ListView } from 'react-native';
+    export default class LearnRN extends Component {
+        constructor(props) {
+            super(props);
+
+            var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+            this.state = {
+                diaryListDataSource: ds.cloneWithRows(['row 1', 'row 2']),
+            }
+        }
+        // data是1个对象，代表当前列的相应数据
+        // sectionID代表当前列表的分段号
+        // rowID代表当前行在整个列表中行号
+        renderListItem(rowData, sectionID, rowID) {
+            return (
+                <TouchableOpacity
+                    onPress={() => this.props.selectListItem(rowID)}
+                >
+                    <Text>{rowData}</Text>
+                </TouchableOpacity>
+            )
+        }
+        renderHeader() {
+            return (
+                <View style={styles.section}>
+                    <Text style={styles.sectionText}>我是Header</Text>
+                </View>
+            )
+        }
+        renderFooter() {
+            return (
+                <View style={styles.section}>
+                    <Text style={styles.sectionText}>我是Footer</Text>
+                </View>
+            )
+        }
+        renderSeparator() {
+            return (
+                <View style={styles.section}>
+                    <Text style={styles.sectionText}>我是Separator</Text>
+                </View>
+            )
+        }
+        render() {
+            return (
+                    <ListView
+                        dataSource={this.state.diaryListDataSource}
+                        renderRow={this.renderListItem}
+                        renderSectionHeader={this.renderSectionHeader}
+                        renderSeparator={this.renderSeparator}
+                        renderHeader={this.renderHeader}
+                        renderFooter={this.renderFooter}
+                    />
+            )
+        }
+    }
+    ```
