@@ -381,5 +381,334 @@
     * `allowsInlineMediaPlayback`
         * 布尔类型, 默认值false
         * 决定H5网页中的视频是在网页中播放还是使用原生的全屏视频播放器播放
-    * 
+    * `bounces`
+        * 布尔类型
+        * `WebView`拉到尽头时，是否有弹动效果
+    * `onShouldStartLoadWithRequest`
+        * 回调函数
+        * `WebView`访问的网页中触发的任何js发起的请求都会交给这个回调函数
+        * 回调函数分析js发起的请求，然后返回true或者false以决定是否执行js发起的请求
+    * `scrollEnabled`
+        * 布尔类型
+        * 用来决定是否允许当前网页上下滚动
+    * `decelerationRate`
+        * `WebView`停止划动动作后，页面减速的方式
+        * 取值
+            * `normal`
+            * `fast`  
 3. android平台独有属性
+    * `domStorageEnabled`
+        * 布尔类型
+        * 是否允许DOM在本机存储
+    * `javaScriptEnabled`
+        * 布尔类型
+        * 是否允许运行javascript脚本
+    * `userAgent`
+        * 用来给`WebView`组件设置代理 
+4. `WebView`组件成员函数
+    * `onLoadinStart`，供开发者调用`onLoadStart`回调函数
+    * `onLoadingError`, 供开发者调用`onLoadError`回调函数
+    * `onLoadingFinish`, 供开发者调用`onLoadEnd`回调函数
+    * `reload`, 供开发者调用重新加载当前页面
+5. example
+    ```js
+    <WebView
+        ref="webViewRef"
+        automaticallyAdjustContentInsets={false}
+        source={
+            uri: 'https://news.sina.com.cn'
+        }
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        onNavigationStateChange={this.onNavigationStateChange}
+        startInLoadingState={true}
+    />
+    ```
+    ```js
+    <WebView
+        automaticallyAdjustContentInsets={false}
+        source={require('./A.html')}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        startInLoadingState={true}
+    />
+    ```
+6. 音视频媒体播放
+    * 通过`WebView`访问包含音视频媒体的网页
+## 4. 应用权限与图库操作
+1. Android平台应用权限
+    * 在项目`AndroidManifest.xml`文件中申请
+        * 手机震动
+        * 访问网络
+        * 其他普通权限
+    * 通过`PermissionsAndroid API`实现动态授权
+        * 读取sdcard
+        * 访问通讯录
+        * 访问用户摄像头
+        * 获取用户位置
+    * `CameraRoll API`
+        * 对手机中保存的图片、视频进行遍历操作与访问
+        * 还可以实现上传图片、裁剪图片功能 
+2. ios平台应用权限
+    * 在项目`info.plist`文件中声明需要使用的权限, 并可设置一段提示语
+    * 第一次执行到需要相应权限的地方时，会弹出选择提示框让用户决定是否给应用相应的权限
+3. example(申请摄像头权限)
+    ```js
+    PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.CAMERA).then(result => {
+        if (result) {
+            this.doSomething();
+            return;
+        }
+        PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
+            title: 'LearnRN权限申请',
+            message: 'LearnRN申请摄像头相关权限'
+        }).then(permission => {
+            if (permission === 'granted') {
+                this.doSomething();
+            } else {
+                if (permission === 'denied') {
+                    this.doOtherthing();
+                } else {
+                    this.doAnotherthing();
+                }
+            }
+        })
+    }).catch(err => {
+        console.error(err);
+    })
+    ```
+4. `React Native`在ios平台以链接库的方式提供一些功能
+5. `getPhotos`获取手机中所有图片的信息
+    * `getPhotos`的第1个参数是1个对象，有4个值
+        * `first`, 数值型变量，告诉`CameraRoll API`希望获取多少张图片信息
+        * `groupTypes`, 用来指定获取图片或者视频的类型
+            * `Album`
+            * `All`
+            * `Event`
+            * `Faces`
+            * `Library`
+            * `PhotoStream`
+        * `assetType`
+            * `Photos`, 只获取图片
+            * `All`
+            * `Videos`
+        * `after`, 记录上一次获取图片的截止标记
+    * example
+        ```js
+        import { CameraRoll } from 'react-native';
+
+        // ...
+        CameraRoll.getPhotos({ first: 50 }).then(data => {
+            // ...
+        }).catch(err => {
+            console.error(err);
+        })
+        // ...
+        ``` 
+6. 获取到的图片信息
+    1. Android平台和Ios平台都具备的图片信息
+        * type, 值为`image/jpeg`或者`image/png`
+        * group_map, 用来保存当前图片文件的文件夹名
+        * timestamp, 时间戳数值
+        * image, { width: number, height: number, uri: string, filename: string }, 可以传给Image组件显示图片信息
+    2. Ios平台图片信息
+        * isStored, 获取到的图片，这个值都为true
+        * location, { latitude: string, longitude: string, altitude: string, heading: string, speed: string }
+    3. 显示`CameraRoll API`获取到的图片
+        ```js
+        import { CameraRoll } from 'react-native';
+
+        // ...
+        componentWillMount() {
+            CameraRoll.getPhotos({
+                first: 1
+            }).then(data => {
+                let image = data.edges[0].node.image;
+                this.setState({ image })
+            })
+        }
+
+        render() {
+            return (
+                <Image
+                    style={styles.imageStyle}
+                    source={this.state.image}
+                />
+            )
+        }
+        // ...
+        ```  
+        
+7. 上传图片
+    ```js
+    CameraRoll.getPhotos({
+        first: 1000
+    }).then(data => {
+        const image = data.edges[0].node.image;
+        if (Platform.OS !== 'ios') image.filename = 'test.jpg';
+
+        let body = new FormData();
+        body.append('photo', {
+            uri: image.uri,
+            name: image.filename,
+            filename: image.filename,
+            type: 'image/jpg'
+        }),
+        body.append('Content-Type', 'image/jpg');
+
+        let aObj = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            },
+            body
+        }
+
+        fetch(uri, aObj).then(result => {
+            // ...
+        })
+    })
+    ```
+8. 裁剪图片
+    ```js
+    import { ImageEditor } from "react-native";
+
+    // ...
+    cropImageDone(aUri) {
+
+    }
+    cropImageFailed(error) {
+
+    }
+    let cropData = {
+        offset: { x: 0, y: 0 },
+        size: { width: 600, height: 1200 },
+        displaySize: { width: 600, height: 1200 },
+        resizeMode: 'contain'
+    }
+
+    ImageEditor.cropImage(this.image, cropData, this.cropImageDone.bind(this), this.cropImageFailed.bind(this))
+    // ...
+    ```
+## 5. 选择器、位置相关、应用状态
+1. 日期、时间选择器
+    1. `DatePickerAndroid` API
+    2. `TimePickerAndroid` API
+    3. `DatePickerIOS`组件 
+2. `Picker`组件
+    1. `Picker`组件的属性
+        * `onValueChange`, 传递2个参数
+            * `itemValue`, 被选中项的`value`值
+            * `itemPosition`, 被选中项在`picker`中的索引位置
+        * `selectedValue`, 指定默认选中的值
+    2. `Android`平台特有属性
+        * `enabled`, 是否可选择
+        * `mode`, Picker的呈现方式
+            * `dialog`
+            * `dropdown`
+        * `prompt`, mode为dialog时，选择框的提示内容
+    3. `ios`平台特有属性
+        * `itemStyle`, 每个选项标签上的样式
+    4. `Picker.Item`组件的属性
+        * `label`, 选项的显示字符串
+        * `color`, 选项的显示颜色
+        * `value`, 选项的返回值
+    5. example
+        ```js
+        import { Picker } from 'react-native';
+
+        <Picker
+            mode={Picker.MODE_DROPDOWN}
+            prompt="提示字符串"
+        >
+            {
+                this.options.map((option, index) => (
+                    <Picker.Item
+                        key={index}
+                        label={option}
+                        value={option}
+                    />
+                ))
+            }
+        </Picker>
+        ```    
+3. `PickerIOS`组件
+4. `Slider`组件
+    > 在某个值范围内来选择一个值
+    * `Disabled`, true则用户不能操作这个组件
+    * `maximumValue`, 默认值为1，用来定义可选择的最大值
+    * `minimumValue`, 默认值为0，用来定义可选择的最小值
+    * `onSlidingComplete`, 用户改变数值后回调函数被调用
+    * `onValueChange`, 用户拖动组件时，函数被持续调用
+    * `step`, 每次拖动的最小单位
+    * `value`, 初始值
+5. `AppState` API
+    1. 支持2个静态函数`addEvenListener`和`removeEvenListener`
+    2. 得知当前应用是前台运行还是后台运行
+        * `active`
+        * `inactive`
+        * `background`
+    3. example
+        ```js
+        import { AppState } from 'react-native';
+
+        // ...
+        componentWillMount() {
+            AppState.addEvenListener('change', newState => {
+
+            })
+        }
+        componentWillUnmount() {
+            AppState.removeEvenListener('change', newState => {
+
+            })
+        }
+        // ...
+        ```   
+6. 获取地理位置
+    1. ios平台，项目的`Info.plist`文件中要有`NSLocationWhenInUseUsageDescription`
+    2. android平台，项目的`AndroidManifest.xml`文件中
+        ```js
+        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION">
+        ```
+    3. 获取地理位置
+        ```js
+        // ...
+        componentDidMount() {
+            navigator.geolocation.getCurrentPosition(position => {
+            
+            }, error => {
+
+            }, {
+                enableHighAccuracy: true, // 允许高精度定位
+                timeout: 20000, // 20s没有位置信息则停止获取
+                maximumAge: 1000 // 定位结果缓存1000毫秒
+            })
+
+            // 地理位置变化监听器
+            this.watchID = navigator.geolocation.watchPosition(position => {
+
+            })
+        }
+        componentWillUnmount() {
+            // 应用退出前，关闭地理位置变化监听器
+            navigator.geolocation.clearWatch(this.watchID);
+        }
+        // ...
+        ``` 
+7. `Vibration` API
+    1. Android需要在`AndroidManifest.xml`中加入
+        ```js
+        <uses-permission android:name="android.permission.VIBRATE">
+        ```
+    2. 实现手机振动
+        ```js
+        import { Vibration } from 'react-native';
+
+        Vibration.vibrate([0, 500, 200, 500])
+        ```
+    3. 
+8. 地图功能
+    * `react-native-maps`
+    * 百度地图
+    * 高德地图
