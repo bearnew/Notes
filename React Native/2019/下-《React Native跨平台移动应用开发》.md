@@ -313,4 +313,73 @@
         * 拨打电话
             ```js
             tel:电话号码
-            ```  
+            ```
+## 3. 网页浏览器、音视频媒体播放器
+1. `WebView`
+    1. `WebView`继承所有的`View`属性
+    2. `WebView`非回调函数属性
+        * `automaticallyAdjustContentInsets`
+            * 布尔类型
+            * true, 打开WebView组件自动调整网页内容功能
+        * `contentInset`
+            * 类变量类型的属性，接收`{top: number, left: number, bottom: number, right: number}`
+            * 定义`WebView`组件中显示内容距`WebView`四边的距离
+        * `html`
+            * 用来在`WebView`组件中显示指定的`HTML`字符串
+        * `injectedJavascript`
+            * 字符串类型
+            * 网页加载时，需要运行的`javascript`代码
+        * `mediaPlaybackRequiresUserAction`
+            * 默认值为true
+            * 加载H5格式的音频或者视频时，是否需要用户点击屏幕来确认播放
+        * `scalesPageToFit`
+            * 默认值为true
+            * `WebView`会自动缩放当前显示网页的显示比例，适应`WebView`的窗口
+            * 用户可以通过两点手势改变显示比例
+        * `startInLoadingState`
+            * 布尔类型
+            * 指定`WebView`组件在刚开始加载时的`Loading`状态
+        * `url`
+            * 字符串类型
+            * 指定`WebView`组件加载的网址
+        * `source`
+            * 结构1
+                ```js
+                {
+                    uri: string, // 用来指定webview组件加载的网页
+                    method: string, // 用来指定加载的方法，除非服务器配合支持，否则不要设置
+                    headers: object, // 用来指定加载时的HTTP消息头，除非服务器配合支持，否则不要设置
+                    body: string // 用来指定加载的HTTP消息体，除非服务器配合支持，否则不要设置
+                }
+                ``` 
+            * 结构2
+                ```js
+                {
+                    html: string, // 用来指定直接加载的HTML页面格式
+                    baseUrl: string // 用来将需要加载的文件路径写成相对于项目的相对路径
+                }
+                ``` 
+        * 
+    3. `WebView`回调函数属性
+        * `onError`
+            * `WebView`加载错误时的处理函数
+        * `onLoad`
+            * `WebView`加载结束时的处理函数
+        * `onLoadEnd`
+            * 网页加载成功或失败，都会调用
+        * `onLoadStart`
+            * 开始加载网页时被调用
+        * `onMessage`
+            * H5中的`postMessage`被调用时，会调用，并得到`postMessage`的参数
+        * `onNavigationStateChange`
+            * 导航状态改变时将被调用
+        * `renderError`
+            * `WebView`加载网页出错时，将在手机屏幕上渲染这个View组件与它的所有子组件
+        * `renderLoading`
+            * 返回一个加载状态指示器 
+2. ios平台独有属性
+    * `allowsInlineMediaPlayback`
+        * 布尔类型, 默认值false
+        * 决定H5网页中的视频是在网页中播放还是使用原生的全屏视频播放器播放
+    * 
+3. android平台独有属性

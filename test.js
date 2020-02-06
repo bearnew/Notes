@@ -1,35 +1,37 @@
-const list = [520, 600, 502, 32, 666, 36, 8, 998, 49, 9];
-console.log(radixSort(list)); // [8, 9, 32, 36, 49, 502, 520, 600, 666, 998]
+const list = [5, 4, 3, 2, 1];
+console.log(binarySearch(list, 3)); // 2
 
-function radixSort(array) {
-    let maxLength = 0
-    for (let v of array) {
-        let length = String(v).length
-        if (length > maxLength) {
-            maxLength = length
+function binarySearch(list, item) {
+    const arr = quickSort(list);
+
+    let low = 0;
+    let high = arr.length - 1;
+    let mid;
+    let element;
+
+    while (low <= high) {
+        mid = Math.floor((low + high) / 2);
+        element = arr[mid];
+
+        if (element < item) {
+            low = mid + 1;
+        } else if (element > item) {
+            high = mid - 1;
+        } else {
+            return mid;
         }
-    }
-    for (i = 0; i < maxLength; i++) {
-        array = sort(array, i)
     }
 
-    function sort(array, index) {
-        let buckets = []
-        for (let i = 0; i < 10; i++) {
-            buckets.push([])
-        }
-        for (let v of array) {
-            // padStart用于头部补全
-            let pad = String(v).padStart(maxLength, '0')
-            let num = pad[maxLength - 1 - index]
-            buckets[num].push(v)
-        }
-        let result = []
-        for (let bucket of buckets) {
-            result.push(...bucket)
-        }
-        console.log(result)
-        return result
-    }
-    return array
+    return -1;
 }
+
+function quickSort(arr) {
+    if (arr.length === 0) return arr;
+
+    let pivot = arr[arr.length - 1]
+    // 通过filter筛选，这个过程不仅在分区 也在进行排序
+    let left = arr.filter((v, i) => (v <= pivot) && (i !== arr.length - 1))
+    let right = arr.filter(v => v > pivot)
+    return [...quickSort(left), pivot, ...quickSort(right)]
+}
+
