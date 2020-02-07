@@ -712,3 +712,75 @@
     * `react-native-maps`
     * 百度地图
     * 高德地图
+
+## 6.RN开源组件
+1. 微软热更新开源平台-`CodePush`
+    1. 使用`react-native-code-push`集成到RN中
+    2. 热更新范围
+        * 只能更新js以及jsx代码，以及js代码中使用的图片
+    3. 缩小更新包
+        * 图片使用网络图片
+    4. 更新提示
+        1. 苹果禁止了`Rollout`和`JSPatch`两种热更新方案
+        2. 使用`CodePush`热更新方案的RN仍然可以在苹果商店上架审核
+        3. 苹果只允许无提示的更新，不允许热更新时向用户弹出版本更新提示框
+    5. 热更新工作流程
+        1. 开发者可以选择马上更新还是下次应用重启时更新
+        2. 热更新会自动删除历史包，不必担心热更新过多，软件占用手机存储空间变大 
+2. `Google`统计平台-`Google Analytics`
+    * RN中利用`react-native-google-analytics-bridge`使用`Google Analytics`
+3. 极光推送
+    * RN中利用`jpush-react-native`实现极光推送
+    * 在ios平台，极光推送通过苹果的`APNS`服务来实现推送
+4. 数据存储
+    1. `Realm`移动平台
+        * 让开发者可以方便地实现数据的持久化
+        * `Realm`对象服务器为`Real`移动平台提供安全认证、自动数据同步、访问控制、事件处理等功能
+    2. `RN`中文件操作
+        * `react-native-fs`可以在APP的沙盒中创建、读、写、删除文件与文件夹
+    3. `RN`中数据库操作
+        * `react-native-sqlite-storage`跨平台数据库开发组件 
+5. 图像处理
+    1. `react-native-transformable-image`是RN开发中广泛使用的图片处理插件, 可以通过手势范大、缩小、拖动查看图片
+    2. `react-native-qrcode`, 生成二维码
+    3. `react-native-camera`, 拍照、摄像、扫描二维码处理插件
+    4. `react-native-chart`， 图表插件
+    5. `react-native-pathjs-charts`, 图表插件
+6. 微信开发组件
+    * `react-native-wechat`用来申请微信授权，集成微信分享功能与微信支付功能, 但都需要服务器配合
+7. 支付宝支付组件
+    * `react-native-alipay`
+        * 集成支付宝支付功能的RN插件
+        * 和`react-native-wechat`一样需要在ios平台修改`AppDelegate.m`文件中的`openURL`函数
+8. 获取设备信息
+    * `react-native-device-info`获取手机信息的跨平台组件
+9. 国际化处理
+    * `react-native-i18n`广泛使用的国际化插件
+## 7.混合开发高级篇
+1. 在`RN`中调用私有组件
+    ```js
+    import { NativeModules, requireNativeComponent } from 'react-native';
+    // 在原生代码侧定义的常量
+    var { ScaleToFill, ScaleAspectFit, ScaleAspectFill } = NativeModules.RNFLAnimatedImageManager;
+    // 在原生代码侧定义的组件
+    var iface = {
+        name: 'KenBurnsView',
+        propTypes: {
+            imgSource: PropTypes.string,
+            ...View.propTypes
+        }
+    }
+    var Iface = requireNativeComponent('RNFLAnimatedImage', iface)
+    ```
+## 8.项目配置、生成发布版本、安装包及其他
+1. 环境的差异
+    1. `Safari`不支持`var date = new Date('2017-3-14')`, 需要使用`var date = new Date('2017/3/14')`
+    2. RN开发中无法使用`btoa`和`atob`进行`Base64`编码和解码
+2. ios平台应用发布
+    * 开发者完成开发后，将开发的软件包使用苹果官方规定的各种证书（通常都是使用苹果开发者账号按苹果规定生成的）签名
+        然后交给苹果审查 
+3. android平台应用发布
+    1. 生成发布密钥
+    2. 密钥文件生成后，移动到项目目录的`android/app`子目录下
+    3. 修改`gradle`配置文件
+    4. 生成发布版本安装包 
