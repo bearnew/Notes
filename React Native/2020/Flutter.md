@@ -33,25 +33,25 @@
     5. 可以使用`flutter upgrade`进行flutter升级
 ## 4.Flutter实现Hello World
 ```js
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
 
-void main()=>runApp(MyApp());
+void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
-    @override
-    Widget build(BuildContext context) {
-        return MaterialApp(
-            title: 'Welcome to Flutter',
-            home: Scaffold(
-                appBar: AppBar(
-                    title: Text('Hello World')
-                ),
-                body: Center(
-                    child: Text('Hello World')
-                )
-            )
-        )
-    }
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      title: 'Welcome to Flutter',
+      home: new Scaffold(
+        appBar: new AppBar(
+          title: new Text('Welcome to Flutter'),
+        ),
+        body: new Center(
+          child: new Text('Hello World'),
+        ),
+      ),
+    );
+  }
 }
 ```
 ## 5.Flutter组件 
