@@ -6,33 +6,27 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>test</title>
 	<style>
-		.box {
-			width: 1000px;
-			display: flex;
-			background: green;
-			flex-wrap: wrap;
+		#parent {
+			position: relative;
+			width: 200px;
+			height: 200px;
+			background-color: gray;
 		}
-		.example {
-			flex: 1;
-			min-width: 500px;
+
+		#child {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			width: 100px;
 			height: 100px;
+			background-color: indianred;
 		}
 	</style>
 </head>
+
 <body>
-	<div id="root">
-		<div class="box">
-			<div class="example"></div>
-			<div class="example"></div>
-			<div class="example"></div>
-		</div>
-		<div id="wrap">
-			<div id="outer">
-			<div id="inner">
-				<input type="text" value="test" />
-			</div>
-			</div>
-		</div>
+	<div id="parent">
+		<div id="child"></div>
 	</div>
 	<!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
