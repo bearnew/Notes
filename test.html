@@ -6,27 +6,30 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>test</title>
 	<style>
-		#parent {
-			position: relative;
-			width: 200px;
-			height: 200px;
-			background-color: gray;
+		.box {
+			display: table;
+			/* 列宽由表格宽度和列宽度设定 */
+			table-layout: fixed;
+			width: 100%;
 		}
 
-		#child {
-			position: absolute;
-			top: 50%;
-			transform: translateY(-50%);
-			width: 100px;
-			height: 100px;
+		.left {
+			display: table-cell;
+			width: 200px;
 			background-color: indianred;
+		}
+
+		.right {
+			display: table-cell;
+			background-color: gray;
 		}
 	</style>
 </head>
 
 <body>
-	<div id="parent">
-		<div id="child"></div>
+	<div class="box">
+		<div class="left">定宽</div>
+		<div class="right">自适应</div>
 	</div>
 	<!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
