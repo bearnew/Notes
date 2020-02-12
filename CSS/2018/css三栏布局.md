@@ -1,4 +1,4 @@
-#### 中间自适应，两边固定
+#### 中间自适应，两边固定(圣杯布局)
 ![image](https://github.com/bear-new/picture/blob/master/mardown/2018-05-26/layout1.PNG?raw=true)
 ##### 1.用margin和float实现
 __css__:
@@ -38,22 +38,34 @@ __html__
 __css__
 ```css
 <style>
+    /* 为了保证三列布局的元素没有重叠 */
+    .container {
+        margin: 0 100px;
+    }
+
     .container div {
         height: 200px;
         line-height: 200px;
         text-align: center;
         float: left;
     }
+
     .left {
+        position: relative;
+        left: -100px;
         width: 100px;
         margin-left: -100%;
         background: yellow;
     }
+
     .right {
+        position: relative;
+        right: -100px;
         width: 100px;
         margin-left: -100px;
         background: green;
     }
+
     .center {
         width: 100%;
         background: #ccc;
@@ -68,7 +80,52 @@ __html__
     <div class="right">right</div>
 </div>
 ```
-##### 3.用flex实现
+##### 3.用float，margin负值实现, 不使用left和right定位，使用inner div实现
+> 淘宝的双飞翼布局
+__css__
+```css
+.left,
+.center,
+.right {
+    height: 200px;
+    line-height: 200px;
+    text-align: center;
+    float: left;
+}
+
+.left {
+    width: 100px;
+    margin-left: -100%;
+    background: yellow;
+}
+
+.right {
+    width: 100px;
+    margin-left: -100px;
+    background: green;
+}
+
+.center {
+    width: 100%;
+    background: #ccc;
+}
+
+.inner {
+    margin: 0 100px;
+    background: lightcoral;
+}
+```
+__html__
+```html
+<div class="container">
+    <div class="center">
+        <div class="inner">center</div>
+    </div>
+    <div class="left">left</div>
+    <div class="right">right</div>
+</div>
+```
+##### 4.用flex实现
 __css__
 ```css
 <style>
