@@ -6,46 +6,38 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>test</title>
 	<style>
-		.left,
-		.center,
-		.right {
-			height: 200px;
-			line-height: 200px;
-			text-align: center;
-			float: left;
+		.parent {
+			column-width: 25%;
+			column-count: 4;
+			column-gap: 10px;
+			/* column-rule-width: 5px;
+			column-rule-color: red;
+			column-rule-style: dotted; */
+			column-rule: 5px red dotted;
 		}
 
-		.left {
-			width: 100px;
-			margin-left: -100%;
-			background: yellow;
-		}
-
-		.right {
-			width: 100px;
-			margin-left: -100px;
+		.col {
+			height: 300px;
 			background: green;
 		}
 
-		.center {
-			width: 100%;
-			background: #ccc;
-		}
-
-		.inner {
-			margin: 0 100px;
-			background: lightcoral;
+		.col2 {
+			height: 300px;
+			background: gray;
+			column-span: all;
 		}
 	</style>
 </head>
 
 <body>
-	<div class="container">
-		<div class="center">
-			<div class="inner">center</div>
-		</div>
-		<div class="left">left</div>
-		<div class="right">right</div>
+	<div class="parent">
+		<div class="col"></div>
+		<div class="col"></div>
+		<div class="col"></div>
+		<div class="col"></div>
+	</div>
+	<div class="parent">
+		<div class="col2"></div>
 	</div>
 	<!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
