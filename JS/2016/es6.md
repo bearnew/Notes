@@ -165,6 +165,7 @@ class Chef {
 }
 
 // static定义的方法，不需要实例化，就可以直接调用
+// 实例化的对象无法使用static 定义的方法
 chef.cook('tomato'); // tomato
 ```
 #### Set
