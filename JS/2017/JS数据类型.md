@@ -10,8 +10,9 @@ Object // 复杂数据类型
 ####
 * 基本数据类型存储在栈中
 * 引用数据类型存储在堆中，栈中存放指向引用数据类型在堆中存储地址的指针
-#### typeof的返回值(6种)
+#### typeof的返回值(7种)
 * string
+* symbol
 * number
 * boolean
 * undefined
@@ -21,8 +22,8 @@ Object // 复杂数据类型
 
 Undefined
 ----
-1.声明了变量但未对其加以初始化
-2.未声明的变量
+1. 声明了变量但未对其加以初始化
+2. 未声明的变量
 Null
 ----
 空对象指针
@@ -68,6 +69,17 @@ isNaN("blue") // true
 isNaN('true') // false
 ```
 数值转换的方法：Number()、 parseInt()、 parseFloat()
+```js
+console.log([1, 2, 3].map(parseInt));       // [1, NaN, NaN]
+// 解析如下
+// parseInt(1, 0) // 1,  没有零进制..直接转换为十进制了
+// parseInt(2, 1) // 一进制只能用0表示，所以返回NaN
+// parseInt(3, 2) // 二进制用0 1表示，也返回NaN
+
+console.log([1, 2, 3].map(parseFloat));            // [1, 2, 3]
+// 解析如下
+// parseFloat函数没有第二参数，只能按照十进制输出了，即为答案的输出。
+```
 
 String
 ====
