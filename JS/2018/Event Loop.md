@@ -29,6 +29,7 @@
     2. 微任务
         * process.nextTick
         * MutationObserver
+            * 监听DOM结构变化的API
         * Promise.then catch finally
     3. 主线程会先执行事件队列中的微任务，再执行事件队列中的宏任务
 eg.1

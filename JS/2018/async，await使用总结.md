@@ -23,7 +23,7 @@ async function testAsync() {
 async function test() {
     const v1 = await getSomething();
     const v2 = await testAsync();
-    console.log(v1, v2); // 输出 something Promise {<resolved>: "hello async"}
+    console.log(v1, v2); // 输出 something hello async
 }
 
 test();

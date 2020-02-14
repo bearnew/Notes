@@ -150,10 +150,23 @@ b = {
 
 console.log(b.x); // 1
 ```
-### 6.Object.setPrototypeOf
+### 7.Object.setPrototypeOf
 ```js
 a = { x: 1 }
 b = {};
 Object.setPrototypeOf(b, a);
 console.log(b.x); // 1
 ```
+
+__总结__
+* 构造函数继承
+	* 对象冒充
+	* prototype + new
+	* apply/call
+	* prototype + Object.create
+* 类继承
+    * extends
+* 对象继承
+    * Object.create
+    * __proto__
+    * setPrototypeOf
