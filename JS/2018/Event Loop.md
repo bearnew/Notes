@@ -99,4 +99,8 @@ console.log(2)
 * timers: 这个阶段执行定时器队列中的回调如 setTimeout() 和 setInterval()。
 * I/O callbacks: 这个阶段执行几乎所有的回调。但是不包括close事件，定时器和setImmediate()的回调。
 * idle, prepare: 这个阶段仅在内部使用，可以不必理会。
+* 观察者的优先顺序 `idle观察者(process.nextTick()) > io观察者(setTimeout) > check观察者(setImmediate)`
+    * process.nextTick()，效率最高，消费资源小，但会阻塞CPU的后续调用； 
+    * setTimeout()，精确度不高，可能有延迟执行的情况发生，且因为动用了红黑树，所以消耗资源大； 
+    * setImmediate()，消耗的资源小，也不会造成阻塞，但效率也是最低的。
 ![nodejs事件循环](https://github.com/bearnew/picture/blob/master/mardown/2018-11-21%20event%20loop/eventLoop2.png?raw=true)

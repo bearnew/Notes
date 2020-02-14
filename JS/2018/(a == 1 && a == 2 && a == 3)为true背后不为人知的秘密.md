@@ -1,6 +1,6 @@
 ### (a == 1 && a == 2 && a == 3)为true
 
-##### 1.valueof
+##### 1.valueOf/toString
 ``` js
 const a = {
   i: 1,
