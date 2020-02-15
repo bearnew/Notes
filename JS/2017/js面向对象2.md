@@ -12,6 +12,8 @@ Foo.prototype
     __proto__: Object
 }
 
+Foo.prototype.__proto__ // {__defineGetter__:f,__defineSetter:f,toString...}
+
 Foo.prototype.prototype
 // undefined
 
@@ -22,13 +24,15 @@ Object.prototype.prototype
 // undefined
 
 Foo.__proto__
-// f()
+// ƒ () { [native code] }
 
 Foo.__proto__.__proto__
 // {__defineGetter__:f,__defineSetter:f,toString...}
 
 Foo.__proto__.__proto__.__proto__
-null
+// null
+
+console.log(Foo.__proto__.__proto__ === Foo.prototype.__proto__) // true
 
 ```
 3. Object.create

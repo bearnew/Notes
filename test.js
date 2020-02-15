@@ -1,23 +1,54 @@
-function chunk(arr, process, count) {
-    setTimeout(function () {
-        console.log('--------------')
+window.stringify = function (obj) {
+    var result = '';
+    var curVal;
 
-        const len = Math.min(count, arr.length);
-        for (var i = 0; i < len; i++) {
-            arr.shift();
-            process();
-        }
+    if (obj === null) return "null";
 
-        if (arr.length > 0) {
-            setTimeout(arguments.callee, 300)
-        }
-    }, 300)
+    switch (typeof obj) {
+        case 'string':
+        case 'number':
+        case 'boolean':
+            return `"${obj}"`;
+        case 'undefined':
+        case "symbol":
+        case "function":
+            return undefined;
+    }
+
+    switch (Object.prototype.toString.call(obj)) {
+        case '[objec RegExp]':
+            return `"{}"`;
+        case '[object Date]':
+            return `"${obj.toJson() ? obj.toJson() : obj.toString()}"`;
+        case '[object Array]':
+            result = '[';
+            for (var i = 0; i < obj.length; i++) {
+                curVal = JSON.stringify(obj[i]);
+                result += `"${curVal === undefined ? null : curVal}"`;
+                result += ','
+            }
+            if (result !== '[') {
+                result.slice(0, -1);
+            }
+            result += ']';
+            return result;
+        case '[object Object]':
+            result = '[';
+            for (var i in obj) {
+                curVal = JSON.stringify(obj[i]);
+                result += `"${i}":${curVal}`;
+                result += ','
+            }
+            if (result !== '[') {
+                result.slice(0, -1);
+            }
+            return result;
+    }
 }
 
-const arr = new Array(29).fill(1);
-const count = 10;
-function process() {
-    console.log('log')
+var test = {
+    a: 1,
+    b: undefined,
+    c: [1, 2, 3]
 }
-
-chunk(arr, process, count)
+console.log(stringify(test));
