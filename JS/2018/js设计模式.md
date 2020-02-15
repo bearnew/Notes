@@ -312,28 +312,29 @@ alert(test2.move());
 * __方法1__
 ```js
 var Flower = function(){};
-
 var Pursuit = {
-    sendFlower:function(target){
-        var flower = new Flower();
-        target.receiveFlower(flower);
+    sendFlower: function (target) {
+        target.receiveFlower('玫瑰');
     }
 };
 
 var Proxy = {
-    sendFlower:function(target){
-        Pursuit.sendFlower(target);
+    sendFlower: function (sender, receiver) {
+        sender.sendFlower(receiver);
     }
 };
 
 var SchoolGirl = {
-    receiveFlower:function(flower){
-        console.log('收到花' + flower);
+    receiveFlower: function (flower) {
+        console.log('女孩收到花: ' + flower);
     }
 };
 
-//调用：
-Proxy.sendFlower(SchoolGirl);
+// 直接送花
+// Pursuit.sendFlower(SchoolGirl);
+
+// 让别人代理送花
+Proxy.sendFlower(Pursuit, SchoolGirl);
 ```
 * __方法2__
 ```js
@@ -631,7 +632,7 @@ car.drive();
 ```
 ```js
 // ES7
-// 方法装饰器
+// 方法装饰器, 传参和defineProperty类似
 // target-Car, 装饰的类
 // key-drive, 修改的属性的名称
 // descriptor, 被修改的属性描述符
