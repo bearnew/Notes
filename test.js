@@ -1,70 +1,32 @@
-window.stringify = function (obj) {
-    var result = '';
-    var curVal;
-
-    if (obj === null) return "null";
-
-    switch (typeof obj) {
-        case 'string':
-        case 'number':
-        case 'boolean':
-            return `"${obj}"`;
-        case 'undefined':
-        case "symbol":
-        case "function":
-            return undefined;
-    }
-
-    switch (Object.prototype.toString.call(obj)) {
-        case '[objec RegExp]':
-            return `"{}"`;
-        case '[object Date]':
-            return `"${obj.toJson() ? obj.toJson() : obj.toString()}"`;
-        case '[object Array]':
-            result = '[';
-            for (var i = 0; i < obj.length; i++) {
-                curVal = JSON.stringify(obj[i]);
-                result += `"${curVal === undefined ? null : curVal}"`;
-                result += ','
-            }
-            if (result !== '[') {
-                result = result.slice(0, -1);
-            }
-            result += ']';
-            return result;
-        case '[object Object]':
-            result = '{';
-            for (var i in obj) {
-                curVal = JSON.stringify(obj[i]);
-                result += `"${i}":${curVal}`;
-                result += ','
-            }
-            if (result !== '{') {
-                result = result.slice(0, -1);
-            }
-            result += '}';
-            return result;
-    }
+// 定义了一个promise，用来模拟异步请求，作用是传入参数++
+function getNum(num) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(num + 1)
+        }, 1000)
+    })
 }
 
-var rx_one = /^[\],:{}\s]*$/;
-var rx_two = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g;
-var rx_three = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g;
-var rx_four = /(?:^|:|,)(?:\s*\[)+/g;
+// 所需要执行的Generator函数，内部的数据在执行完成一步的promise之后，再调用下一步
+var func = function* () {
+    var f1 = yield getNum(1);
+    console.log(f1)
+    var f2 = yield getNum(f1);
+    console.log(f2);
+};
+asyncFun(func);
 
-window.parse = function (json) {
-    if (
-        rx_one.test(
-            json
-                .replace(rx_two, "@")
-                .replace(rx_three, "]")
-                .replace(rx_four, "")
-        )
-    ) {
-        // return eval(`(${json})`)
-        return (new Function('return' + json))()
+//自动执行器，如果一个Generator函数没有执行完，则递归调用
+function asyncFun(func) {
+    var gen = func();
+
+    function next(data) {
+        var result = gen.next(data);
+        if (result.done) return result.value;
+        result.value.then(function (data) {
+            next(data);
+        });
     }
-}
 
-var json = '{"a":"1", "b":2}';
-console.log(parse(json))
+    next();
+}
