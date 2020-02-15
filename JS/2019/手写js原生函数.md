@@ -180,16 +180,19 @@ if (!Function.prototype.myApply) (function () {
 #### 6.bind
 * 创建1个新函数，新函数的this被指定为bind()的第一个参数，其余参数作为新函数的参数
 ```js
+const unbound = {
+    x: 1,
+    getX: function () {
+        return this.x;
+    }
+}
 const module = {
-  x: 42,
-  getX: function() {
-    return this.x;
-  }
+    x: 42
 }
 
-const boundGetX = unboundGetX.bind(module);
+const boundGetX = unbound.getX.bind(module);
 console.log(boundGetX());
-// expected output: 42
+  // expected output: 42
 ```
 * `bind()`使函数拥有预设的初始参数
 ```js
