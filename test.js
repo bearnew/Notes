@@ -28,27 +28,43 @@ window.stringify = function (obj) {
                 result += ','
             }
             if (result !== '[') {
-                result.slice(0, -1);
+                result = result.slice(0, -1);
             }
             result += ']';
             return result;
         case '[object Object]':
-            result = '[';
+            result = '{';
             for (var i in obj) {
                 curVal = JSON.stringify(obj[i]);
                 result += `"${i}":${curVal}`;
                 result += ','
             }
-            if (result !== '[') {
-                result.slice(0, -1);
+            if (result !== '{') {
+                result = result.slice(0, -1);
             }
+            result += '}';
             return result;
     }
 }
 
-var test = {
-    a: 1,
-    b: undefined,
-    c: [1, 2, 3]
+var rx_one = /^[\],:{}\s]*$/;
+var rx_two = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g;
+var rx_three = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g;
+var rx_four = /(?:^|:|,)(?:\s*\[)+/g;
+
+window.parse = function (json) {
+    if (
+        rx_one.test(
+            json
+                .replace(rx_two, "@")
+                .replace(rx_three, "]")
+                .replace(rx_four, "")
+        )
+    ) {
+        // return eval(`(${json})`)
+        return (new Function('return' + json))()
+    }
 }
-console.log(stringify(test));
+
+var json = '{"a":"1", "b":2}';
+console.log(parse(json))
