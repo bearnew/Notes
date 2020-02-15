@@ -66,34 +66,34 @@ window.addEventListener('scroll', debounce(() => {
 //  arr: 源数据
 //  process: 处理函数
 //  count: 每次抽取个数
-function chunk (arr, process, count){
-    setTimeout(function(){
-        console.log('++++++++++')
-        for(var i = 0; i < Math.min(count, arr.length + 1); i++) {
-            process(arr.shift());
+function chunk(arr, process, count) {
+    setTimeout(function () {
+        console.log('--------------')
+
+        const len = Math.min(count, arr.length);
+        for (var i = 0; i < len; i++) {
+            arr.shift();
+            process();
         }
-        if(arr.length > 0) {
-            setTimeout(arguments.callee, 100);
+
+        if (arr.length > 0) {
+            setTimeout(arguments.callee, 300)
         }
-    }, 100);
+    }, 300)
 }
 
-// ++++++++++
-// 1
-// 2
-// 3
-// ++++++++++
-// 4
-// 5
-// 6
-// ++++++++++
-// 7
-// 8
-const arr = [1, 2, 3, 4, 5, 6, 7, 8]
-const process = number => {
-    console.log(number)
+const arr = new Array(29).fill(1);
+const count = 10;
+function process() {
+    console.log('log')
 }
 
-chunk(arr, process, 3);
+// --------------
+// log * 10
+// --------------
+// log * 10
+// --------------
+// log * 9
+chunk(arr, process, count)
 ```
 

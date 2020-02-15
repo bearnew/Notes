@@ -1,34 +1,23 @@
-// ES7
-// 方法装饰器
-// target-Car, 装饰的类
-// key-drive, 修改的属性的名称
-// descriptor, 被修改的属性描述符
-// {
-//   value: drive,
-//   enumerable: false,
-//   configurable: true,
-//   writable: true
-// };
-function autopilotDecorator(target, key, descriptor) {
-    console.log(target, key, descriptor)
-    const method = descriptor.value;
+function chunk(arr, process, count) {
+    setTimeout(function () {
+        console.log('--------------')
 
-    descriptor.value = () => {
-        method.apply(target);
-        console.log('start auto drive');
-    }
+        const len = Math.min(count, arr.length);
+        for (var i = 0; i < len; i++) {
+            arr.shift();
+            process();
+        }
 
-    return descriptor;
+        if (arr.length > 0) {
+            setTimeout(arguments.callee, 300)
+        }
+    }, 300)
 }
 
-class Car {
-    @autopilotDecorator
-    drive() {
-        console.log('normal drive');
-    }
+const arr = new Array(29).fill(1);
+const count = 10;
+function process() {
+    console.log('log')
 }
 
-let car = new Car();
-// normal drive
-// start auto drive
-car.drive();
+chunk(arr, process, count)
