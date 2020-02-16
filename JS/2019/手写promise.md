@@ -80,7 +80,7 @@ function Promise(fn) {
         if (callBacks.length === 0 && status === 'rejected') {
             catchFunction(err);
         }
-        if (callBacks.length === 0) {
+        if (callBacks.length === 0 && completeFunction) {
             completeFunction();
             return;
         };
@@ -152,18 +152,16 @@ function Promise(fn) {
     Promise.race = promises => {
         return new Promise(((resolve, reject) => {
             const errs = [];
-            const res = val => {
-                resolve(val);
-            }
-            const rej = err => {
-                errs.push(err);
-                if (errs.length === promises.length) {
-                    reject(errs[0]);
-                }
-            };
 
             for (let p of promises) {
-                p.then(res, rej);
+                p.then(val => {
+                    resolve(val);
+                }, err => {
+                    errs.push(err);
+                    if (errs.length === promises.length) {
+                        reject(errs[0]);
+                    }
+                });
             }
         }))
     }
@@ -171,16 +169,16 @@ function Promise(fn) {
     Promise.all = promises => {
         return new Promise((resolve, reject) => {
             const results = [];
-            const res = val => {
-                results.push(val);
-                if (results.length === promises.length) {
-                    resolve(results);
-                }
-            }
-            const rej = reject;
 
             for (let p of promises) {
-                p.then(res, rej);
+                p.then(val => {
+                    results.push(val);
+                    if (results.length === promises.length) {
+                        resolve(results);
+                    }
+                }, err => {
+                    reject(err);
+                });
             }
         })
     }

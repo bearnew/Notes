@@ -1,46 +1,184 @@
-// 定义了一个promise，用来模拟异步请求，作用是传入参数++
-function getNum(num) {
+new Promise((resolve, reject) => {
+    console.log('step-1') // step-1
+    setTimeout(() => {
+        resolve('step-2');
+    }, 1000)
+}).then(data => {
+    console.log(data)
     return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            resolve(num + 1)
-        }, 1000)
+        resolve('step-3')
     })
-}
+}).then(data => {
+    console.log(data);
+    return Promise.resolve('step-4');
+}).then(data => {
+    console.log(data);
+    return Promise.reject('step-5');
+}).then(data => {
+    console.log(data); // step-4
+}, err => {
+    console.log('reject', err)
+}).catch(err => {
+    console.error('error', err)
+}).finally(() => {
+    console.log('finally')
+})
 
-// 所需要执行的Generator函数，内部的数据在执行完成一步的promise之后，再调用下一步
-function* func() {
-    var f1 = yield getNum(1);
-    console.log(f1)
-    var f2 = yield getNum(f1);
-    console.log(f2);
-};
-asyncFun(func);
+let p1 = new Promise((resolve, reject) => {
+    resolve('success 1')
+})
 
-//自动执行器，如果一个Generator函数没有执行完，则递归调用
-function asyncFun(func) {
-    var gen = func();
+let p2 = new Promise((resolve, reject) => {
+    resolve('success 2')
+})
 
-    function next(data) {
-        var result = gen.next(data);
-        if (result.done) return result.value;
-        result.value.then(function (res) {
-            next(res);
-        });
+let p3 = new Promise((resolve, reject) => {
+    reject('fail fail')
+})
+
+Promise.all([p1, p2]).then((result) => {
+    console.log(result); // ["success 1", "success 2"]
+}).catch((error) => {
+    console.error(error)
+})
+
+Promise.race([p2, p3]).then((result) => {
+    console.log(result); // success 2
+}).catch((error) => {
+    console.error(error)
+})
+
+function Promise(fn) {
+    let value = null;
+    let err = null;
+    let status = 'pending';
+    const callBacks = [];
+
+    fn(resolve, reject);
+
+    function resolve(result) {
+        status = 'fulfilled';
+        value = result;
+
+        setTimeout(() => {
+            handleCallBacks();
+        }, 0)
     }
 
-    next();
+    function reject(error) {
+        status = 'rejected';
+        err = error;
+
+        setTimeout(() => {
+            handleCallBacks();
+        }, 0)
+    }
+
+    function handleCallBacks() {
+        if (callBacks.length === 0 && status === 'rejected') {
+            catchFunction(err);
+        }
+        if (callBacks.length === 0 && completeFunction) {
+            completeFunction();
+            return;
+        };
+        const callBack = callBacks.shift();
+        const {
+            onFulfilled,
+            onRejected,
+            resolve,
+            reject
+        } = callBack;
+
+        try {
+            if (status === 'fulfilled') {
+                const newValue = onFulfilled(value);
+
+                if (typeof newValue === 'object' && typeof newValue.then === 'function') {
+                    newValue.then(res => {
+                        resolve(res);
+                    })
+                } else {
+                    resolve(newValue);
+                }
+            }
+
+            if (status === 'rejected' && onRejected) {
+                onRejected(err);
+            }
+
+            if (status === 'rejected' && !onRejected) {
+                catchFunction(err);
+            }
+        } catch (err) {
+            catchFunction(err);
+        }
+    }
+
+    this.then = (onFulfilled, onRejected) => {
+        return new Promise((resolve, reject) => {
+            callBacks.push({
+                onFulfilled,
+                onRejected,
+                resolve,
+                reject
+            });
+        })
+    }
+
+    this.catch = errFunction => {
+        catchFunction = errFunction;
+        return new Promise((resolve, reject) => { })
+    }
+
+    this.finally = finallyFunction => {
+        completeFunction = finallyFunction;
+    }
+
+    Promise.resolve = value => {
+        return new Promise(resolve => {
+            resolve(value);
+        })
+    }
+
+    Promise.reject = err => {
+        return new Promise((resolve, reject) => {
+            reject(err);
+        })
+    }
+
+    Promise.race = promises => {
+        return new Promise(((resolve, reject) => {
+            const errs = [];
+
+            for (let p of promises) {
+                p.then(val => {
+                    console.log('123123', val)
+                    resolve(val);
+                }, err => {
+                    errs.push(err);
+                    if (errs.length === promises.length) {
+                        reject(errs[0]);
+                    }
+                });
+            }
+        }))
+    }
+
+    Promise.all = promises => {
+        return new Promise((resolve, reject) => {
+            const results = [];
+
+            for (let p of promises) {
+                p.then(val => {
+                    results.push(val);
+                    if (results.length === promises.length) {
+                        resolve(results);
+                    }
+                }, err => {
+                    reject(err);
+                });
+            }
+        })
+    }
 }
-
-function* test() {
-    var y = 2;
-    var x = yield 1;
-    x = yield (x + y + 1);
-    return x;
-}
-
-const gen = test();
-console.log(gen.next()); // {value: 1, done: false}
-
-// 只接收上一次yield生成的变量，y依然使用函数中的变量
-console.log(gen.next(5, 4)); // {value: 8, done: false}
-console.log(gen.next()); // {value: undefined, done: true}
