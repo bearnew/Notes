@@ -318,7 +318,7 @@
     var bar = foo.call( obj1 );
     bar.call( obj2 ); // 2, 不是 3 ！
 ```
-    ```js
+```js
     function foo() {
         var self = this; // lexical capture of this
         setTimeout( function(){
@@ -329,7 +329,7 @@
         a: 2
     };
     foo.call( obj ); // 2
-    ```
+```
 13. this优先级（1-4, 从高到低）
     * 1.存在new绑定，this指向新创建的对象
     ```js
