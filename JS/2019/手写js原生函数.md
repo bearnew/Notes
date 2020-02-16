@@ -320,6 +320,22 @@ function asyncFun(func) {
     next();
 }
 ```
+> generator补充知识（使用上一次yield生成的值，需要通过next函数传参）
+```js
+function* test() {
+    var y = 2;
+    var x = yield 1;
+    x = yield (x + y + 1);
+    return x;
+}
+
+const gen = test();
+console.log(gen.next()); // {value: 1, done: false}
+
+// 只接收上一次yield生成的变量，y依然使用函数中的变量
+console.log(gen.next(5, 4)); // {value: 8, done: false}
+console.log(gen.next()); // {value: undefined, done: true}
+```
 #### 9.继承
 * https://github.com/bearnew/Notes/blob/master/JS/2018/JS%E5%AF%B9%E8%B1%A1%E7%BB%A7%E6%89%BF.md
 #### 10.js函数柯里化

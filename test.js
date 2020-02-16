@@ -8,7 +8,7 @@ function getNum(num) {
 }
 
 // 所需要执行的Generator函数，内部的数据在执行完成一步的promise之后，再调用下一步
-var func = function* () {
+function* func() {
     var f1 = yield getNum(1);
     console.log(f1)
     var f2 = yield getNum(f1);
@@ -23,10 +23,24 @@ function asyncFun(func) {
     function next(data) {
         var result = gen.next(data);
         if (result.done) return result.value;
-        result.value.then(function (data) {
-            next(data);
+        result.value.then(function (res) {
+            next(res);
         });
     }
 
     next();
 }
+
+function* test() {
+    var y = 2;
+    var x = yield 1;
+    x = yield (x + y + 1);
+    return x;
+}
+
+const gen = test();
+console.log(gen.next()); // {value: 1, done: false}
+
+// 只接收上一次yield生成的变量，y依然使用函数中的变量
+console.log(gen.next(5, 4)); // {value: 8, done: false}
+console.log(gen.next()); // {value: undefined, done: true}
