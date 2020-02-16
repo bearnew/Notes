@@ -699,7 +699,7 @@
         var c = '';
 
         var d = a && b && c; // false
-        var e = Boolean(d); // true
+        var e = Boolean(d); // false
         ``` 
         ```js
         var a = [];

@@ -1,8 +1,8 @@
-function Foo() {
-    this.x = 'x';
-}
+var a = [];
+var b = {};
+var c = function () { };
 
-Foo.prototype.y = 'y';
+var d = a && b && c; // function() {}
+var e = Boolean(a && b && c); // true
 
-var f = new Foo();
-console.log(f)
+console.log(e)
