@@ -1,8 +1,4 @@
-var a = [];
-var b = {};
-var c = function () { };
-
-var d = a && b && c; // function() {}
-var e = Boolean(a && b && c); // true
-
-console.log(e)
+var a = 42;
+var b = a++;
+console.log(a); // 43
+console.log(b); // 42
