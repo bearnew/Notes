@@ -30,27 +30,33 @@ const data = [
 // 深度遍历, 使用递归
 function getName(data) {
     const result = [];
-    data.forEach(item => {
-        const map = data => {
-            result.push(data.name);
-            data.children && data.children.forEach(child => map(child));
-        }
-        map(item);
-    })
+    traverse(data);
+
+    function traverse(list) {
+        list.forEach(item => {
+            result.push(item.name);
+            if (item.children) {
+                traverse(item.children);
+            }
+        });
+    }
+
     return result.join(',');
 }
 
 // 广度遍历, 创建一个执行队列, 当队列为空的时候则结束
 function getName2(data) {
-    let result = [];
-    let queue = data;
-    while (queue.length > 0) {
-        [...queue].forEach(child => {
-            queue.shift();
-            result.push(child.name);
-            child.children && (queue.push(...child.children));
-        });
+    const result = [];
+    let quene = data;
+
+    while (quene.length > 0) {
+        const item = quene.shift();
+        result.push(item.name);
+        if (item.children) {
+            quene.push(...item.children);
+        }
     }
+
     return result.join(',');
 }
 
