@@ -1,4 +1,6 @@
 ## CI/CD
+> CI(Continuous Integration)持续集成, 持续集成（CI）是在源代码变更后自动检测、拉取、构建和单元测试的过程
+> CD(Continuous Delivery & Depolyment)持续交互&部署, 自动监测源代码变更并通过构建、测试、打包生成可部署的版本
 1. Gitlab runner
     * CI的执行环境，负责执行`gitlab-ci.yml`文件，并将结果返回给`GitLab`系统
     * Runner有docker, 虚拟机, shell三种方式
