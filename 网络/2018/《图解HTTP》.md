@@ -133,17 +133,17 @@ OPTIONS * HTTP/1.1
     _ 在 Max-Forwards 首部字段中填入数值
     _ 每经过一个服务器端就将该数字减 1，减到 0 时，就停止继续传输 \* 最后接收到请求的服务器端则返回状态码 200OK 的响应
 
-        | 请求 | TRACE / HTTP/1.1<br/> Host: hackr.jp<br/>Max-Forwards:2                                                                                                |
-        | :--- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
-        | 响应 | HTTP/1.1 200OK<br/>Content-Type:message/http<br/>Content-Length: 1024<br/>TRACE / HTTP/1.1<br/>Host:hackr.jp<br/>Max-Forwards: 2(返回响应包含请求内容) |
+    | 请求 | TRACE / HTTP/1.1<br/> Host: hackr.jp<br/>Max-Forwards:2 |
+    | :--- |:-------------------- |
+    | 响应 | HTTP/1.1 200OK<br/>Content-Type:message/http<br/>Content-Length: 1024<br/>TRACE / HTTP/1.1<br/>Host:hackr.jp<br/>Max-Forwards: 2(返回响应包含请求内容) |
 
     8.CONNECT: 要求用隧道协议连接代理
     _ 与代理服务器通信时建立隧道, 实现用隧道协议进行 TCP 通信
     _ 主要用 SSL（Secure Sockets Layer，安全套接层）和 TLS（Transport Layer Security, 传输层安全）通信协议将通信内容加密后经网络隧道传输 \* CONNECT 代理服务器名:端口号 HTTP 版本
 
-        | 请求 | CONNECT proxy.hackr.jp:8080 HTTP/1.1 <br/> Host: proxy.hackr.jp |
-        | :--- | :-------------------------------------------------------------- |
-        | 响应 | HTTP/1.1 200 OK（之后进入网络隧道）                             |
+    | 请求 | CONNECT proxy.hackr.jp:8080 HTTP/1.1 <br/> Host: proxy.hackr.jp |
+    | :--- | :-------------------------------------------------------------- |
+    | 响应 | HTTP/1.1 200 OK（之后进入网络隧道）                             |
 
 #### 6.使用方法下达命令
 
