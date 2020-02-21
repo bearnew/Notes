@@ -10,6 +10,8 @@
 
 > TCP/IP 协议族内预存了各类通用的应用服务
 
+> 7层模式还包括表示层（数据的表示、安全、压缩）, 会话层（建立、管理、终止会话）
+
 - FTP（File Transfer Protocol，文件传输协议）
 - DNS（Domain Name System，域名系统）
 - HTTP
@@ -35,6 +37,7 @@
 
 > 用来处理连接网络的硬件部分
 > 包括控制操作系统、硬件的设备驱动、NIC（Network Interface Card，网络适配器，即网卡），及光纤等物理可见部分（还包括连接器等一切传输媒介）。硬件上的范畴均在链路层的作用范围之内。
+> 7层协议中还包括物理层（建立、维护、断开物理连接）
 
 ### 2.IP、TCP、DNS
 
@@ -131,8 +134,8 @@ OPTIONS * HTTP/1.1
     - 在 Max-Forwards 首部字段中填入数值
     - 每经过一个服务器端就将该数字减 1，减到 0 时，就停止继续传输 \* 最后接收到请求的服务器端则返回状态码 200OK 的响应
 
-    | 请求 | TRACE / HTTP/1.1<br/> Host: hackr.jp<br/>Max-Forwards:2 |
-    | :--- |:-------------------- |
+    | 请求 | TRACE / HTTP/1.1<br/> Host: hackr.jp<br/>Max-Forwards:2                                                                                                |
+    | :--- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
     | 响应 | HTTP/1.1 200OK<br/>Content-Type:message/http<br/>Content-Length: 1024<br/>TRACE / HTTP/1.1<br/>Host:hackr.jp<br/>Max-Forwards: 2(返回响应包含请求内容) |
 
 8. CONNECT: 要求用隧道协议连接代理
@@ -593,7 +596,7 @@ OPTIONS * HTTP/1.1
  
 #### 24.HTTP + 加密 + 认证 + 完整性保护 = HTTPS
   1. ![http theory](https://github.com/bearnew/picture/blob/master/mardown/2018-12-20%20http%E8%AF%BB%E5%90%8E%E6%84%9F/https%E5%8E%9F%E7%90%86.PNG?raw=true)
-  2. HTTPS是身披SSL外壳的HTTP
+  2. HTTPS是身披SSL(secure socket layer, 安全套接层)外壳的HTTP
       * HTTP先和SSL通信，SSL再和TCP通信
   3. SSL采用一种叫做公开密钥加密的加密处理方式
   4. 对称密钥加密
@@ -617,6 +620,12 @@ OPTIONS * HTTP/1.1
   9. OpenSSL让每个人可以自己给自己颁发证书，但该证书在互联网上不可用，浏览器访问该服务器时，会显示“无法确认连接安全性”或“该网
 站的安全证书存在问题”等警告消息。
   10. HTTPS通信速度HTTP慢2到100倍(大量的消耗CPU和内存资源)
+  11. HTTPS的请求过程
+      1. 客户端发起TLS(transport layer security, 安全层传输协议)握手请求
+      2. 服务器给客户端响应证书，非对称加密的公钥
+      3. 客户端验证证书是否合法，然后生成对称加密的密钥，发送给服务器
+      4. 服务器使用非对称加密的私钥对对称加密的密钥进行解密
+      5. 之后客户端与服务器之间就使用对称加密的密钥进行加密和解密 
  
 ## 四、确认访问用户身份的认证
 
