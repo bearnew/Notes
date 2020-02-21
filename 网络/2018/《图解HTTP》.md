@@ -106,20 +106,20 @@ OPTIONS * HTTP/1.1
 
 #### 5.HTTP 方法
 
-1.  GET: 获取资源
-2.  POST: 传输实体主体
-3.  PUT: 传输文件
+1. GET: 获取资源
+2. POST: 传输实体主体
+3. PUT: 传输文件
     - 像 FTP 协议的文件上传一样
     - http/1.1 的 PUT 方法自身不带验证机制，任何人都可以上传文件，存在安全性问题
     - 响应返回状态码 204 No Content（比如： 该 html 已存在于服务器上）
-4.  HEAD: 获得报文首部
+4. HEAD: 获得报文首部
     - 和 GET 方法一样，不返回报文主体部分
     - 用于确认 URL 的有效性及资源更新的日期时间
     - 响应返回 Index.html 有关的响应首部
-5.  DELETE: 删除文件
+5. DELETE: 删除文件
     - 请求 url 删除指定资源
     - 响应返回状态码 204 No Content（比如 ：该 html 已从该服务器上删除）
-6.  OPTIONS: 询问支持的方法
+6. OPTIONS: 询问支持的方法
 
     - OPTIONS 方法用来查询针对请求 URL 指定的资源支持的方法
 
@@ -127,7 +127,7 @@ OPTIONS * HTTP/1.1
     | :--- | :------------------------------------------------------------------- |
     | 响应 | HTTP/1.1 200OK<br/>Allow:GET,POST,HEAD,OPTIONS(返回服务器支持的方法) |
 
-7.  TRACE: 追踪路径
+7. TRACE: 追踪路径
     _ 让 web 服务器端将之前的请求通信环回给客户端的方法
     _ 容易引发 XST（cross-site tracing, 跨站追踪）攻击
     _ 在 Max-Forwards 首部字段中填入数值
@@ -137,7 +137,7 @@ OPTIONS * HTTP/1.1
     | :--- |:-------------------- |
     | 响应 | HTTP/1.1 200OK<br/>Content-Type:message/http<br/>Content-Length: 1024<br/>TRACE / HTTP/1.1<br/>Host:hackr.jp<br/>Max-Forwards: 2(返回响应包含请求内容) |
 
-    8.CONNECT: 要求用隧道协议连接代理
+8. CONNECT: 要求用隧道协议连接代理
     _ 与代理服务器通信时建立隧道, 实现用隧道协议进行 TCP 通信
     _ 主要用 SSL（Secure Sockets Layer，安全套接层）和 TLS（Transport Layer Security, 传输层安全）通信协议将通信内容加密后经网络隧道传输 \* CONNECT 代理服务器名:端口号 HTTP 版本
 
