@@ -1,11 +1,29 @@
-// 加入ଇ߲nextTick()的回调函数
-process.nextTick(function () {
-    console.log('nextTickჽ׿执行1');
-});
+var minCoinChange = new MinCoinChange([1, 5, 10, 25]);
+console.log(minCoinChange.makeChange(36)); // [1, 10, 25]
 
-new Promise((resolve, reject) => {
-    resolve(1)
-    console.log('5555')
-}).then(res => {
-    console.log('sdfsdf')
-})
+function MinCoinChange(coins) {
+    var cache = {};
+
+    this.makeChange = function (amount) {
+        if (!amount) return [];
+        if (cache[amount]) {
+            return cache[amount];
+        }
+
+        var min = [];
+        var newMin;
+        var newAmount;
+
+        for (var i = 0; i < coins.length; i++) {
+            var coin = coins[i];
+            newAmount = amount - coin;
+
+            if (newAmount >= 0) {
+                newMin = this.makeChange(newAmount);
+                min = [coin].concat(newMin);
+            }
+        }
+
+        return (cache[amount] = min);
+    }
+}
