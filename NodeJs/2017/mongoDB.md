@@ -136,7 +136,7 @@ tar zcvf backup.tar.gz backup
 scp -P 3999 /D/MongoDB/data/backup.tar.gz root@120.78.177.221:/usr/local/mongodb/data
 ```
 ***
-剩余步骤在服务器操作
+#### 剩余步骤在服务器操作
 4. ssh登陆服务器后，解压数据库
 ```js
 cd /usr/local/mongodb/data
