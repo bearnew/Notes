@@ -28,5 +28,3 @@
         * reponse.lastModified
         * response.etag
 3. koa1中间件原理
-    
-    * 2.
