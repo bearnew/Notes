@@ -151,6 +151,7 @@
     * 要求属性是一个有特定成员变量的对象
         * `React.PropTypes.objectOf(React.PropTypes.number)`
     * 要求属性是一个指定构成方式的对象
+        * `React.PropTypes.shape({})`
         ```js
         React.PropTypes.shape({
             color: React.PropTypes.string,
