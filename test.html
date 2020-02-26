@@ -6,12 +6,22 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>test</title>
 	<style>
+		.left {
+			float: left;
+			width: 200px;
+			background-color: indianred;
+		}
 
+		.right {
+			background-color: gray;
+			/* 开启BFC模式，当前元素的内部环境与外界完全隔离 */
+			overflow: hidden;
+		}
 	</style>
 </head>
 
 <body>
-	<div class="container">
+	<div class="box">
 
 	</div>
 	<!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
