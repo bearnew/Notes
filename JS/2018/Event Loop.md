@@ -92,16 +92,35 @@ console.log(2)
 // 6
 ```
 ### 4.nodejs事件循环
-外部输入数据-->轮询阶段(poll)-->检查阶段(check)-->关闭事件回调阶段(close callback)-->定时器检测阶段(timer)-->I/O事件回调阶段(I/O callbacks)-->闲置阶段(idle, prepare)-->轮询阶段...
-
-* poll: 等待新的I/O事件，node在一些特殊情况下会阻塞在这里。
-* check: setImmediate()的回调会在这个阶段执行。
-* close callbacks: 例如socket.on('close', ...)这种close事件的回调。
-* timers: 这个阶段执行定时器队列中的回调如 setTimeout() 和 setInterval()。
-* I/O callbacks: 这个阶段执行几乎所有的回调。但是不包括close事件，定时器和setImmediate()的回调。
-* idle, prepare: 这个阶段仅在内部使用，可以不必理会。
-* 观察者的优先顺序 `idle观察者(process.nextTick()) > io观察者(setTimeout) > check观察者(setImmediate)`
+1. `Node.js`启动时，会初始化`Event loop`, 每个`Event loop`包含如下顺序的6个循环阶段
+    1. timers: 这个阶段执行定时器队列中的回调如 setTimeout() 和 setInterval()。
+    2. pending callbacks: 执行系统操作的回调，例如TCP错误
+    3. idle, prepare: 这个阶段仅在内部使用，可以不必理会。
+    4. poll: 等待新的I/O事件，执行与I/O相关的回调，node在一些特殊情况下会阻塞在这里。
+    5. check: setImmediate()的回调会在这个阶段执行。
+    6. close callbacks: 例如socket.on('close', ...)这种close事件的回调。
+2. 观察者的优先顺序 `idle观察者(process.nextTick()) > timer观察者(setTimeout) > check观察者(setImmediate)`
     * process.nextTick()，效率最高，消费资源小，但会阻塞CPU的后续调用； 
     * setTimeout()，精确度不高，可能有延迟执行的情况发生，且因为动用了红黑树，所以消耗资源大； 
     * setImmediate()，消耗的资源小，也不会造成阻塞，但效率也是最低的。
+    ```js
+    setTimeout(() => {
+        console.log('setTimeout延迟执行')
+    }, 0);
+
+    process.nextTick(function () {
+        console.log('nextTick延迟执行');
+    });
+
+    setImmediate(function () {
+        console.log('setImmediate延迟执行');
+    });
+
+    console.log('正常执行');
+
+    // 正常执行
+    // nextTick延迟执行
+    // setTimeout延迟执行
+    // setImmediate延迟执行
+    ```
 ![nodejs事件循环](https://github.com/bearnew/picture/blob/master/mardown/2018-11-21%20event%20loop/eventLoop2.png?raw=true)
