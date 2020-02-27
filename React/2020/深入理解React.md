@@ -64,7 +64,22 @@
 #### 3.React Fiber
 1. React Fiber将渲染工作分割成块并将其分散到多个帧中
 2. React渲染分为`reconciler`(调度阶段)和`commit`(渲染阶段)
-3. `reconciler`会执行对虚拟DOM树自上到下的递归算法，对`current tree`和`new tree`做计算
+3. `reconciler`会执行对虚拟DOM树（render的时候生成）自上到下的递归算法，对`current tree`和`new tree`做计算
+    * 两个不同类型的元素会产生出不同的树
+    * 开发者可以通过`key`让diff比较变得高效
+    ```js
+    //  React 知道只有带着 '2014' key 的元素是新元素，带着 '2015' 以及 '2016' key 的元素仅仅移动了。
+    <ul>
+        <li key="2015">Duke</li>
+        <li key="2016">Villanova</li>
+    </ul>
+
+    <ul>
+        <li key="2014">Connecticut</li>
+        <li key="2015">Duke</li>
+        <li key="2016">Villanova</li>
+    </ul>
+    ``` 
 4. `commit`会将`reconciler`获取到的变化应用到真实的DOM树中
 5. React Fiber会把diff递归拆分成一系列的小任务，每次检查树上的一小部分
 6. React Fiber更新是用队列进行更新
