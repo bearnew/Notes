@@ -1,3 +1,5 @@
+## Promise二次封装
+```js
 var x = 0;
 function query() {
     x ++;
@@ -43,3 +45,4 @@ queryWrap(100, 3).then(res => {
 }, fail => {
     console.log(fail);
 })
+```
