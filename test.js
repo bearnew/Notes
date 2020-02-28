@@ -1,45 +1,36 @@
-var x = 0;
-function query() {
-    x ++;
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            // resolve('success');
-            if (x == 3) {
-                resolve('success');
-            }
-            reject('fail');
-        }, 200);
-    })
-}
+var minCoinChange = new MinCoinChange([1, 5, 10, 25]);
+console.log(minCoinChange.makeChange(36)); // [1, 10, 25]
 
-function queryWrap(interval, max) {
-    return excute(0);
+function MinCoinChange(coins) {
+    var cache = {};
 
-    function excute(n) {
-        return query().then(res => {
-            return res;
-        }, async fail => {
-            n++;
-            if (n > max) {
-                return Promise.reject(fail);
+    this.makeChange = function (amount) {
+        if (!amount) return [];
+        if (cache[amount]) {
+            return cache[amount];
+        }
+
+        var min = [];
+        var newMin;
+        var newAmount;
+
+        for (var i = 0; i < coins.length; i++) {
+            var coin = coins[i];
+            newAmount = amount - coin;
+
+            if (newAmount >= 0) {
+                newMin = this.makeChange(newAmount);
             }
 
-            await waitFunc();
-            return excute(n++);
-        })
-    }
+            if (newAmount >= 0 &&
+                (newMin.length < min.length - 1 || !min.length) &&
+                (newMin.length || !newAmount)
+            ) {
+                min = [coin].concat(newMin);
+                // console.log(min, amount)
+            }
+        }
 
-    async function waitFunc() {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve();
-            }, interval);
-        })
+        return (cache[amount] = min);
     }
 }
-
-queryWrap(100, 3).then(res => {
-    console.log(res)
-}, fail => {
-    console.log(fail);
-})
