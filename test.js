@@ -1,36 +1,33 @@
-var minCoinChange = new MinCoinChange([1, 5, 10, 25]);
-console.log(minCoinChange.makeChange(36)); // [1, 10, 25]
+console.log(coinChange([5, 1, 10, 25], 6)); // [1, 10, 25]
 
-function MinCoinChange(coins) {
-    var cache = {};
+function coinChange(coins, amount) {
+    var memo = [];
 
-    this.makeChange = function (amount) {
-        if (!amount) return [];
-        if (cache[amount]) {
-            return cache[amount];
-        }
+    function dp(n) {
+        if (memo[n]) return memo[n];
 
-        var min = [];
-        var newMin;
-        var newAmount;
+        if (n === 0) return [];
+        if (n < 0) return null;
 
-        for (var i = 0; i < coins.length; i++) {
-            var coin = coins[i];
-            newAmount = amount - coin;
+        var min = Number.MAX_SAFE_INTEGER;
+        var minCoins;
+        var subCoins;
 
-            if (newAmount >= 0) {
-                newMin = this.makeChange(newAmount);
-            }
+        for (let coin of coins) {
+            if (n - coin < 0) continue;
 
-            if (newAmount >= 0 &&
-                (newMin.length < min.length - 1 || !min.length) &&
-                (newMin.length || !newAmount)
-            ) {
-                min = [coin].concat(newMin);
-                // console.log(min, amount)
+            var subCoins = dp(n - coin);
+
+            if (!subCoins) continue;
+
+            if (subCoins.length + 1 < min) {
+                minCoins = [coin].concat(subCoins);
+                min = subCoins.length + 1;
             }
         }
 
-        return (cache[amount] = min);
+        return (memo[n] = minCoins);
     }
+
+    return dp(amount);
 }
