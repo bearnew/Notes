@@ -115,7 +115,9 @@
             </MyErrorBoundary>
         </div>
     );
-    ``` 
+    ```
+3. 动态加载时的webpack配置
+    * 动态加载生成的文件目录和文件名，使用`output.chunkFilename`进行配置
 #### 6.context
 1. `React.createContext`
     * React渲染一个订阅了这个Context对象的组件, 组件会从离自身最近的`Provider`读取值
