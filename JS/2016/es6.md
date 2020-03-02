@@ -171,7 +171,7 @@ chef.cook('tomato'); // tomato
 #### Set
 > Set和Map类似，也是一组key的集合，但不存储value。由于key不能重复，所以，在Set中，没有重复的key。
 ```js
-let dessert = new Set('apple', 'banana', 'tomato');
+let dessert = new Set(['apple', 'banana', 'tomato']);
 dessert.add('pear');
 dessert.has('apple');
 dessert.delete('pear');
