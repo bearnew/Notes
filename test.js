@@ -1,25 +1,24 @@
-function getClimbingWays(n) {
-    if (n < 1) {
-        return 0;
-    }
-    if (n === 1) {
-        return 1;
-    }
-    if (n === 2) {
-        return 2;
-    }
+var promiseStart = new Promise(function (resolve, reject) {
+    reject('promise is rejected');
+});
 
-    var a = 1;
-    var b = 2;
-    var temp = 0;
+promiseStart
+    .then(res => {
+        console.log('resolved');
+        return new Promise(function (resolve, reject) {
+            resolve('promise is resolved');
+        });
+    }, fail => {
+        console.log('rejected:', fail);
+        // return Promise.reject('1234')
+        return '123'
+    })
+    .then(res => {
+        console.log('resolved:', res);
+    })
+    .catch(function (err) {
+        console.error('catched:', err);
+    })
 
-    for (var i = 3; i <= n; i++) {
-        temp = a + b;
-        a = b;
-        b = temp;
-    }
-
-    return temp;
-}
-
-console.log(getClimbingWays(10))
+// rejected: promise is rejected
+// resolved: undefined
