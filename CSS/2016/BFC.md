@@ -16,3 +16,7 @@
     3. position为absolute或fixed
     4. display为inline-block tabbel-cell table-caption flex inline-flex\
     5. overflow不为visible
+5. BFC的作用
+    1. 自适应两栏布局
+    2. 清除浮动
+    3. 阻止margin重叠
