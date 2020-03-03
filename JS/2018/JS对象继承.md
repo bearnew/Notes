@@ -103,6 +103,7 @@ var Child = function() {
 	}
 }
 
+// 相当于把Child.prototype.__proto__指向Parent
 Child.prototype = Object.create(Parent, {
 	name: {
 		value: 'wade'
