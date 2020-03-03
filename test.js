@@ -1,28 +1,24 @@
-var Parent = {
-	name: 'james',
-	sayHi: function() {
-		console.log(`Hi ${this.name}.`)
-	}
-}
-
-var Child = function() {
-	this.getName = function() {
-		console.log(this.name)
-	}
-}
-
-// 相当于把Child.prototype.__proto__指向Parent
-Child.prototype = Object.create(Parent, {
-	name: {
-		value: 'wade'
-	}
+var promiseStart = new Promise(function (resolve, reject) {
+    reject('promise is rejected');
 });
-var c = new Child();
 
-console.log(Child.prototype)
-console.log(c.constructor) // ƒ Object() { [native code] }
-Child.prototype.constructor = Child;
-console.log(c.constructor) // f () { this.getName = function() { console.log(this.name) } }
+promiseStart
+    .then(res => {
+        console.log('resolved');
+        return new Promise(function (resolve, reject) {
+            resolve('promise is resolved');
+        });
+    }, fail => {
+        console.log('rejected:', fail);
+        // return Promise.reject('1234')
+        return '123'
+    })
+    .then(res => {
+        console.log('resolved:', res);
+    })
+    .catch(function (err) {
+        console.error('catched:', err);
+    })
 
-c.sayHi(); // Hi wade.
-c.getName(); // wade
+// rejected: promise is rejected
+// resolved: undefined
