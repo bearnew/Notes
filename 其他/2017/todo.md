@@ -14,3 +14,4 @@
 5. React和Vue的区别
 6. https://blog.csdn.net/qq_25968195/article/details/79142755
 7. https://www.jb51.net/article/126539.htm
+6. node高并发
