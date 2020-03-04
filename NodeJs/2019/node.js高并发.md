@@ -88,7 +88,45 @@ server {
 }
 ```
 ## 3.限流
-1. 
+```js
+// koa限流
+const app = new Koa();
+
+let count = 0;
+const maxAllowRequest = 5;
+const queue = [];
+
+app.use(async (ctx, next) => {
+    count++;
+    // 如果超过了最大并发数目
+    if (count >= maxAllowRequest) {
+        // 如果当前队列中已经过长
+        await new Promise((resolve, reject) => {
+            queue.push(resolve);
+        });
+    }
+    await next();
+    count--;
+
+    // resolve调用后，第1个await执行完毕，进入到await next
+    const resolve = queue.shift();
+    resolve && resolve();
+});
+
+router.get('/', async function (ctx) {
+    ctx.state.currentTime = new Date();
+    await delay();
+    ctx.body = 'hello koa';
+});
+
+function delay() {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve();
+        }, 3000);
+    });
+}
+``` 
 ## 4.代码进行异步并发控制
 1. bagpipe.js
     * 通过一个队列来控制并发量
