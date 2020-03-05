@@ -153,3 +153,52 @@
 #### 7.Error Boundaries
 1. 使用`componentDidCatch()`打印错误信息
 2. 使用`static getDerivedStateFromError()`渲染备用 UI
+```js
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    // 更新 state 使下一次渲染可以显降级 UI
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // 你可以渲染任何自定义的降级  UI
+      return <h1>Something went wrong.</h1>;
+    }
+
+    return this.props.children; 
+  }
+}
+```
+#### 8.hydrate()
+* `ReactDOM.hydrate(element, container[, callback])`
+* hydrate是 React 中提供在初次渲染的时候，去复用原本已经存在的 DOM 节点，减少重新生成节点以及删除原本 DOM 节点的开销，来加速初次渲染的功能。主要使用场景是服务端渲染
+* 在 React v15 版本里，ReactDOM.render 方法会根据 data-react-checksum 的标记，复用 ReactDOMServer 的渲染结果，不重复渲染。根据 data-reactid 属性，找到需要绑定的事件元素，进行事件绑定的处理。
+* 在 React v16 版本里，ReactDOMServer 渲染的内容不再带有 data-react 属性，ReactDOM.render 可以使用但是会报警告。
+* 在 React v17 版本里，ReactDOM.render 将不再具有复用 SSR 内容的功能，统一用 hydrate() 来进行服务端渲染。
+
+#### 9.React16新特性
+1. hooks
+    * useState
+    * useEffect
+    * useLayoutEffect
+    * useRefs
+    * useCallback
+    * useMemo
+    * useContext
+    * useReducer
+2. 生命周期
+3. componentDidCatch和getDerivedStateFromError 
+4. 渲染string, number
+5. portals
+6. profiler
+7. fragments
+8. context
+9.  动态import以及React.Lazy
+10. Refs转发
+11. ReactDom.hydrate()
