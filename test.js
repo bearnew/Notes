@@ -1,12 +1,16 @@
-var x = 8.24;
-
-console.log(~~x); // 8
-console.log(x | 0); // 8
-console.log(x ^ 0); // 8
-console.log(~~x); // 8
-console.log(x << 0); // 8
-console.log(x >> 0); // 8
-console.log(parseInt(x)); // 8
-console.log(Math.floor(x)); // 8
-console.log(Math.round(x)); // 8
-console.log(Math.ceil(x)); // 9
+var a = 1;
+switch (a) {
+    case 1:
+    case 2:
+        // 永远执行不到这里
+        console.log('1 or 2')
+    case 3:
+        console.log("3");
+        break;
+    case 4:
+        console.log("4");
+    default:
+        console.log("default");
+}
+// 1 or 2
+// 3
