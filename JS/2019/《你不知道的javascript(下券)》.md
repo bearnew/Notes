@@ -287,7 +287,7 @@
     function bar(x = 1, y = w + 1, z = w + 1 ) {
         console.log( x, y, z );
     }
-    foo(); // 1 2 2
+    bar(); // 1 2 2
     ```
 5. 解构
     1. 对象赋值模式
