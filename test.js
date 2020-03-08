@@ -1,7 +1,11 @@
-var x = '123';
+var a = 1;
+function b() {
+    var a = 2;
+    function c() {
+        console.log(a);
+    }
 
-console.log(~~x); // 123
-console.log(+x); // 123
-console.log(Number(x)); // 123
-console.log(parseInt(x)); // 123
-console.log(parseFloat(x)); // 123
+    return c;
+}
+
+b()(); // 2

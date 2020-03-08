@@ -37,7 +37,7 @@ console.log(new B());   // B {a: undefined}
 console.log(new C(2));  // C {a: 2}
 ```
 
-```
+```js
 var a = 1;
 function b() {
     var a = 2;
@@ -48,7 +48,7 @@ function b() {
     return c;
 }
 
-b()();
+b()(); // 2
 ```
 #### 自执行函数
 ```js
