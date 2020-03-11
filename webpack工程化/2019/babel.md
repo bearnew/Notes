@@ -22,10 +22,14 @@
     * 可以使用 [generator-babel-plugin](https://github.com/babel/generator-babel-plugin) 生成1个插件模板
     ```js
     // 一个插件就是一个函数
+    // 函数接收一个babel对象
+    // 返回一个包含visitor的对象，visitor内的函数接收path
     export default function ({types: t}) {
         return {
             visitor: {
-                Identifier(path) {
+                // path是指AST上的节点
+                // state是用户自定义的options
+                Identifier(path, state) {
                     let name = path.node.name; // reverse the name: JavaScript -> tpircSavaJ
                     path.node.name = name.split('').reverse().join('');
                 }
@@ -122,6 +126,44 @@
         * shippedProposals
             * boolean, 默认false
             * 是否启用对浏览器中提供的内置函数/功能提议进行支持
+    3. 自定义`presets`
+        ```js
+        // presets
+        module.exports = function() {
+            return {
+                plugins: [
+                "pluginA",
+                "pluginB",
+                "pluginC",
+                ]
+            };
+        }
+        ```
+        ```js
+        // 自定义的presets可以包含另外的presets
+        module.exports = () => ({
+            presets: [
+                require("@babel/preset-env"),
+            ],
+            plugins: [
+                [require("@babel/plugin-proposal-class-properties"), { loose: true }],
+                require("@babel/plugin-proposal-object-rest-spread"),
+            ],
+        });
+        ```
+        ```js
+        // 使用
+        {
+            "presets": ["./myProject/myPreset"]
+        }
+        // 或者发布到了npm包
+        {
+            "presets": [
+                "myPreset",
+                "babel-preset-myPreset" // equivalent
+            ]
+        }
+        ```
 5. `@babel/polyfill`
     1. 用于业务项目中，而非库/工具中
     2. 使用`babel-node`时，`polyfill`将被自动加载
