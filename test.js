@@ -1,3 +1,10 @@
-var str = '  124ssd ';
-console.log(parseInt([123,324]))
-console.log(parseInt(str.trim().match(/^[+|-]?\d+/)[0]))
+var s = new XMLSerializer();
+
+var $ll = document.getElementById('ll');
+var $input = document.getElementById('input');
+
+$input.value = '123'
+var $wrap = document.getElementById('root');
+console.log(s.serializeToString($wrap))
+console.log($wrap.childNodes)
+$ll.innerHTML = s.serializeToString($wrap)
