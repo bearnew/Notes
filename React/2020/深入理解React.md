@@ -202,3 +202,18 @@ class ErrorBoundary extends React.Component {
 9.  动态import以及React.Lazy
 10. Refs转发
 11. ReactDom.hydrate()
+
+#### 10.React diff
+1. `tree diff`
+    * 两棵树只会对同一层级的节点进行比较
+    * `React`不建议对DOM进行跨层级的操作
+2. `component diff`
+    * 对于同一类型的组件，按照策略继续比较`virtual DOM tree`
+    * 如果不是，则替换整个组件下的所有子节点
+    * 使用`shouldComponent`可以判断组件是否需要`diff`
+3. `element diff`
+    * 设置唯一`key`的策略，对`element`进行算法优化
+
+#### 11.React fiber reconciler
+1. 可拆分，可中断任务
+2. 可重用各分阶段任务，且可以设置优先级（计算的结果可缓存）
