@@ -35,3 +35,4 @@ Cross Site Scripting(跨站脚本攻击)
 * 3.黑名单，白名单（过滤）
     * 将<script> onerror这种危险标签纳入黑名单，过滤掉
     * 设置标签白名单，不在白名单内的，一律过滤掉
+* 4.请求头设置`X-XSS-Protection`
