@@ -217,3 +217,16 @@ class ErrorBoundary extends React.Component {
 #### 11.React fiber reconciler
 1. 可拆分，可中断任务
 2. 可重用各分阶段任务，且可以设置优先级（计算的结果可缓存）
+
+#### 12.React事件系统
+1. 使用`SyntheticEvent`的动机
+    1. 通过其他相关事件模拟低版本不兼容的事件
+    2. 自定义高级事件如`onChange`
+    3. 利用事件委托，将所有事件绑定到`document`上，而不是`dom`节点本身，简化`dom`事件处理逻辑，减少内存开销
+    4. 干预事件的分发（事件触发的优先级）
+2. 事件绑定
+    * React会判断元素是否是媒体类型（Video），媒体类型的事件是无法在Document监听的，所以会直接在元素上进行绑定
+    * 其他事件在`Document`上绑定，事件处理器只需在`Document`订阅一次
+3. 事件分发
+    * 调用`dispatchEvent`从DOM原生事件对象获取事件触发的`target`, 再根据`target`获取关联的`React`节点
+    
