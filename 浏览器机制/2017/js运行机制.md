@@ -1,4 +1,6 @@
-来源：https://juejin.im/post/5a6547d0f265da3e283a1df7
+来源：
+https://juejin.im/post/5a6547d0f265da3e283a1df7
+https://www.cnblogs.com/wmhuang/p/11156367.html
 #### 1. 进程和线程
 + __进程__
 > 进程是cpu资源分配的最小单位（是能拥有资源和独立运行的最小单位）
@@ -50,8 +52,8 @@ __tips:__
     3. 将`DOM`树与`CSSOM`树一起生成`render`树
     4. 绘制render树，绘制页面像素信息
 2. 事件触发
-    * DOM加载完成，不包括样式表、图片，DOMContentLoaded事件会触发
-    * 所有DOM,样式表，脚本，图片加载完成，onload事件触发
+    * DOM加载完成，不包括样式表、图片，DOMContentLoaded事件会触发(`dom ready`)
+    * 所有DOM,样式表，脚本，图片加载完成，onload事件触发(`page load`)
 3. 普通图层和复合图层
     1. 浏览器默认只有1个复合图层
     2. 其他render树绘制都会按普通图层渲染
@@ -63,3 +65,34 @@ __tips:__
         3. will-change(提前告诉浏览器，有哪些属性需要变化，达到页面优化)
         4. <video>, <iframe>, <canvas>, <webgl>, 等元素
 
+#### 6.渲染事件
+1. 白屏时间
+    * 白屏时间 = 地址栏输入网址后回车 - 浏览器出现第一个元素
+    * 影响白屏时间的因素：网络，服务端性能，前端页面结构设计。
+2. 首屏时间
+    * 首屏时间 = 地址栏输入网址后回车 - 浏览器第一屏渲染完成
+    * 影响首屏时间的因素：白屏时间，资源下载执行时间。
+3. 可交互时间
+    * js执行完成，事件绑定完成，用户可交互的时间
+4. 事件执行顺序
+    * ![event order](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B5%8F%E8%A7%88%E5%99%A8/timing-overview.png?raw=true)
+    * `navigationStart`: 表示从上一个文档卸载结束时的 unix 时间戳，如果没有上一个文档，这个值将和 fetchStart 相等。
+    * `unloadEventStart`: 表示前一个网页（与当前页面同域）unload 的时间戳，如果无前一个网页 unload 或者前一个网页与当前页面不同域，则值为 0。
+    * `unloadEventEnd`: 返回前一个页面 unload 时间绑定的回掉函数执行完毕的时间戳。
+    * `redirectStart`: 第一个 HTTP 重定向发生时的时间。有跳转且是同域名内的重定向才算，否则值为 0。
+    * `redirectEnd`: 最后一个 HTTP 重定向完成时的时间。有跳转且是同域名内部的重定向才算，否则值为 0。
+    * `fetchStart`: 浏览器准备好使用 HTTP 请求抓取文档的时间，这发生在检查本地缓存之前。
+    * `domainLookupStart/domainLookupEnd`: DNS 域名查询开始/结束的时间，如果使用了本地缓存（即无 DNS 查询）或持久连接，则与 fetchStart 值相等
+    * `connectStart`: HTTP（TCP）开始/重新 建立连接的时间，如果是持久连接，则与 fetchStart 值相等。
+    * `connectEnd`: HTTP（TCP） 完成建立连接的时间（完成握手），如果是持久连接，则与 fetchStart 值相等。
+    * `secureConnectionStart`: HTTPS 连接开始的时间，如果不是安全连接，则值为 0。
+    * requestStart: HTTP 请求读取真实文档开始的时间（完成建立连接），包括从本地读取缓存。
+    * responseStart: HTTP 开始接收响应的时间（获取到第一个字节），包括从本地读取缓存。
+    * responseEnd: HTTP 响应全部接收完成的时间（获取到最后一个字节），包括从本地读取缓存。
+    * domLoading: 开始解析渲染 DOM 树的时间，此时 Document.readyState 变为 loading，并将抛出 readystatechange 相关事件。
+    * domInteractive: 完成解析 DOM 树的时间，Document.readyState 变为 interactive，并将抛出 readystatechange 相关事件，注意只是 DOM 树解析完    成，这时候并没有开始加载网页内的资源。
+    * domContentLoadedEventStart: DOM 解析完成后，网页内资源加载开始的时间，在 DOMContentLoaded 事件抛出前发生。
+    * domContentLoadedEventEnd: DOM 解析完成后，网页内资源加载完成的时间（如 JS 脚本加载执行完毕）。
+    * domComplete: DOM 树解析完成，且资源也准备就绪的时间，Document.readyState 变为 complete，并将抛出 readystatechange 相关事件。
+    * loadEventStart: load 事件发送给文档，也即 load 回调函数开始执行的时间。
+    * loadEventEnd: load 事件的回调函数执行完毕的时间。
