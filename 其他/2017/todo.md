@@ -17,3 +17,9 @@
 6. node高并发
 7. 动态加载原理
 8. 首屏时间 可交互时间
+9. nodejs进程通信
+10. 浏览器进程通信
+11. externals和dllplugin区别
+12. interface和type区别
+13. isBatchUpdate原理
+14. http2多路复用原理
