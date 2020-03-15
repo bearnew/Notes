@@ -26,6 +26,29 @@
 	 <script type="text/javascript" src="co.js"></script> -->
 	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
 	<script type="text/javascript" src="test.js"></script>
+	<script>
+		function myNew(F) {
+			return function () {
+				// var o = Object.create(F.prototype);
+				var o = {};
+				o.__proto__ = F.prototype;
+				var result = F.apply(o, arguments);
+
+				return (result ? result : o);
+			}
+		}
+
+		function Test(a) {
+			this.a = a;
+
+			return {
+				x: '1'
+			}
+		}
+
+		var test = myNew(Test)('hello');
+		console.log(test);
+	</script>
 </body>
 
 </html>
