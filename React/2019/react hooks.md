@@ -444,12 +444,54 @@
     * 返回一个memoized回调
     * 仅当第2个参数数组中有值发生变化时，第1个参数的回调才执行，类似于shouldComponentUpdate, 避免不必要的渲染
     * `useCallback(fn, deps)` is equivalent to `useMemo(() => fn, deps)`.
+    * `useCallback` 将返回 fn 函数而不调用它
 3. useMemo
     * 与`useCallback`相同，第2个参数数组有值发生变化时，第1个参数函数才会执行
     * 传递给`useMemo`的函数在`render`期间执行
     * 不要在`useMemo`中做任何在渲染时不必做的事情，渲染时的副作用应该放在useEffect中执行
     * 第2个参数如果没有提供一个`array`,每次`render`都会执行useMemo中的函数
     * 函数中涉及到的每1个值，都应该在数组中出现
+    * `useMemo`将调用 fn 函数并返回其结果
+    ```js
+    interface ChildProps {
+        name: { name: string; color: string };
+        onClick: Function;
+    }
+    const Child = ({ name, onClick}: ChildProps): JSX.Element => {
+        console.log('子组件?')
+        return(
+            <>
+                <div style={{ color: name.color }}>我是一个子组件，父级传过来的数据：{name.name}</div>
+                <button onClick={onClick.bind(null, '新的子组件name')}>改变name</button>
+            </>
+        );
+    }
+    const ChildMemo = memo(Child);
+
+    const Page = (props) => {
+        const [count, setCount] = useState(0);
+        const [name, setName] = useState('Child组件');
+        
+        return (
+            <>
+                <button onClick={(e) => { setCount(count+1) }}>加1</button>
+                <p>count:{count}</p>
+                <ChildMemo 
+                    //使用useMemo，返回一个和原本一样的对象，第二个参数是依赖性，当name发生改变的时候，才产生一个新的对象
+                    name={
+                        useMemo(()=>({ 
+                            name, 
+                            color: name.indexOf('name') !== -1 ? 'red' : 'green'
+                        }), [name])
+                    } 
+                    onClick={ useCallback((newName: string) => setName(newName), []) }
+                    {/* useCallback((newName: string) => setName(newName),[]) */}
+                    {/* 这里使用了useCallback优化了传递给子组件的函数，只初始化一次这个函数，下次不产生新的函数
+                />
+            </>
+        )
+    }
+    ```
 4. useRef
     * example
         ```jsx
