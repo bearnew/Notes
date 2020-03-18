@@ -110,7 +110,12 @@ OPTIONS * HTTP/1.1
 #### 5.HTTP 方法
 
 1. GET: 获取资源
+    * GET产生一个TCP数据包
+    * 浏览器会把http header和data一并发送出去，服务器响应200（返回数据）
 2. POST: 传输实体主体
+    * POST产生两个TCP数据包
+    * 对于POST，浏览器先发送header，服务器响应100 continue
+    * 浏览器再发送data，服务器响应200 ok（返回数据）
 3. PUT: 传输文件
     - 像 FTP 协议的文件上传一样
     - http/1.1 的 PUT 方法自身不带验证机制，任何人都可以上传文件，存在安全性问题
