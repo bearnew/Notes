@@ -6,18 +6,47 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>test</title>
 	<style>
+		/* 为了保证三列布局的元素没有重叠 */
+		.container {
+			padding: 0 100px;
+		}
 
+		.container div {
+			height: 200px;
+			line-height: 200px;
+			text-align: center;
+			float: left;
+		}
+
+		.left {
+			position: relative;
+			left: -100px;
+			width: 100px;
+			margin-left: -100%;
+			background: yellow;
+		}
+
+		.right {
+			position: relative;
+			right: -100px;
+			width: 100px;
+			margin-left: -100px;
+			background: green;
+		}
+
+		.center {
+			width: 100%;
+			background: #ccc;
+		}
 	</style>
 </head>
 
 <body>
-	<div id="root">
-		<div class="test">
-			<span>242342</span>
-			<input id="input" />
-		</div>
+	<div class="container">
+		<div class="center">center</div>
+		<div class="left">left</div>
+		<div class="right">right</div>
 	</div>
-	<div id="ll"></div>
 	<!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
 	<script crossorigin src="https://cdn.bootcss.com/babel-standalone/6.10.3/babel.min.js"></script>
@@ -26,29 +55,6 @@
 	 <script type="text/javascript" src="co.js"></script> -->
 	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
 	<script type="text/javascript" src="test.js"></script>
-	<script>
-		function myNew(F) {
-			return function () {
-				// var o = Object.create(F.prototype);
-				var o = {};
-				o.__proto__ = F.prototype;
-				var result = F.apply(o, arguments);
-
-				return (result ? result : o);
-			}
-		}
-
-		function Test(a) {
-			this.a = a;
-
-			return {
-				x: '1'
-			}
-		}
-
-		var test = myNew(Test)('hello');
-		console.log(test);
-	</script>
 </body>
 
 </html>

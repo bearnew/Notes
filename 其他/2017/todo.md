@@ -23,3 +23,5 @@
 12. interface和type区别
 13. isBatchUpdate原理
 14. http2多路复用原理
+15. amd中加载变量
+16. DNS查找
