@@ -52,11 +52,13 @@ fetch("/").then(() => {
 * 获取到请求返回值后，setState后会重新render
 
 #### 4.setState isBatchingUpdates
+> https://hateonion.me/posts/19jan14/
 1. `isBatchingUpdates: true`
     * 暂存state进队列, 最后进行批量更新
     * 每次render都会完整的执行一次批量更新流程，调用一次diff算法，使用批量更新减少性能损耗
     * 生命周期和合成函数调用`setState`，是异步
+    * `setState`异步会处在一个大的事务中
 2. `isBatchingUpdates: false`
     * 直接更新state
     * `setTimeout`、原生事件、`async`函数中调用`setState`是同步
-    * 
+    * 由于`EventLoop`, setState一定是在上一次`batch update`完成之后执行, `isBatchingUpdate`为false, 从而同步更新
