@@ -199,11 +199,13 @@ m.get('Adam'); // undefined
 3. `Object`不能通过`for...of`来遍历
 ## WeakMap
 1. 只接收对象作为键名
-2. 键名是弱引用, 垃圾回收不会考虑`WeakMap`键的引用
-3. 使用`WeakMap`在`dom`上添加数据，当dom被删除，weakMap的记录就自动被移除
+2. 不可遍历，没有`size`属性，不支持`clear`方法
+3. 键名是弱引用, 垃圾回收不会考虑`WeakMap`键的引用
+4. 使用`WeakMap`在`dom`上添加数据，当dom被删除，weakMap的记录就自动被移除
 ## WeakSet
 1. 成员只能是对象
 2. `WeakSet`不可遍历
 3. `WeakSet`适合临时存放一组对象，但是`WeakSet`里面的成员可能会随时消失
 4. `WeakSet`中的对象都是弱引用，即垃圾回收机制不考虑 WeakSet 对该对象的引用，如果只有WeakSet引用该对象，那么垃圾回收机制会自动回收该对象所占用的内存
+5. 没有`size`属性，没有`clear`方法
 
