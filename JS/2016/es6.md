@@ -169,7 +169,7 @@ class Chef {
 chef.cook('tomato'); // tomato
 ```
 #### Set
-> Set和Map类似，也是一组key的集合，但不存储value。由于key不能重复，所以，在Set中，没有重复的key。
+1. Set和Map类似，也是一组key的集合，但不存储value。由于key不能重复，所以，在Set中，没有重复的key。
 ```js
 let dessert = new Set(['apple', 'banana', 'tomato']);
 dessert.add('pear');
@@ -178,7 +178,10 @@ dessert.delete('pear');
 dessert.clear();
 ```
 #### Map
-> Map是一组键值对的结构，具有极快的查找速度。
+1. 各种类型的值都可以作为`key`
+2. 支持`for...of`迭代，`typeof obj[Symbol.iterator] === 'function'`
+3. 频繁的增加删除键值对，有更好的性能表现
+4. 迭代获取key的顺序，与添加到`Map`的顺序相同
 ```js
 var m = new Map([[1, 'Michael'], [2, 'Bob'], [3, 'Tracy']]);
 m.get(1); // 'Michael'
@@ -190,4 +193,17 @@ m.get('Adam'); // 67
 m.delete('Adam'); // 删除key 'Adam'
 m.get('Adam'); // undefined
 ```
+#### Object
+1. `Object`的`key`必须是`String`或者`Symbol`, 当key不为字符串时，会调用`toString`强制转换
+2. `Object`含有内置属性，如`constructor`, `toString`, `valueOf`与其同名的键值会产生冲突
+3. `Object`不能通过`for...of`来遍历
+## WeakMap
+1. 只接收对象作为键名
+2. 键名是弱引用, 垃圾回收不会考虑`WeakMap`键的引用
+3. 使用`WeakMap`在`dom`上添加数据，当dom被删除，weakMap的记录就自动被移除
+## WeakSet
+1. 成员只能是对象
+2. `WeakSet`不可遍历
+3. `WeakSet`适合临时存放一组对象，但是`WeakSet`里面的成员可能会随时消失
+4. `WeakSet`中的对象都是弱引用，即垃圾回收机制不考虑 WeakSet 对该对象的引用，如果只有WeakSet引用该对象，那么垃圾回收机制会自动回收该对象所占用的内存
 
