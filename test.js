@@ -1,20 +1,18 @@
-const ws = new WeakSet();
-const obj = {};
-const foo = {};
-
-ws.add(window);
-ws.add(obj);
-ws.clear()
-
-var a = {
-    x: 1
+function unique1(arr) {
+    return Array.from(new Set(arr));
 }
-var b = {
-    x: 2
+
+function unique2(arr) {
+    var map = {};
+    arr.map((i, index) => {
+        if (map[i]) {
+            arr.splice(index, 1);
+        } else {
+            map[i] = true;
+        }
+    })
+
+    return arr;
 }
-const m = new WeakMap([[a, 1], [b, 2]])
-console.log(m)
-a = null;
-console.log(a)
-m.clear()
-console.log(m)
+
+console.log(unique2([1, 2, 2, 3, 4]))
