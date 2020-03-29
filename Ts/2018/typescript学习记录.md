@@ -174,4 +174,11 @@ interface SearchFunc {
         [propName: string]: any;
     }
     ``` 
-5. 
+5. 可索引的类型
+```js
+interface ReadonlyStringArray {
+    readonly [index: number]: string;
+}
+let myArray: ReadonlyStringArray = ["Alice", "Bob"];
+myArray[2] = "Mallory"; // error!
+``` 
