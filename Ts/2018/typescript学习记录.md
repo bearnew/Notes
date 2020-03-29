@@ -160,3 +160,18 @@ interface SearchFunc {
   (source: string, subString: string): boolean;
 }
 ```
+4. 额外的属性检查
+   1. 类型断言
+    ```js
+    let mySquare = createSquare({ width: 100, opacity: 0.5 } as SquareConfig);
+    ```
+    2. 字符串索引签名
+    ```js
+    // 表示的是SquareConfig可以有任意数量的属性，并且只要它们不是color和width，那么就无所谓它们的类型是什么
+    interface SquareConfig {
+        color?: string;
+        width?: number;
+        [propName: string]: any;
+    }
+    ``` 
+5. 
