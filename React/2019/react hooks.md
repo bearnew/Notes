@@ -4,6 +4,8 @@
 1. 复用组件之间的状态逻辑
 2. 解决组件内业务逻辑过于复杂，难于理解的场景
 3. 抛弃class,拥抱function
+4. JavaScript 中闭包函数的性能是非常快
+5. useEffect、useMemo、useCallback都是自带闭包的。也就是说，每一次组件的渲染，其都会捕获当前组件函数上下文中的状态(state, props)，所以每一次这三种hooks的执行，反映的也都是当前的状态，你无法使用它们来捕获上一次的状态
 ### hooks概要
 #### 1.useState
 1. `useState`等同于`this.setState`，只是`useState`不能将老的`state`和新的`state`合并到一起
@@ -445,6 +447,31 @@
     * 仅当第2个参数数组中有值发生变化时，第1个参数的回调才执行，类似于shouldComponentUpdate, 避免不必要的渲染
     * `useCallback(fn, deps)` is equivalent to `useMemo(() => fn, deps)`.
     * `useCallback` 将返回 fn 函数而不调用它
+    * 能充分利用一个函数式组件多次 `render` 时产生的相同功能的 `callback`
+    * `callback` 能不受闭包限制，访问到这个函数式组件内部最新的状态
+        ```js
+        function Form() {
+            const [text, updateText] = useState('');
+            const textRef = useRef();
+
+            useLayoutEffect(() => {
+                textRef.current = text; // 将 text 写入到 ref
+            });
+
+            const handleSubmit = useCallback(() => {
+                const currentText = textRef.current; // 从 ref 中读取 text
+                alert(currentText);
+            }, [textRef]); // handleSubmit 只会依赖 textRef 的变化。不会在 text 改变时更新
+
+            return (
+                <>
+                <input value={text} onChange={e => updateText(e.target.value)} />
+                <ExpensiveTree onSubmit={handleSubmit} />
+                </>
+            );
+        }
+        ``` 
+
 3. useMemo
     * 与`useCallback`相同，第2个参数数组有值发生变化时，第1个参数函数才会执行
     * 传递给`useMemo`的函数在`render`期间执行
