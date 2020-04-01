@@ -11,7 +11,9 @@ git fetch origin 远程分支名x:本地分支名x
 git log 
 ```
 查看最近4次commit
-```
+```js
+// 改变了当前分支的branch out节点
+// rebase过程会出现多次解决同一个地方的冲突，可以使用squash解决
 git rebase -i HEAD~4
 ```
 > 将pick更改为squash,将这个commit合并到它的上一个commit
