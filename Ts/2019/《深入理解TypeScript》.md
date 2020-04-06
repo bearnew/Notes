@@ -1,7 +1,11 @@
 # 深入理解TypeScript
 > https://jkchao.github.io/typescript-book-chinese/
 ## 1.typescript编译原理
-
+1. 扫描器, sourceCode => Token流
+2. 解析器, Token流 => AST
+3. 绑定器, AST => Symbols（符号）
+4. 检查器, AST + Symbols（符号）=> 类型验证
+5. 发射器, AST + 检查器 => JavaScript 代码
 ## 2.type和interface区别
 > 能用interface就使用interface，否则使用type
 * 相同点
