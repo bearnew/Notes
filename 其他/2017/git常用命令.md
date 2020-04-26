@@ -42,9 +42,10 @@ git reflog
 git reset --soft [commit_id]
 git reset HEAD *
 ```
-#### git 重新提交commit
-```
-git cherry-pick <commit id>
+#### git 将在其他分支上的 commit 修改，移植到当前的分支
+```js
+// 将其他分支的commit移植到当前分支
+git cherry-pick [commit id]
 ```
 
 #### Git: fatal: The remote end hung up unexpectedly 解决方法
