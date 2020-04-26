@@ -52,6 +52,9 @@ git cherry-pick -x [commit_id]
 
 // 设定一个开始和结束的commit, 进行cherry-pick操作, 不会包含start-commit-id的commit
 git cherry-pick <start-commit-id>...<end-commit-id>
+
+// 设定一个开始和结束的commit, 进行cherry-pick操作, 包含start-commit-id的commit
+git cherry-pick <start-commit-id>^...<end-commit-id>
 ```
 
 #### Git: fatal: The remote end hung up unexpectedly 解决方法
