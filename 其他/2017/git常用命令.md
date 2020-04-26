@@ -45,7 +45,10 @@ git reset HEAD *
 #### git 将在其他分支上的 commit 修改，移植到当前的分支
 ```js
 // 将其他分支的commit移植到当前分支
-git cherry-pick [commit id]
+git cherry-pick [commit_id]
+
+// 保留原提交的作者信息进行提交
+git cherry-pick -x [commit_id]
 ```
 
 #### Git: fatal: The remote end hung up unexpectedly 解决方法
