@@ -42,9 +42,19 @@ git reflog
 git reset --soft [commit_id]
 git reset HEAD *
 ```
-#### git 重新提交commit
-```
-git cherry-pick <commit id>
+#### git 将在其他分支上的 commit 修改，移植到当前的分支
+```js
+// 将其他分支的commit移植到当前分支
+git cherry-pick [commit_id]
+
+// 保留原提交的作者信息进行提交
+git cherry-pick -x [commit_id]
+
+// 设定一个开始和结束的commit, 进行cherry-pick操作, 不会包含start-commit-id的commit
+git cherry-pick <start-commit-id>...<end-commit-id>
+
+// 设定一个开始和结束的commit, 进行cherry-pick操作, 包含start-commit-id的commit
+git cherry-pick <start-commit-id>^...<end-commit-id>
 ```
 
 #### Git: fatal: The remote end hung up unexpectedly 解决方法
@@ -70,3 +80,22 @@ git config --global http.postBuffer 1048576000
 #### git本地识别大小写
 * `git config core.ignorecase false`
 * `git rm --cached src/components/book_b/Coupon/couponList -r`
+#### git缓存
+```js
+// 把暂存区和工作区的改动缓存起来
+git stash
+
+// 显示缓存的内容
+git stash list
+
+// 将最新的缓存内容放回工作区
+git stash pop
+
+// 放回指定的缓存内容到工作区, stashId通过git stash list查看
+// git stash pop stash@{[stashId]}
+git stash pop stash@{1}
+
+// 删除一个缓存的内容
+// git stash drop stash@{[stashId]}
+git stash drop stash@{0}
+```

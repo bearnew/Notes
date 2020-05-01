@@ -34,3 +34,6 @@
 10. 安装`whistle`的`Https`证书
     * 点击界面头部https进行下载安装
 11. 如果公司只开放了`5389`端口，用`5389`启动`whistle`才能连接手机
+12. 手机连电脑 wifi 热点，在配置了代理 ip 和端口之后，任然不能访问
+    * 打开 Windows 防火墙，点击 “允许程序或功能通过 Windows 防火墙”，找到 Node.js 的所有进程（Node.js: Server-side JavaScript），勾选所有进程及进程里的 checkbox 即可。
+13. 
