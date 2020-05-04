@@ -112,10 +112,13 @@ OPTIONS * HTTP/1.1
 1. GET: 获取资源
     * GET产生一个TCP数据包
     * 浏览器会把http header和data一并发送出去，服务器响应200（返回数据）
+    * GET请求会被浏览器主动cache
+    * GET请求只能进行url编码，而POST支持多种编码方式。
 2. POST: 传输实体主体
     * POST产生两个TCP数据包
     * 对于POST，浏览器先发送header，服务器响应100 continue
     * 浏览器再发送data，服务器响应200 ok（返回数据）
+    * GET请求会被浏览器主动cache，POST不会，除非手动设置。
 3. PUT: 传输文件
     - 像 FTP 协议的文件上传一样
     - http/1.1 的 PUT 方法自身不带验证机制，任何人都可以上传文件，存在安全性问题
@@ -291,16 +294,16 @@ OPTIONS * HTTP/1.1
 > eg. Cache-Control: private, max-age=0, no-cache
 * 缓存请求响应
 
-  | 指令             | 参数   | 说明                         |
-  | :--------------- | :----- | :--------------------------- |
-  | no-cache         | 无     | 强制向原服务器再次验证, 不缓存过期资源       |
-  | no-store         | 无     | 不缓存请求或响应的任何内容   |
-  | max-age=[秒]     | 必需   | 响应的最大Age值              |
-  | max-stale(=[秒]) | 可省略 | 接收已过期的响应             |
-  | min-fresh=[秒]   | 必需   | 期望在指定时间内的响应仍有效 |
-  | no-transform     | 无     | 代理不可更改媒体类型         |
-  | only-if-cached   | 无     | 从缓存获取资源               |
-  | cache-extension  | -      | 新指令标记（token）          |
+  | 指令             | 参数   | 说明                                   |
+  | :--------------- | :----- | :------------------------------------- |
+  | no-cache         | 无     | 强制向原服务器再次验证, 不缓存过期资源 |
+  | no-store         | 无     | 不缓存请求或响应的任何内容             |
+  | max-age=[秒]     | 必需   | 响应的最大Age值                        |
+  | max-stale(=[秒]) | 可省略 | 接收已过期的响应                       |
+  | min-fresh=[秒]   | 必需   | 期望在指定时间内的响应仍有效           |
+  | no-transform     | 无     | 代理不可更改媒体类型                   |
+  | only-if-cached   | 无     | 从缓存获取资源                         |
+  | cache-extension  | -      | 新指令标记（token）                    |
 
 * 缓存响应指令
  
