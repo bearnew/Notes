@@ -1,14 +1,13 @@
-const user = {
-    name: 'jay',
-    age: 26,
-    toJSON() {
-        return {
-            des: `${this.name}'s age is ${this.age}`
-        }
+const arr = [1, 2, 3, 4, 5];
+
+function test() {
+    for (let i of arr) {
+        console.log(i)
+        if (i === 3) {
+            return i;
+        }   
     }
+    console.log('5555')
 }
 
-// {
-//     ** "des": "jay's age is 26"
-// }
-console.log(JSON.stringify(user, null, '**')); // 优先调用toJSON方法
+console.log(test())
