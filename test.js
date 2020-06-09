@@ -1,13 +1,6 @@
-const arr = [1, 2, 3, 4, 5];
+const test = new Promise((resolve, reject) => {
 
-function test() {
-    for (let i of arr) {
-        console.log(i)
-        if (i === 3) {
-            return i;
-        }   
-    }
-    console.log('5555')
-}
-
-console.log(test())
+})
+Promise.all([test]).finally(() => {
+    console.log('1111')
+})
