@@ -1,13 +1,10 @@
-const arr = [1, 2, 3, 4, 5];
+console.log(test1)
+let test1 = () => {
 
-function test() {
-    for (let i of arr) {
-        console.log(i)
-        if (i === 3) {
-            return i;
-        }   
-    }
-    console.log('5555')
 }
+// const test2 = new Promise(resolve => {
+//     console.log(1)
+//     a = resolve;
+// })
 
-console.log(test())
+// test1();
