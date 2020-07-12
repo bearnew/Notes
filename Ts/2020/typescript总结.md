@@ -181,3 +181,72 @@ class Grid {
     }
 }
 ```
+
+## 12.抽象类
+
+```ts
+// 抽象类不允许被实例化的
+// 抽象方法必须在子例中实现
+abstract class Department {
+    name: string
+
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    printName(): void {
+        console.log('Department name' + this.name);
+    }
+
+    abstract printMeeting(): void;
+}
+
+class AccountingDepartment extends Department {
+    constructor() {
+        super('Accounting ad Auditing')
+    }
+
+    printMeeting(): void {
+        console.log('The Accounting Department meets each Monday at 10am')
+    }
+
+    generateReports(): void {
+        console.log('generating....')
+    }
+}
+
+let department: Department;
+department = new AccountingDepartment();
+department.printName();
+department.printMeeting();
+department.generateReports(); //error, 类型Department中没有generateReports方法
+```
+
+## 13.高级技巧
+
+```ts
+class Greeter {
+    static standardGreeting = 'Hello, there';
+    greeting: string;
+    constructor(message?: string) {
+        this.greeting = message;
+    }
+    greet() {
+        if (this.greeting) {
+            return 'hello' + this.greeting;
+        } else {
+            return Greeter.standardGreeting;
+        }
+    }
+}
+
+let greeter: Greeter;
+greeter = new Greeter();
+console.log(greeter.greet());
+
+let greeterMaker: typeof Greeter = Greeter;
+greeterMaker.standardGreeting = 'Hey there';
+
+let greeter2: Greeter = new greeterMaker();
+console.log(greeter2.greet());
+``` 
