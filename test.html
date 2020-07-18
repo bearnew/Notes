@@ -6,27 +6,59 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>test</title>
 	<style>
-		.wrap {
-			height: 400px;
-			overflow: scroll;
+		.spinner {
+			width: 50px;
+			height: 50px;
+			margin: 100px auto;
+			text-align: center;
 		}
 
-
-
-		.box {
-			height: 800px;
-			background: red;
+		.spinner>div {
+			display: inline-block;
+			width: 6px;
+			height: 100%;
+			background: green;
+			animation: strechdelay 1.2s infinite ease-in-out;
 		}
 
-		/* .wrap::-webkit-scrollbar {
-			width: 0;
-		} */
+		.spinner .line2 {
+			animation-delay: -1.1s;
+		}
+
+		.spinner .line3 {
+			animation-delay: -1s;
+		}
+
+		.spinner .line4 {
+			animation-delay: -0.9s;
+		}
+
+		.spinner .line5 {
+			animation-delay: -0.8s;
+		}
+
+		@keyframes strechdelay {
+
+			0%,
+			40%,
+			100% {
+				transform: scaleY(.4);
+			}
+
+			20% {
+				transform: scaleY(1);
+			}
+		}
 	</style>
 </head>
 
 <body>
-	<div class="wrap">
-		<div class="box"></div>
+	<div class="spinner">
+		<div class="line1"></div>
+		<div class="line2"></div>
+		<div class="line3"></div>
+		<div class="line4"></div>
+		<div class="line5"></div>
 	</div>
 	<!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
