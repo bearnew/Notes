@@ -104,3 +104,55 @@
     }
     */
     ```
+## 3.声明空间
+* 类型声明空间
+```js
+class Foo {}
+interface Bar {}
+type Bas = {};
+
+// 类型注解
+let foo: Foo;
+let bar: Bar;
+let bas: Bas;
+```
+* 变量声明空间
+```js
+class Foo {}
+const someVar = Foo;
+const someOtherVar = 123;
+```
+## 4.模块
+* 全局模块
+```js
+// foo.ts
+const foo = 123;
+
+// bar.ts
+// foo是全局变量
+const bar = foo; // allowed
+```
+* 文件模块
+> 使用import或者export会在这个文件中创建一个本地作用域
+```js
+// foo.ts
+export const foo = 123;
+
+// bar.ts
+import { foo } from './foo';
+const bar = foo; // allow
+```
+* 文件模块详情
+    * `AMD`, 只能在浏览器中工作
+    * `SystemJS`, 已经被ES模块代替
+    * `ES`, 浏览器还没准备好，一般需要编译
+    * `commonjs`，一般使用它
+* 使用`export`关键字导出一个变量（或者类型）
+```js
+// foo.ts
+export const someVar = 123;
+export type someType = {
+    foo: string
+}
+```
+* 
