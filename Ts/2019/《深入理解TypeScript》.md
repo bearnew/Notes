@@ -342,3 +342,133 @@ declare module '*.html';
 ```js
 import * as foo from './some/file.css'
 ```
+## 17. @types
+* `@types`支持全局和模块类型定义
+```js
+import * as $ from 'jquery';
+```
+* 控制全局
+```js
+// tsconfig
+// 配置 compilerOptions.types: [ "jquery" ] 后，只允许使用 jquery 的 @types 包
+// npm install @types/node，它的全局变量(例如 process)也不会泄漏到你的代码中，直到你将它们添加到 tsconfig.json 类型选项
+{
+    "compilerOptions": {
+      "types" : [
+        "jquery"
+    ]}
+}
+```
+## 18.声明文件
+* `declare`告诉`typescript`，正在试图表述一个其他地方已经存在的代码
+* 建议把声明放入 .d.ts 里(可以从一个命名 为 globals.d.ts 或者 vendor.d.ts 文件开始) 
+## 19.接口
+* 接口可以轻松的将成员添加到`myPoint`的现有声明中
+```js
+// Sample A, 内敛注解
+declare const myPoint: { x: number; y: number };
+
+// Sample B， 接口
+interface Point {
+    x: number;
+    y: number;
+}
+declare const myPoint: Point;
+```
+```js
+// Lib a.d.ts
+interface Point {
+    x: number,
+    y: number
+}
+
+declare const myPoint: Point
+// Lib b.d.ts
+interface Point {
+    z: number
+}
+
+// Your code
+let myPoint.z // Allowed!
+```
+* `implements` 限制了类实例的结构 
+```ts
+// 编译错误
+interface Point {
+    x: number;
+    y: number;
+    z: number; // New member
+}
+class MyPoint implements Point {
+    // ERROR : missing member `z`
+    x: number;
+    y: number;
+}
+```
+* 可以使用 new 调用某些内容
+```js
+interface Crazy {
+    new (): {
+        hello: number;
+    };
+}
+
+class CrazyClass implements Crazy {
+    constructor() {
+        return { hello: 123 };
+    }
+}
+
+// Because
+const crazy = new CrazyClass(); // crazy would be { hello:123 }
+```
+## 20.向枚举中添加静态方法
+* `enum + namespace` 的声明的方式向枚举类型添加静态方法
+```js
+enum Weekday {
+    Monday,
+    Tuseday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday,
+    Sunday
+}
+
+namespace Weekday {
+    export function isBusinessDay(day: Weekday) {
+        switch (day) {
+            case Weekday.Saturday:
+            case Weekday.Sunday:
+            return false;
+        default:
+            return true;
+        }
+    }
+}
+
+const mon = Weekday.Monday; 
+const sun = Weekday.Sunday;
+console.log(Weekday.isBusinessDay(mon)); // true
+console.log(Weekday.isBusinessDay(sun));
+```
+## 21.lib.d.ts
+1. 安装TypeScript时，会顺带安装`lib.d.ts`等声明文件，此文件包含了`JavaScript`运行时以及`DOM`中存在各种常见的环境声明
+2. `lib.d.ts`的作用：
+    * 它自动包含在 TypeScript 项目的编译上下文中
+    * 它能让你快速开始书写经过类型检查的 JavaScript 代码
+3. 通过指定 --noLib 的编译器命令行标志(或者在 tsconfig.json 中指定选项 noLib: true)从上下文中排除此文件
+## 22.lib.d.ts的使用示例
+```js
+// 运行正常
+// lib.d.ts 为所有 JavaScript 对象定义了 toString 方法
+const foo = 123;
+const bar = foo.toString();
+```
+```js
+// noLib选项下
+// Error: 属性 toString 不存在类型 number 上
+const foo = 123;
+const bar = foo.toString();
+```
+## 23.lib.d.ts内部
