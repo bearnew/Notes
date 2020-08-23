@@ -12,4 +12,10 @@
 3. `transform`和`opacity`的动画更加流畅
    * 不影响文档流
    * 不依赖于文档流
-   * 不会造成重绘  
+   * 不会造成重绘
+4. ios微信中audio元素的autoplay无效，需要
+```js
+wx.ready(() => {
+    $audio.play()
+})
+```    
