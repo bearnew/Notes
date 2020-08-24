@@ -591,4 +591,137 @@ tsc --target es5 --lib dom,es6
         "lib": ["es5", "dom", "scripthost", "es2015.symbol"]
     }
     ```  
-* 
+## 25.在旧的 JavaScript 引擎时使用 Polyfill
+* 安装`core-js`，在项目中使用它
+```js
+import 'core-js';
+``` 
+## 26.可调用
+```ts
+// 表示一个可被调用的类型注解
+interface ReturnString {
+    (): string;
+}
+```
+* 多种调用签名，用以特殊的函数重载
+```ts
+interface Overloaded {
+    (foo: string): string;
+    (foo: number): number;
+}
+```
+## 27.可实例化
+* 使用 new 做为前缀。它意味着你需用使用 new 关键字去调用它
+```ts
+interface CallMeWithNewToGetString {
+    new (): string;
+}
+// 使用
+declare const Foo: CallMeWithNewToGetString;
+const bar = new Foo(); // bar 被推断为 string 类型
+```
+## 28.类型断言
+* 类型断言被认为是有害的
+```ts
+const foo = {};
+foo.bar = 123; // Error: 'bar' 属性不存在于 ‘{}’
+foo.bas = 'hello'; // Error: 'bas' 属性不存在于 '{}'
+```
+```ts
+interface Foo {
+    bar: number;
+    bas: string;
+}
+const foo = {} as Foo;
+foo.bar = 123;
+foo.bas = 'hello';
+```
+## 29.双重断言
+* 使用类型断言来提供代码的提示
+```ts
+function handler(event: Event) {
+    const mouseEvent = event as MouseEvent;
+}
+```
+```ts
+function handler(event: Event) {
+    const element = event as HTMLElement; // Error: 'Event' 和 'HTMLElement' 中的任何一个都不能赋值给另外一个
+}
+```
+```ts
+function handler(event: Event) {
+    const element = (event as any) as HTMLElement; // ok
+}
+```
+## 30.类型保护
+* `typeof`
+```ts
+function doSome(x: number | string) {
+    if (typeof x === 'string') {
+        // 在这个块中，TypeScript 知道 `x` 的类型必须是 `string` 
+        console.log(x.subtr(1)); // Error: 'subtr' 方法并没有存在于 `string` 上
+        console.log(x.substr(1)); // ok
+    }
+    x.substr(1); // Error: 无法保证 `x` 是 `string` 类型
+}
+```
+* `instanceof`
+```ts
+class Foo {
+    foo = 123;
+}
+class Bar {
+    bar = 123;
+}
+
+function doStuff(arg: Foo | Bar) {
+    if (arg instanceof Foo) {
+        console.log(arg.foo); // ok
+        console.log(arg.bar); // Error 
+    } else {
+        // 这个块中，一定是 'Bar' 
+        console.log(arg.foo); // Error 
+        console.log(arg.bar); // ok
+    }
+}
+
+doStuff(new Foo());
+doStuff(new Bar());
+```
+* `in`
+```ts
+interface A {
+    x: number;
+}
+interface B {
+    y: string;
+}
+
+function doStuff(q: A | B) {
+    if ('x' in q) {
+        // q: A 
+    } else {
+        // q: B 
+    }
+}
+```
+## 31.字面量类型保护
+```ts
+type Foo = {
+    kind: 'foo'; // 字面量类型 foo: number;
+};
+type Bar = {
+    kind: 'bar'; // 字面量类型 bar: number;
+};
+
+function doStuff(arg: Foo | Bar) {
+    if (arg.kind === 'foo') {
+        console.log(arg.foo); // ok
+        console.log(arg.bar); // Error
+    } else {
+        // 一定是 Bar
+        console.log(arg.foo); // Error 
+        console.log(arg.bar); // ok
+    }
+}
+``` 
