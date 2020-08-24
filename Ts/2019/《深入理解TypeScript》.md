@@ -472,3 +472,123 @@ const foo = 123;
 const bar = foo.toString();
 ```
 ## 23.lib.d.ts内部
+1. lib.d.ts 的内容主要是一些变量声明(如:window、document、math)和一些类似的接口声明 (如: Window 、 Document 、 Math )。
+```ts
+declare var window: Window;
+
+interface Window extends EventTarget, WindowTimers, WindowSessionStorage, WindowLocalStorage, WindowConsole, Glo animationStartTime: number;
+    applicationCache: ApplicationCache;
+    clientInformation: Navigator;
+    closed: boolean;
+    crypto: Crypto;
+    // so on and so forth...
+}
+```
+2. 创建`globals.d.ts`, 修改原始类型
+```ts
+interface Window {
+    helloWorld(): void;
+}
+
+// Add it at runtime
+window.helloWorld = () => console.log('hello world');
+// Call it
+window.helloWorld();
+// 滥用会导致错误
+window.helloWorld('gracius'); // Error: 提供的参数与目标不匹配
+```
+```ts
+declare var Math: Math;
+
+interface Math {
+    E: number;
+    LN10: number; // others ...
+}
+
+interface Math {
+    seedrandom(seed?: string): void;
+}
+
+Math.seedrandom();
+Math.seedrandom('Any string you want');
+```
+3. `day.js`在`Date`的全局变量以及`Date`实例上同时添加了成员
+```ts
+// DateJS 公开的静态方法
+interface DateConstructor {
+    /** Gets a date that is set to the current date. The time is set to the start of the day (00:00 or 12:00 AM) **/ 
+    today(): Date;
+    // ... so on and so forth
+}
+
+// DateJS 公开的实例方法
+interface Date {
+    /** Adds the specified number of milliseconds to this instance. */ 
+    addMilliseconds(milliseconds: number): Date;
+    // ... so on and so forth
+}
+```
+```ts
+// 用法
+const today = Date.today();
+const todayAfter1second = today.addMilliseconds(1000);
+```
+## 24.--lib选项
+* 使用 --lib 选项可以将任何 lib 与 --target 解偶
+* 你可以通过命令行或者在 tsconfig.json 中提供此选项(推荐)
+```ts
+// 编译目标是 --target es5，环境库支持是es6
+tsc --target es5 --lib dom,es6
+```
+```json
+// config.json
+"compilerOptions": {
+      "lib": ["dom", "es6"]
+}
+```
+* lib分类
+    * `JavaScript` 功能
+        * es5
+        * es6
+        * es2015
+        * es7
+        * es2016
+        * es2017
+        * esnext
+    * 运行环境
+        * dom 
+        * dom.iterable
+        * webworker 
+        * scripthost
+    * `ESNext` 功能选项
+        * es2015.core
+        * es2015.collection
+        * es2015.generator
+        * es2015.iterable
+        * es2015.promise
+        * es2015.proxy
+        * es2015.reflect
+        * es2015.symbol
+        * es2015.symbol.wellknown
+        * es2016.array.include
+        * es2017.object
+        * es2017.sharedmemory
+        * esnext.asynciterable 
+* 没有指定--lib，则会导入默认库
+    * --target 选项为 es5 时，会导入 es5, dom, scripthost。
+    * --target 选项为 es6 时，会导入 es6, dom, dom.iterable, scripthost。
+    * 个人推荐
+    ```ts
+    "compilerOptions": {
+        "target": "es5",
+        "lib": ["es6", "dom"]
+    }
+    ```
+    * 使用 Symbol 的 ES5 使用例子
+    ```ts
+    "compilerOptions": {
+        "target": "es5",
+        "lib": ["es5", "dom", "scripthost", "es2015.symbol"]
+    }
+    ```  
+* 
