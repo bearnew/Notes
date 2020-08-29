@@ -725,3 +725,102 @@ function doStuff(arg: Foo | Bar) {
     }
 }
 ``` 
+## 32.字符串字面量
+* 使用字符串或者`boolean`或者`number`的字面量类型
+```js
+type CardinalDirection = 'North' | 'East' | 'South' | 'West';
+function move(distance: number, direction: CardinalDirection) {
+    // ...
+}
+move(1, 'North'); // ok 
+move(1, 'Nurth'); // Error
+
+type OneToFive = 1 | 2 | 3 | 4 | 5;
+type Bools = true | false;
+```
+* 推断
+```js
+function iTakeFoo(foo: 'foo') {}
+type Test = {
+    someProp: 'foo';
+};
+const test: Test = {
+    // 推断 `someProp` 永远是 'foo'
+    someProp: 'foo'
+};
+
+iTakeFoo(test.someProp); // ok
+``` 
+## 33.readonly
+```js
+function foo(config: { readonly bar: number, readonly bas: number }) {
+    // ..
+}
+const config = { bar: 123, bas: 123 };
+foo(config);
+// 现在你能够确保 'config' 不能够被改变了
+```
+```js
+type Foo = {
+    readonly bar: number;
+    readonly bas: number;
+};
+// 初始化
+const foo: Foo = { bar: 123, bas: 456 };
+// 不能被改变
+foo.bar = 456; // Error: foo.bar 为仅读属性
+```
+* 你也能指定一个类的属性为只读，然后在声明时或者构造函数中初始化它们
+```ts
+class Foo {
+    readonly bar = 1; // OK
+    readonly baz: string;
+    constructor() {
+        this.baz = 'hello'; // OK 
+    }
+}
+```
+## 34.readonly映射类型
+```js
+type Foo = {
+    bar: number;
+    bas: number;
+};
+type FooReadonly = Readonly<Foo>;
+const foo: Foo = { bar: 123, bas: 456 };
+const fooReadonly: FooReadonly = { bar: 123, bas: 456 };
+foo.bar = 456; // ok
+fooReadonly.bar = 456; // Error: bar 属性只读
+``` 
+## 35.readonly与const的区别
+* const
+    * 用于变量
+    * 变量不能重新赋值给其他事物
+* readonly
+      * 用于属性
+      * 用于别名，可以修改属性
+      * readonly 能确保“我”不能修改属性，但是当你把这个属性交给其他并没有这种保证的使用者(允许出于类型兼容性的原因)，他 们能改变它
+```ts
+const foo: {
+    readonly bar: number;
+} = {
+    bar: 123
+};
+function iMutateFoo(foo: { bar: number }) {
+    foo.bar = 456;
+}
+iMutateFoo(foo);
+console.log(foo.bar); // 456
+```
+```ts
+interface Foo {
+    readonly bar: number;
+}
+let foo: Foo = {
+    bar: 123
+};
+function iTakeFoo(foo: Foo) {
+    foo.bar = 456; // Error: bar 属性只读
+}
+iTakeFoo(foo);
+```  
