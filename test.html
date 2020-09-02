@@ -6,59 +6,52 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>test</title>
 	<style>
-		.spinner {
-			width: 50px;
-			height: 50px;
-			margin: 100px auto;
-			text-align: center;
+		.page {
+			position: absolute;
+			top: 0;
+			left: 50%;
+			width: 200px;
+			height: 250px;
+			transform-origin: left center;
+			transform-style: preserve-3d;
+			transition: all ease 1s;
+			transform: rotateY(-180deg);
 		}
 
-		.spinner>div {
-			display: inline-block;
-			width: 6px;
+		.page_cover {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
 			height: 100%;
-			background: green;
-			animation: strechdelay 1.2s infinite ease-in-out;
+			line-height: 250px;
+			text-align: center;
+			color: #FFF;
+			font-size: 24px;
+			backface-visibility: hidden;
+			background: #000;
 		}
 
-		.spinner .line2 {
-			animation-delay: -1.1s;
-		}
-
-		.spinner .line3 {
-			animation-delay: -1s;
-		}
-
-		.spinner .line4 {
-			animation-delay: -0.9s;
-		}
-
-		.spinner .line5 {
-			animation-delay: -0.8s;
-		}
-
-		@keyframes strechdelay {
-
-			0%,
-			40%,
-			100% {
-				transform: scaleY(.4);
-			}
-
-			20% {
-				transform: scaleY(1);
-			}
+		.page_back {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			line-height: 250px;
+			text-align: center;
+			color: #FFF;
+			font-size: 24px;
+			backface-visibility: hidden;
+			background: red;
 		}
 	</style>
 </head>
 
 <body>
-	<div class="spinner">
-		<div class="line1"></div>
-		<div class="line2"></div>
-		<div class="line3"></div>
-		<div class="line4"></div>
-		<div class="line5"></div>
+	<div class="page">
+		<div class="page_front page_cover">Cover</div>
+		<div class="page_back page_1">1</div>
 	</div>
 	<!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>

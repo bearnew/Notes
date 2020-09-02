@@ -196,7 +196,7 @@ dot::before {
     display: block;
     content: '...\A..\A.';
     white-space: pre-wrap; // 换行
-    animation: dot 3s infinite step-start both;
+    animation: dot 3s infinite step-start both;animation
 }
 @keyframes dot {
     33% {
@@ -427,4 +427,3 @@ label {
             border-color: #f30 #f30 transparent transparent;
         }
     ```
-阅读至111页 第5章
