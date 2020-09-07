@@ -110,3 +110,8 @@ str.replace(reg, function(match, group1, group2, group3, index, origin) {
 * (\d)表示匹配之后捕获该匹配，并分组并对组进行编号
 * \1表示被捕获的第一个分组
 * {n-1}是因为被捕获的第一个分组已经消耗了一位数字，因此要减1。
+
+#### 10.正则非
+```js
+rule.test = /^((?!\.styled).)*\.(sa|sc|c)ss$/;
+```
