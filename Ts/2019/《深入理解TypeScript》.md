@@ -823,4 +823,115 @@ function iTakeFoo(foo: Foo) {
     foo.bar = 456; // Error: bar 属性只读
 }
 iTakeFoo(foo);
-```  
+```
+## 36.泛型
+* 提供有意义的约束
+    * 类的实例方法
+    * 类的方法
+    * 函数参数
+    * 函数返回值
+* 简单的泛型使用
+    ```js
+    class Utility {
+        reverse<T>(items: T[]): T[] {
+            const toreturn = [];
+            for (let i = items.length; i >= 0; i--) {
+                toreturn.push(items[i]); 
+            }
+            return toreturn;
+        }
+    }
+    ```
+* 用泛型封装请求
+```ts
+// 请求接口数据
+export interface ResponseData<T = any> {
+    /**
+    * 状态码
+    * @type { number } */
+    code: number;
+
+    /**
+    * 数据
+    * @type { T } */
+    result: T;
+
+    /**
+    * 消息
+    * @type { string } */
+    message: string;
+}
+```
+```ts
+ 
+// 在 axios.ts 文件中对 axios 进行了处理，例如添加通用配置、拦截器等 import Ax from './axios';
+import { ResponseData } from './interface.ts';
+
+export function getUser<T>() {
+    return Ax.get<ResponseData<T>>('/somepath')
+        .then(res => res.data)
+        .catch(err => console.error(err));
+    }
+```
+```ts
+interface User {
+    name: string;
+    age: number;
+}
+
+async function test() {
+    // user 被推断出为
+    // {
+    //     code: number,
+    //     result: { name: string, age: number },
+    //     message: string
+    // }
+    const user = await getUser<User>();
+}
+
+```
+## 37.类型推断
+* TypeScript 能根据一些简单的规则推断(检查)变量的类型
+* 定义变量
+    ```ts
+    let foo = 123; // foo 是 'number'
+    let bar = 'hello'; // bar 是 'string'
+    foo = bar; // Error: 不能将 'string' 赋值给 `number`
+    ```
+* 函数返回类型（推断函数返回一个数字）
+    ```ts
+    function add(a: number, b: number) {
+        return a + b;
+    }
+    ```
+* 赋值（函数参数类型/返回值也能通过赋值来推断）
+    ```ts
+    type Adder = (a: number, b: number) => number;
+    let foo: Adder = (a, b) => a + b;
+    ```
+    ```ts
+    type Adder = (a: number, b: number) => number;
+    let foo: Adder = (a, b) => {
+        a = 'hello'; // Error:不能把 'string' 类型赋值给 'number' 类型
+        return a + b;
+    };
+    ```
+* 结构化
+    ```ts
+    const foo = {
+        a: 123,
+        b: 456
+    };
+    foo.a = 'hello'; // Error:不能把 'string' 类型赋值给 'number' 类型
+    ```
+* 类型注解，函数参数也就能被推断(a，b 都能被推断为 number 类型)
+    ```ts
+    type TwoNumberFunction = (a: number, b: number) => void;
+    const foo: TwoNumberFunction = (a, b) => {
+        /* do something */
+    };
+    ```
+* noImplicitAny
+    * 选项 noImplicitAny 用来告诉编译器，当无法推断一个变量时发出一个错误(或者只能推断为一个隐式的 any 类型)
+    * 通过显式添加 :any 的类型注解，来让它成为一个 any 类型;
+    * 通过一些更正确的类型注解来帮助 TypeScript 推断类型。
