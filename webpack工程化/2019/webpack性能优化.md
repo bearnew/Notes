@@ -30,7 +30,16 @@ const smp = new SpeedMeasurePlugin()
 
 module.exports = smp.wrap(YourWebpackConfig);
 ```
-
+3. webpack-jarvis （分析webpack的打包信息）
+* 打开`http://localhost:4000/`
+```js
+plugins: [
+    new Jarvis({
+        watchOnly: false,
+        port: 4000 // optional: set a port
+    })
+]
+``` 
 ### webpack优化
 
 1. happypack（多线程打包）
