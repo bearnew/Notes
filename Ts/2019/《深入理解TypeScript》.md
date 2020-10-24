@@ -935,3 +935,63 @@ async function test() {
     * 选项 noImplicitAny 用来告诉编译器，当无法推断一个变量时发出一个错误(或者只能推断为一个隐式的 any 类型)
     * 通过显式添加 :any 的类型注解，来让它成为一个 any 类型;
     * 通过一些更正确的类型注解来帮助 TypeScript 推断类型。
+## 38.Never
+1. `never`类型是`typescript`的底层类型
+2. `never`会自然被分配给下列场景
+    1. 一个从来不会有返回值的函数
+    2. 一个总是会抛出错误的函数（如：function foo() { throw new Error('Not Implemented') }，foo 的返回类型是 never）
+3. `never`可以用作类型注解，但是`never`类型仅能被赋值给另外一个`never`
+## 39.捕获键的名称
+1. `keyof`操作符能捕获一个类型的键名称
+```ts
+const colors = {
+    red: 'red',
+    blue: 'blue'
+}
+
+typeof Colors = keyof typeof colors;
+let color: Colors; // color 的类型是 'red' | 'blue' 
+color = 'red'; // ok 
+color = 'blue'; // ok 
+color = 'anythingElse'; // Error
+```
+## 40.异常处理
+1. `js`有一个`Error`类，用于处理异常
+```ts
+try {
+    throw new Error('Something bad happened');
+} catch(e) {
+    console.log(e)
+}
+```
+2. 额外的内置错误子类型，继承自`Error`类
+3. `RangeError`
+    * 当数字类型变量或者参数超出其有效范围时，出现 `RangeError` 的错误提示
+    ```ts
+    // 使用过多参数调用 console
+    // RangeError: 数组长度无效
+    console.log.apply(console, new Array(1000000000));
+    ``` 
+4. `ReferenceError`
+    * 当引用无效时，会出现 `ReferenceError` 的错误提示
+    ```ts
+    'use strict';
+    console.log(notValidVar); // ReferenceError: notValidVar 未定义
+    ```
+5. `SyntaxError`
+    * 当解析无效 `JavaScript` 代码时，会出现 `SyntaxError` 的错误提示
+    ```ts
+    1 *** 3 // SyntaxError: 无效的标记 *
+    ``` 
+6. `TypeError`
+    * 变量或者参数不是有效类型时，会出现 TypeError 的错误提示
+    ```ts
+    '1.2'.toPrecision(1); // TypeError: '1.2'.toPrecision 不是函数。
+    ``` 
+7. `URIError`
+    * 当传入无效参数至 `encodeURI()` 和 `decodeURI()` 时，会出现 `URIError` 的错误提示
+    ```ts
+    decodeURI('%'); // URIError: URL 异常
+    ``` 
+8. 不不需需要要 `throw` 抛抛出出一一个个错错误, 使用 `Error` 对象的基本好处是，它能自动跟踪堆栈的属性构建以及生成位置 
+9.  
