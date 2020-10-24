@@ -994,4 +994,97 @@ try {
     decodeURI('%'); // URIError: URL 异常
     ``` 
 8. 不不需需要要 `throw` 抛抛出出一一个个错错误, 使用 `Error` 对象的基本好处是，它能自动跟踪堆栈的属性构建以及生成位置 
-9.  
+
+## 41.命名空间
+1. 使用命名空间来进行分组管理
+```ts
+namespace Tools {
+    const TIMEOUT = 100;
+ 
+    export class Ftp {
+        constructor() {
+            setTimeout(() => {
+                console.log('Ftp');
+            }, TIMEOUT)
+        }
+    }
+ 
+    export class Http {
+        constructor() {
+            console.log('Http');
+        }
+    }
+ 
+    export function parseURL(){
+        console.log('parseURL');
+    }
+}
+```
+```ts
+Tools.TIMEOUT // 报错, Tools上没有这个属性
+Tools.parseURL() // 'parseURL'
+```
+2. 引入写好的命名空间
+    1. 通过 "/// <reference path='xxx.ts'/>" 导入
+    2. 通过`import`导入
+        ```ts
+        namespace Food {
+            export interface Fruits{
+                taste: string;
+                hardness: number;
+            }
+        }
+        ```
+        ```ts
+        // yyy.ts
+        import {Food} from './xxx'; // 使用import导入
+        let meat: Food.Meat;
+        let fruits: Food.Fruits;
+        ``` 
+## 42.HTML标签
+1. 一个`HTML`标签foo被标记为JSX.IntrinsicElements.foo类型
+2. 已经安装的react-jsx.d.ts中定义了所有主要的标签类型
+```ts
+declare namespace JSX {
+    interface IntrinsicElements {
+        a: React.HTMLAttributes;
+        abbr: React.HTMLAttributes;
+        div: React.HTMLAttributes;
+        span: React.HTMLAttributes;
+        // 其他 
+    } 
+}
+```
+## 43.函数式组件
+```ts
+type Props = {
+    foo: string;
+};
+
+const myComponent: React.FunctionComponent<Props> = props => {
+    return <span>{props.foo}</span>;
+};
+
+<MyComponent foo="bar" />;
+```
+## 43.类组件
+```ts
+type Props = {
+    foo: string;
+};
+
+class MyComponent extends React.Component<Props, {}> {
+    render() {
+        return <span>{this.props.foo}</span>;
+    }
+}
+<MyComponent foo="bar" />;
+```
+## 44.接收组件实例
+```ts
+class MyAwesomeComponent extends React.Component { render() {
+return <div>Hello</div>; }
+}
+const foo: React.ReactElement<MyAwesomeComponent> = <MyAwesomeComponent />; // Okay 
+const bar: React.ReactElement<MyAwesomeComponent> = <NotMyAwesomeComponent />; // Error!
+```
