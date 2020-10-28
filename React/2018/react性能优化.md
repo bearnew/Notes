@@ -9,7 +9,9 @@
 5. 动态链接库的生成和引用
 ```new webpack.DllPlugin```
 ```new webpack.DllReferencePlugin```
-6. css优化
+6. 使用`why-did-you-render`查找需要优化的点
+7. 使用`react.pureComponent`（相当于`使用shouldComponentUpdate`）优化class，使用`React.memo`优化函数组件
+8. css优化
 * 加载性能： 提取公共css，组件css在组件中引入，打包到head标签中
 * 解析性能： 
     * 让属性尽可能多的继承，而不是覆盖
