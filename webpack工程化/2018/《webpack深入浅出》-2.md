@@ -911,6 +911,37 @@ module.exports = {
         }
     }
     ```
+3. tree shaking优化的点
+```js
+// format3.js
+export function test4() {
+    console.log('44444')
+}
+
+export function test5() {
+    console.log('555555')
+}
+```
+```js
+// format.js
+export * from './format3';
+
+export const testA = () => {
+    console.log('aaaaa');
+}
+
+export const testB = () => {
+    console.log('bbbbb')
+}
+```
+```js
+// 入口文件
+// webpack只会打包testA和test4的代码
+import { testA, test4 } from './utils/format';
+
+testA();
+test4();
+```
 #### 10.提取公共代码
 1. 提取公共代码的优点
     1. 减少网络传输流量，降低服务器成本
