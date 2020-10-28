@@ -43,3 +43,29 @@ reaction(()=>this.page, page => {
         this.showMessage({ title: 'Congratulations', message: 'You did it!'});
     })
     ```
+### 5.工具函数
+1. `observe`监听
+    ```js
+    observe(this.todos, change => {
+        this.disposers.forEach(disposer => disposer());
+        this.disposers = [];
+
+        for (let todo of change.object) {
+            var disposer = observe(todo, changex => {
+                console.log(changex);
+            })
+
+            this.disposers.push(disposer);
+        }
+    })
+    ```
+2. `spy`
+    * 注册一个全局间谍监听器，用来监听所有 MobX 中的事件。 
+    * 它类似于同时在所有的 observable 上附加了一个 observe 监听器，而且还通知关于运行中的事务/反应和计算
+4. `toJS`
+    * `toJS(value, options?)`
+    * 递归地将一个(observable)对象转换为 javascript 结构
+    * 支持 observable 数组、对象、映射和原始类型
+5. `trace`
+    * 帮助你查找为什么计算值、 reactions 或组件会重新计算
+    * 传入 true 作为最后参数来自动地进入 debugger
