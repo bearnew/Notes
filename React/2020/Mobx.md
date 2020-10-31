@@ -69,3 +69,7 @@ reaction(()=>this.page, page => {
 5. `trace`
     * 帮助你查找为什么计算值、 reactions 或组件会重新计算
     * 传入 true 作为最后参数来自动地进入 debugger
+### 6.mobx性能优化
+* 细粒度拆分视图组件
+* 使用专用组件处理列表
+* 尽可能晚的解构可观察数据  
