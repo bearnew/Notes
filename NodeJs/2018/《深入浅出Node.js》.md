@@ -90,7 +90,90 @@
         1. 传给require()方法的参数，必须符合小驼峰命名的字符串，或者以., ..开头的相对路径，或者绝对路径
         2. 每个模块具有独立的空间，互不干扰，不必考虑变量污染
     4. ![commonjs](https://github.com/bearnew/picture/blob/master/mardown/2020/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAnodejs/node%E7%BB%84%E4%BB%B6%E6%9E%84%E6%88%90.PNG?raw=true)
-2. Node的模块实现
+    5. `Node.js`在启动时，会生成一个全局量 `process`
+    6. `commonjs`和`ES6 module`的区别
+
+|区别|	require/exports	|import/export|
+|:----|:-----|:-----|
+|出现的时间/地点不同|	2009年出生 出自CommonJS	|2015年出生 出自ECMAScript2015(ES6)|
+|不同端的使用限制|	100|	999|
+|加载方式|	同步加载，运行时动态加载，加载的是一个对象，对象需要在脚本运行完成后才会生成|	异步加载，静态编译，ES6 模块不是对象，它的对外接口只是一种静态定义，在代码静态解析|阶段就会生成|
+|输出对比|	输出的是一个值的拷贝，一旦输出一个值，模块内部的变化不会影响到这个值|	输出的是值的引用，JS 引擎对脚本静态分析的时候，遇到模块加载命令import，就会生成一个只读|引用。等到脚本真正执行时，再根据这个只读引用，到被加载的那个模块里面去取值。若文件引用的模块值改变，require 引入的模块值不会改变，而 import 引入的模块值会改变。
+|使用方式|	上面手写过程中已经说了使用方式|	import的使用方式
+
+7. commonJs 和 esModule 的区别
+        * commonJs是被加载的时候运行，esModule是编译的时候运行
+        * commonJs输出的是值的浅拷贝，esModule输出值的引用
+        * commentJs具有缓存。在第一次被加载时，会完整运行整个文件并输出一个对象，拷贝（浅拷贝）在内存中。下次加载文件时，直接从内存中取值
+8. commonJs 输出值拷贝
+```js
+/*************** a.js**********************/
+let count = 0
+exports.count = count; // 输出值的拷贝
+exports.add = ()=>{
+    //这里改变count值，并不会将module.exports对象的count属性值改变
+    count++;
+}
+
+/*************** b.js**********************/
+const { count, add } = require('./a.js')
+//在支持es6模块的环境下等同于
+import { count, add } from './a.js'
+
+console.log(count) //0
+add();
+console.log(count)//0
+```
+9. esModule 输出值引用
+```js
+/*************** a.js**********************/
+export let count = 0;//输出的是值的引用，指向同一块内存
+export const add = ()=>{
+    count++;//此时引用指向的内存值发生改变
+}
+
+
+/*************** b.js**********************/
+import { count, add } from './a.js'
+
+console.log(count) //0
+add();
+console.log(count)//1
+```
+10. commonjs进阶用法
+```js
+/*************** child.js**********************/
+let foo = 1
+
+setTimeout(()=>{
+  foo=2;
+  exports.foo= foo
+},1000)
+exports.foo=foo
+
+/*******************index.js***************************/
+var test =require('./child');
+
+console.log(test.foo);// 1
+
+setTimeout(()=>{
+  console.log(test.foo) // 2
+},2000)
+```
+11. `commonjs`加载ES6模块
+```js
+// es.mjs
+let foo = { bar: 'my-default' };
+export default foo;
+
+// cjs.js
+const es_namespace = await import('./es.mjs');
+
+console.log(es_namespace.default);
+// { bar:'my-default' }
+```  
+
+13. Node的模块实现
     1. Node中引入模块的过程
         1. 核心模块（Node提供的模块）
             * 路径分析（Node进程启动时，部分核心模块被加载到了内存中）
@@ -190,7 +273,7 @@
               * 良好的文档
               * 良好的测试
               * 良好的编码
-3. AMD（Asynchronous Module Definition）
+14. AMD（Asynchronous Module Definition）
     * AMD是commonjs的一个延申
     * 仅在需要的时候被引入
     * 在声明模块时指定所有的依赖，通过形参传递依赖到模块中
@@ -199,7 +282,7 @@
         return function () {};
     }); 
     ``` 
-4. CMD
+15. CMD
     * CMD支持动态引入
     * require, exports, module通过形参传给模块，需要依赖模块时，调用require引入
     ```js
@@ -207,7 +290,7 @@
     // The module code goes here
     });
     ``` 
-5. 兼容多种模块规范
+16. 兼容多种模块规范
     ```js
     ;(function (name, definition) {
     // 检测上ူ文环境是否为AMDईCMD
