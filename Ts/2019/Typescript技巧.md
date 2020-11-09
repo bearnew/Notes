@@ -145,3 +145,17 @@ export function isDate(val: any): val is Date {
     * 支持从 CommonJS/AMD/UMD 默认导入，并且可以正常工作。
 4. `noImplicitAny`, 在表达式和声明上有隐含的 any类型时报错。
 5. `target`, 指定ECMAScript目标版本 "ES3"（默认）， "ES5"， "ES6"/ "ES2015"， "ES2016"， "ES2017"或 "ESNext"。 
+## 4.高阶组件定义类型
+```ts
+interface Styles {
+    [key: string]: string;
+}
+
+declare module 'isomorphic-style-loader/withStyles' {
+    function withStyles(
+        ...styles: Styles[]
+    ): <T>(component: T) => T;
+
+    export = withStyles;
+}
+``` 
