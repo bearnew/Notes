@@ -1322,59 +1322,65 @@ const foo = <T extends {}>(x: T) => x; // correct
 
 ```ts
 class Hello extends React.Component<{
-    /*** @default 'TypeScript' */
-    compiler?: string; 
-    framework: string; 
+  /*** @default 'TypeScript' */
+  compiler?: string;
+  framework: string;
 }> {
-    static defaultProps = {
-        compiler: 'TypeScript'
-    };
-    
-    render() { 
-        const compiler = this.props.compiler!; 
-        return ( 
-            <div> 
-                <div>{compiler}</div> 
-                <div>{this.props.framework}</div> 
-            </div> 
-        );
-    }
+  static defaultProps = {
+    compiler: "TypeScript",
+  };
+
+  render() {
+    const compiler = this.props.compiler!;
+    return (
+      <div>
+        <div>{compiler}</div>
+        <div>{this.props.framework}</div>
+      </div>
+    );
+  }
 }
 ```
-## 46.Ts中尽量不要使用export default
+
+## 46.Ts 中尽量不要使用 export default
+
 1. `export default`可发现性差，不能被编辑器智能的识别
 2. `commonjs`互用性差
-    ```ts
-    // 导出的是export default
-    const { default } = require('module/foo');
-    // export const
-    const { Foo } = require('module/foo')
-    ```
+   ```ts
+   // 导出的是export default
+   const { default } = require('module/foo');
+   // export const
+   const { Foo } = require('module/foo')
+   ```
 3. 在动态的`import`中，默认导出会以`default`的名字暴露自己
-    ```ts
-    const HighChart = await import('https://code.highcharts.com/js/es-modules/masters/highcharts.src.js'); 
-    Highcharts.default.chart('container', { ... }); // Notice `.default`
-    ```
-## 47.创建数组  
+   ```ts
+   const HighChart = await import('https://code.highcharts.com/js/es-modules/masters/highcharts.src.js');
+   Highcharts.default.chart('container', { ... }); // Notice `.default`
+   ```
+
+## 47.创建数组
+
 ```ts
-const foo: string[] = new Array(3).fill('');
+const foo: string[] = new Array(3).fill("");
 console.log(foo); // 会输出 ['','','']
 ```
+
 ## 48.单例模式
+
 ```ts
 // 传统的单例模式
 class Singleton {
-    private static instance: Singleton; 
-    private constructor() {
-        // .. 
+  private static instance: Singleton;
+  private constructor() {
+    // ..
+  }
+  public static getInstance() {
+    if (!Singleton.instance) {
+      Singleton.instance = new Singleton();
     }
-    public static getInstance() {
-        if (!Singleton.instance) {
-            Singleton.instance = new Singleton();
-        }
-        return Singleton.instance;
-    }
-    someMethod() {} 
+    return Singleton.instance;
+  }
+  someMethod() {}
 }
 
 // Error: constructor of 'singleton' is private
@@ -1382,31 +1388,84 @@ let someThing = new Singleton();
 // do some thing with the instance
 let instacne = Singleton.getInstance();
 ```
+
 ```ts
 // 直接初始化
 namespace Singleton {
-    // .. 其他初始化的代码 
-    export function someMethod() {} 
+  // .. 其他初始化的代码
+  export function someMethod() {}
 }
-// 使用 
+// 使用
 Singleton.someMethod();
 ```
+
 ## 49.函数参数使用对象
+
 ```ts
 function foo(flagA: boolean, flagB: boolean) {
-    // 函数主体 
+  // 函数主体
 }
 
-function foo(
-    config: {
-        flagA: boolean;
-        flagB: boolean;
-    }
-) {
-    const { flagA, flagB } = config;
+function foo(config: { flagA: boolean; flagB: boolean }) {
+  const { flagA, flagB } = config;
 }
 ```
+
 ## 50.使用!!获取明确的布尔值
-* 第一个!用来将其转换成布尔值，但是其取反后的值
-* 第二个取反得到真正的值
-## 51. 
+
+- 第一个!用来将其转换成布尔值，但是其取反后的值
+- 第二个取反得到真正的值
+
+## 51.TS 实现 TypedEvent
+
+```ts
+export interface Listener<T> {
+  (event: T): any;
+}
+export interface Disposable {
+  dispose(): any;
+}
+export class TypedEvent<T> {
+  private listeners: Listener<T>[] = [];
+  private listenersOncer: Listener<T>[] = [];
+  public on = (listener: Listener<T>): Disposable => {
+    this.listeners.push(listener);
+    return {
+      dispose: () => this.off(listener),
+    };
+  };
+  public once = (listener: Listener<T>): void => {
+    this.listenersOncer.push(listener);
+  };
+  public off = (listener: Listener<T>) => {
+    const callbackIndex = this.listeners.indexOf(listener);
+    if (callbackIndex > -1) this.listeners.splice(callbackIndex, 1);
+  };
+  public emit = (event: T) => {
+    this.listeners.forEach((listener) => listener(event));
+    this.listenersOncer.forEach((listener) => listener(event));
+    this.listenersOncer = [];
+  };
+  public pipe = (te: TypedEvent<T>): Disposable => {
+    return this.on((e) => te.emit(e));
+  };
+}
+
+
+const te1 = new TypedEvent();
+const te2 = new TypedEvent();
+
+  te1.on(() => {
+      console.log('777777')
+  })
+
+  te2.on(() => {
+    console.log('888888')
+})
+
+te1.pipe(te2);
+
+// 777777
+// 888888
+te1.emit('test');
+```
