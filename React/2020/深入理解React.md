@@ -229,4 +229,24 @@ class ErrorBoundary extends React.Component {
     * 其他事件在`Document`上绑定，事件处理器只需在`Document`订阅一次
 3. 事件分发
     * 调用`dispatchEvent`从DOM原生事件对象获取事件触发的`target`, 再根据`target`获取关联的`React`节点
+
+#### 13.forwardRef
+1. `ref`的局限性
+    * `ref`不能传递给没有实例的`FunctionComponent`
+    * 无法通过`ref`获取高阶组件包装前的组件
+    * `props`无法传递`ref`
+2. `React.forwardRef`
+    * 创建一个 React 组件，该组件能够将其接收的 ref 属性转发到内部的一个组件中
+    * `example`
+    ```js
+    const FancyButton = React.forwardRef((props, ref) => (
+        <button ref={ref} className="FancyButton">
+            {props.children}
+        </button>
+    ));
+
+    // You can now get a ref directly to the DOM button:
+    const ref = React.createRef();
+    <FancyButton ref={ref}>Click me!</FancyButton>;
+    ``` 
     
