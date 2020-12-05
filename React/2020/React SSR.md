@@ -28,8 +28,12 @@ const config = Object.assign({
             '@babel/plugin-transform-runtime',
             {
                 helpers: true
-            }
+            },
         ],
+        ["babel-plugin-react-css-modules", {
+            context: WORKSPACE,
+            generateScopedName: "[name]__[local]___[hash:base64:5]",
+        }]
     ]    
 }, {
     ignore: [
@@ -67,3 +71,56 @@ app.use(
 // ssr热更新
 app.use(require('webpack-hot-middleware')(compiler));
 ```
+## 4.自定义编译后的命名
+1. 直接命名的缺点
+    * 编译后的命名过长
+    * 必须确保`babel`和`webpack.config`的`context`一直，来保证`jsx`中的`className`和`css`文件的类名在编译后能够匹配
+2. 自定义`className`编译后命名
+    ```js
+    // babel config
+    ["babel-plugin-react-css-modules", {
+        generateScopedName: (localName, resourcePath, file) => {
+            return generateUniqueCls(resourcePath, localName);
+        }
+    }]
+    ```
+    ```js
+    module: {
+        rules: [
+            {
+                test: /\.iso\.scss$/,
+                enforce: 'pre',
+                use: [
+                    'isomorphic-style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: true,
+                            getLocalIdent: function (context, localIdentName, localName) {
+                                return generateUniqueCls(context.resourcePath, localName);
+                            }
+                        },
+                    },
+                    {
+                        loader: 'sass-loader'
+                    },
+                ]
+            }
+        ]
+    }
+    ```
+    ```js
+    // generateUniqueCls
+    const genericNames = require('generic-names');
+
+    const generate = genericNames('[local]_[hash:base64:2]', {
+    context: process.cwd()
+    });
+
+    module.exports = {
+        generateUniqueCls: function (resourcePath, localName) {
+            return generate(localName, resourcePath);
+        }
+    }
+    ```
+## 5.接入isomorphic-style-loader
