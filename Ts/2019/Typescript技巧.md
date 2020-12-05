@@ -158,4 +158,19 @@ declare module 'isomorphic-style-loader/withStyles' {
 
     export = withStyles;
 }
+```
+## 5.使用Object.entries转换枚举
+```ts
+enum FruitEnum {
+    tomato = 1,
+    banana =  2,
+    apple = 3
+}
+const FruitList = Object.entries(FruitEnum)
 ``` 
+## 6.一些需要避免的
+1. 不要使用`ts-ignore`
+2. 使用`unknow`替换`any`,`unknow`是任何类型的子类型
+3. 函数参数过多时，使用对象来聚合
+4. 禁止使用!.非空来断言
+5. 使用ts的内置函数`Partial Pick Omit Record extends infer`
