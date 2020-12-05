@@ -1469,3 +1469,72 @@ te1.pipe(te2);
 // 888888
 te1.emit('test');
 ```
+## 52.Reflect Metadata
+1. 通过反射来获取有哪些装饰器添加到了类或者方法上，是ES7的属性
+2. 给对象添加元信息，对象不会有任何变化，起到装饰对象而不改变对象的能力
+3. 通过装饰器或反射给类添加一些自定义的信息，通过反射将这些信息提取出来
+```ts
+@Reflect.metadata('name', 'A')
+class A {
+  @Reflect.metadata('hello', 'world')
+  public hello(): string {
+    return 'hello world'
+  }
+}
+ 
+Reflect.getMetadata('name', A) // 'A'
+Reflect.getMetadata('hello', new A()) // 'world'
+// 这里为什么要用 new A()，用 A 不行么？后文会讲到
+```
+4. 查找元数据通过原型链进行
+```ts
+class A {
+ @Reflect.metadata('name', 'hello')
+ hello() {}
+}
+ 
+const t1 = new A()
+const t2 = new A()
+Reflect.defineMetadata('otherName', 'world', t2, 'hello')
+Reflect.getMetadata('name', t1, 'hello') // 'hello'
+Reflect.getMetadata('name', t2, 'hello') // 'hello'
+Reflect.getMetadata('otherName', t2, 'hello') // 'world'
+ 
+Reflect.getOwnMetadata('name', t2, 'hello') // undefined
+Reflect.getOwnMetadata('otherName', t2, 'hello') // 'world'
+```
+6. `Reflect`的`Api`
+```ts
+namespace Reflect {
+  // 用于装饰器
+  metadata(k, v): (target, property?) => void
+    
+  // 在对象上面定义元数据
+  defineMetadata(k, v, o, p?): void
+    
+  // 是否存在元数据
+  hasMetadata(k, o, p?): boolean
+  hasOwnMetadata(k, o, p?): boolean
+    
+  // 获取元数据
+  getMetadata(k, o, p?): any
+  getOwnMetadata(k, o, p?): any
+    
+  // 获取所有元数据的 Key
+  getMetadataKeys(o, p?): any[]
+  getOwnMetadataKeys(o, p?): any[]
+    
+  // 删除元数据
+  deleteMetadata(k, o, p?): boolean
+}
+```
+6. 内部的获取方式
+```ts
+weakMap.get(o).get(p).get(k)
+``` 
+## 53.协变和逆变
+* A ≼ B 意味着 A 是 B 的子类型。 
+* A → B 指的是以 A 为参数类型，以 B 为返回值类型的函数类型。 
+* x : A 意味着 x 的类型为 A  
+* 返回值类 型是协变的，意思是 A ≼ B 就意味着 (T → A) ≼ (T → B)
+* 参数类型是逆变的，意思是 A ≼ B 就意味着 (B → T) ≼ (A → T) （ A 和 B 的位置颠倒过来了）
