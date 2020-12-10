@@ -6,61 +6,36 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>test</title>
 	<style>
-		
+		.reversal {
+            width:200px;
+            height:200px; 
+            border: 1px solid red; 
+            margin:0 auto; 
+            position: relative;
+        }
+        .face,.back {
+            width:200px; 
+            height:200px; 
+            position: absolute; 
+            text-align: center;  
+            line-height: 200px;   
+            backface-visibility: hidden; 
+            transform-style: preserve-3d; 
+            transition: transform 2s; 
+        }
+        .face{transform: rotateY(0deg);}
+         .back{transform: rotateY(-180deg);}
+        .reversal:hover .back{transform:rotateY(0deg);}
+        .reversal:hover .face{transform:rotateY(180deg);}
+
 	</style>
 </head>
 
 <body>
-	<div class="page">
-		<table border="1">
-			<tr>
-				<th>语文</th>
-				<th>数学</th>
-				<th>英语</th>
-				<th>体育</th>
-				<th>物理</th>
-				<th>化学</th>
-				<th>政治</th>
-				<th>历史</th>
-				<th>生物</th>
-				<th>一次合格</th>
-				<th>全科合格</th>
-			</tr>
-			<tr>
-				<td><input /></td>
-				<td><input /></td>
-				<td><input /></td>
-				<td><input /></td>
-				<td><input /></td>
-				<td><input /></td>
-				<td><input /></td>
-				<td><input /></td>
-				<td><input /></td>
-				<td></td>
-				<td></td>
-			</tr>
-		</table>
-		<div>
-			<span>总人数：</span>
-			<span></span>
-		</div>
-		<div>
-			<span>一次性合格人数：</span>
-			<span></span>
-		</div>
-		<div>
-			<span>全科合格人数：</span>
-			<span></span>
-		</div>
-		<div>
-			<span>一次性合格率：</span>
-			<span></span>
-		</div>
-		<div>
-			<span>全科合格率</span>
-			<span></span>
-		</div>
-	</div>
+	<div class="reversal">
+        <p  class="face">正面</p>
+        <p  class="back">反面</p>
+    </div>
 	<!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
 	<script crossorigin src="https://cdn.bootcss.com/babel-standalone/6.10.3/babel.min.js"></script>
