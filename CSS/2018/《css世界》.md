@@ -195,8 +195,8 @@ dot {
 dot::before {
     display: block;
     content: '...\A..\A.';
-    white-space: pre-wrap; // 换行
-    animation: dot 3s infinite step-start both;animation
+    white-space: pre-wrap; 
+    animation: dot 3s infinite step-start both;
 }
 @keyframes dot {
     33% {
@@ -427,3 +427,41 @@ label {
             border-color: #f30 #f30 transparent transparent;
         }
     ```
+### 22.字母x
+1. 字母x的下边缘就是我们的基线（`baseline`）
+2. `x-height`是指小写字母x的高度
+3. `vertical-align: middle`, 指的是基线往上1/2 x-height高度， 近似理解为x交叉点的位置
+4. 不同的字体在行内盒子中的位置是不一样的，因此`vertical-align: middle`并不是绝对的垂直居中对齐
+5. `ex`是css的相对单位，指的小写字母x的高度
+```css
+/* 图标和文字天然居中方式 */
+/* 使用ex单位对齐，不受字体和字号的影响 */
+.icon-arrow {
+    display: inline-block;
+    width: 20px;
+    height: 1ex;
+    background: url(arrow.png) no-repeat center;
+}
+```
+## 2.line-height
+1. div的高度是由`line-height`决定的
+2. 行距为`line-height - font-size`
+3. 多行文字`line-height`垂直居中
+```html
+<div class="box">
+    <div class="content">基于行高实现的...</div>
+</div>
+```
+```css
+.box {
+    line-height: 120px;
+    background-color: #f0f3f9;
+}
+.content {
+    display: inline-block;
+    line-height: 20px;
+    margin: 0 20px;
+    vertical-align: middle;
+}
+```
+4. `line-height`的默认值是`normal`, 不同的`font-family`, `normal`对应的值不一样
