@@ -70,10 +70,17 @@
         }
     }
     ```
+6. useEffect加了条件，里面的函数也会运行一次
+    ```js
+    // 第1次count > 1为false，也会执行，第2次执行时，才会条件判断
+    useEffect(() => {
+        setDisplay(x => true);
+    }, [count > 1])
+    ```
 #### 3.rules of hooks
 1. hooks只能在最外层使用，不能在循环中，条件语句中，嵌套函数中使用hooks
 2. 只能在react function components中使用hooks
-3. React依赖hooks调用的顺序，因此不能使用条件语句，否则每次render的顺序无法一一对应
+3. React依赖hooks调用的顺序，因此不能使用条件语句，否则每次render的顺序无法一一对应，例如第一次存在2个hooks，第二次满足条件存在3个hooks
 #### 4.building your own hooks
 1. 在处理组件之间的状态逻辑时，一般使用higher-order component和props处理
 2. 有了hooks，我们可以使用useState和useEffect来处理
@@ -540,6 +547,7 @@
     * `useRef`可以在其`.current`属性中保存可变值
     * `.current`上的属性变化，不会`re-render`
 5. useImperativeHandle
+    * 命令式`hooks`，给ref添加`focus`函数，并传递给子组件
     * example
         ```js
         // 子组件
@@ -547,7 +555,7 @@
             const inputRef = useRef();
             useImperativeHandle(ref, () => ({
                 focus: () => {
-                inputRef.current.focus();
+                    inputRef.current.focus();
                 }
             }));
             return <input ref={inputRef} ... />;
