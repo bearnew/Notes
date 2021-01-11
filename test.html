@@ -6,35 +6,20 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>test</title>
 	<style>
-		.reversal {
-            width:200px;
-            height:200px; 
-            border: 1px solid red; 
-            margin:0 auto; 
-            position: relative;
+        .box {
+            display: block;
         }
-        .face,.back {
-            width:200px; 
-            height:200px; 
-            position: absolute; 
-            text-align: center;  
-            line-height: 200px;   
-            backface-visibility: hidden; 
-            transform-style: preserve-3d; 
-            transition: transform 2s; 
+		.item {
+            line-height: 25px;
         }
-        .face{transform: rotateY(0deg);}
-         .back{transform: rotateY(-180deg);}
-        .reversal:hover .back{transform:rotateY(0deg);}
-        .reversal:hover .face{transform:rotateY(180deg);}
 
 	</style>
 </head>
 
 <body>
-	<div class="reversal">
-        <p  class="face">正面</p>
-        <p  class="back">反面</p>
+	<div class="box">
+        <span class="item">时间空间的</span>
+        <span class="item">时间空间的</span>
     </div>
 	<!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
