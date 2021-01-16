@@ -443,7 +443,7 @@ label {
     background: url(arrow.png) no-repeat center;
 }
 ```
-## 2.line-height
+### 23.line-height
 1. div的高度是由`line-height`决定的
 2. 行距为`line-height - font-size`
 3. 多行文字`line-height`垂直居中
@@ -465,3 +465,93 @@ label {
 }
 ```
 4. `line-height`的默认值是`normal`, 不同的`font-family`, `normal`对应的值不一样
+5. `line-height`的值
+    * 数值(`line-height: 1.5`)，百分比(`line-height: 150%`)，长度值(`line-height: 1.5em`)最终的计算值是和当前`font-size`相乘后的值
+    * 数值(`line-height: 1.5`)，所有子元素继承的都是这个值
+    * 使用百分比值或者长度值作为属性值，所有子元素继承的是最终的值
+    * HTML中的很多替换元素，尤其表单类的替换元素，如输入框、按钮之类的，很多具有继承特性的CSS属性其自己也有一套，如`font-family`、`font-size`以及这里的`line-height`
+    ```css
+    body {
+        line-height: 1.5;
+    }
+    input, button {
+        line-height: inherit;
+    }
+    ```
+    * 浏览器计算`14 * 1.42857`近乎是`20px`，会以`19px`的高度呈现
+6. `line-height`的大值特性
+    * 以下2种方式的css,高都是`96px`
+    ```html
+    <div class="box">
+        <span>内容...</span>
+    </div>
+    ```
+    ```css
+    <!-- 方案1 -->
+    .box {
+        line-height: 20px;
+    }
+    .box span {
+        line-height: 96px;
+    }
+    ```
+    ```css
+    .box {
+        line-height: 96px;
+    }
+    .box span {
+        line-height: 20px;
+    }
+    ```
+    * `span`元素前会存在幽灵空白节点，`box`设置`line-height: 96px`，幽灵空白节点的高度为`96px`，设置`span`的`line-height: 96px`，`span`的高度则变成了`96px`，行框盒子的高度由高度最高的那个内联盒子决定，因此`box`的高度永远是最大的那个`line-height`
+7. `line-height`的好朋友`vertical-align`
+    1. `vertical-align`的值
+        * 线类，如`baseline`、`top`、`middle`、`bottom`
+        * 文本类，`text-top`，`text-bottom`
+        * 上标下标类，如`sub`、`super`
+        * 数值百分比类，如`20px`、`2em`、`20%`等
+    2. 设置`vertical-align: 10px`，文字内容会在当前基线位置往上精确偏移`10px`
+    3. `vertical-align: middle`会让图标近似居中，而默认情况下文字(基线x)是偏下的，因此会使高度大于容器设置的高度，我们可以设置`vertical-align: -5px`，图标和文字会实现真正意义上的居中，并且容器的可视高度会和当前行高保持一致。
+    4. `margin`和`padding`的百分比值是相对于宽度计算的，`line-height`的百分比值是相对于`height`计算的，`vertical-align`是相对于`line-height`计算的。
+    5. `vertical-align`的属性只能在`display`为`inline`，`inline-block`，`inline-table`，`table-cell`的元素上。
+    6. `float: left`浮动和绝对定位(`position: absolute`)会使元素块状化，所以`vertical-align`是无效的。
+    7. `vertical-align: middle`是和`line-height`相关的
+        ```html
+        <div class="box">
+            <img src="1.jpg">
+        </div>
+        ```
+        * 盒子前面的幽灵空白节点高度太小，img不会垂直居中，会顶着box元素的上边缘显示
+        ```css
+        .box {
+            height: 128px;
+        }
+        .box > img {
+            height: 96px;
+            vertical-align: middle;
+        }
+        ```
+        * 设置行高，让幽灵空白节点的高度足够，img就垂直居中了
+        ```css
+        .box {
+            height: 128px;
+            line-height: 128px;
+        }
+        .box > img {
+            height: 96px;
+            vertical-align: middle;
+        }
+        ```
+        * `table-cell`元素设置`vertical-align`垂直对齐的是子元素，子元素即使为块级元素，也能垂直居中。
+        ```css
+        .cell {
+            height: 128px;
+            display: table-cell;
+            vertical-align: middle;
+        }
+        .cell > img {
+            height: 96px;
+        }
+        ``` 
+    8. 
+8. 
