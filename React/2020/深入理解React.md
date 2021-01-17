@@ -248,5 +248,11 @@ class ErrorBoundary extends React.Component {
     // You can now get a ref directly to the DOM button:
     const ref = React.createRef();
     <FancyButton ref={ref}>Click me!</FancyButton>;
-    ``` 
+    ```
+#### 14.React.cloneElement
+```jsx
+const wrappedComponent = React.cloneElement(<Test />, {
+    close: this.handleClose.bind(this, pullupKey)
+});
+```
     
