@@ -461,6 +461,8 @@
         2. 使用了原型链
         3. 操作window
         4. 立即执行函数引用了外部变量
+        5. 使用`export default { a, b }`，`{a, b}`会被当成一个对象，a和b都会被打包进去，无法支持`tree shaking`
+        6. 使用`export * from './test'`，支持`tree shaking`
     5. `tree shaking`用来尽可能的删除没有被使用过的代码和一些被`import`了但其实没有被使用的代码
         * 代码不会被执行
         * 代码执行结果不会被用到
