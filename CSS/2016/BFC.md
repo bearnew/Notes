@@ -16,7 +16,15 @@
     3. position为absolute或fixed
     4. display为inline-block tabbel-cell table-caption flex inline-flex\
     5. overflow不为visible
-5. BFC的作用
+z-index值不为auto的flex项(父元素display:flex|inline-flex).
+元素的opacity值不是1.
+元素的transform值不是none.
+元素mix-blend-mode值不是normal.
+元素的filter值不是none.
+元素的isolation值是isolate.
+will-change指定的属性值为上面任意一个。
+元素的-webkit-overflow-scrolling设为touch.
+1. BFC的作用
     1. 自适应两栏布局
     2. 清除浮动
     3. 阻止margin重叠
