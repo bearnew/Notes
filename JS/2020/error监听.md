@@ -62,4 +62,28 @@ document.addEventListener('error', function (event) {
   }
   //设为true表示捕获阶段调用，会在元素的onerror前调用,在window.addEventListener('error')后调用
 }, true)
-``` 
+```
+## 监控资源加载失败
+1. script onerror
+```js
+<script onerror="onError(this)"></script>  
+
+new ScriptExtHtmlWebpackPlugin({
+    custom: {
+      test: /\.js$/,
+      attribute: 'onerror',
+      value: 'onError(this)'
+    }
+ })
+```
+2. window.addEventListener
+* `onerror` 的事件并不会向上冒泡，`window.onerror` 接收不到加载失败的错误
+* 冒泡虽不行，但捕获可以！我们可以通过捕获的方式全局监控加载失败的错误
+* 这也监控到了脚本错误，但通过 `!(event instanceof ErrorEvent)` 判断便可以筛选出加载失败的错误
+```js
+window.addEventListener('error', (event) => {
+  if (!(event instanceof ErrorEvent)) {
+    // todo
+  }
+}, true);
+```  
