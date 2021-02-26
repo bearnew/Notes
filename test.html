@@ -9,17 +9,27 @@
         .box {
             display: block;
         }
-		.item {
-            line-height: 25px;
-        }
+		.bfc-wrap {
+			overflow: hidden;
+		}
+		.bfc {
+			width: 200px;
+			height: 200px;
+			margin: 10px;
+			background: red;
+		}
 
 	</style>
 </head>
 
 <body>
 	<div class="box">
-        <span class="item">时间空间的</span>
-        <span class="item">时间空间的</span>
+		<div class="bfc-wrap">
+        	<div class="bfc"></div>
+		</div>
+		<div class="bfc-wrap">
+        	<div class="bfc"></div>
+		</div>
     </div>
 	<!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>

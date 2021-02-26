@@ -19,4 +19,4 @@
 1. BFC的作用
     1. 自适应两栏布局
     2. 清除浮动（利用 BFC 来清除浮动的影响，给 .box 添加 overflow: hidden 产生新的 BFC）
-    3. 阻止margin重叠
+    3. 阻止margin重叠（每个子元素套一层外壳`.wrapper`，设置为`overflow: hidden`）
