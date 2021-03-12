@@ -18,6 +18,13 @@
 			margin: 10px;
 			background: red;
 		}
+		circular-ring:not(:defined)::after {
+    display: block;
+    content: '';
+    width: 100px;
+    height: 100px;
+    background-color: #dddddd;
+}
 
 	</style>
 </head>
@@ -30,6 +37,9 @@
 		<div class="bfc-wrap">
         	<div class="bfc"></div>
 		</div>
+		<circular-ring radius="50" border-width="2" border-color="red" inner-color="yellow">
+    <div style="width: 100px; height: 100px; box-sizing: border-box; background-color: yellow; border-radius: 50%; border: solid 2px red;">
+</circular-ring>
     </div>
 	<!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
@@ -39,6 +49,25 @@
 	 <script type="text/javascript" src="co.js"></script> -->
 	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
 	<script type="text/javascript" src="test.js"></script>
+	<script>
+		class CircularRing extends HTMLElement {
+    constructor() {
+        super();
+    }
+    connectedCallback() {
+        const size = this.getAttribute('radius') * 2;
+        const innerColor = this.getAttribute('inner-color');
+        const styles = `
+            width: $(size)px;
+            height: $(size)px;
+            background-color: $(innerColor);
+        `;
+        this.innerHtTMl = '<div style="${styles}"></div>';
+    }
+}
+
+customElements.define('circular-ring', CircularRing);
+	</script>
 	<!-- <script type="text/javascript" src="test1.js" type="module"></script> -->
 </body>
 
