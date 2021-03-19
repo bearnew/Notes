@@ -1,4 +1,5 @@
 # React源码进阶
+> https://xiaochen1024.com/article_item/600ac6afecf02e002e6db56b
 ## 1.React模型
 1. `React`核心
 ```js
@@ -50,4 +51,74 @@ const UI = commit(state);
     }
     ```
     * 在`Scheduler`中的每的每个任务的优先级使用过期时间表示的，如果一个任务的过期时间离现在很近，说明它马上就要过期了，优先级很高，如果过期时间很长，那它的优先级就低，没有过期的任务存放在`timerQueue`中，过期的任务存放在`taskQueue`中，`timerQueue`和`timerQueue`都是小顶堆，所以peek取出来的都是离现在时间最近也就是优先级最高的那个任务，然后优先执行它。
-9. 
+9. `lane`
+    * `react`之前的版本用`expirationTime`属性代表优先级，该优先级和IO不能很好的搭配工作（io的优先级高于cpu的优先级），现在有了更加细粒度的优先级表示方法`Lane`，`Lane`用二进制位表示优先级，二进制中的1表示位置，同一个二进制数可以有多个相同优先级的位，这就可以表示‘批’的概念，而且二进制方便计算。
+    * 这好比赛车比赛，在比赛开始的时候会分配一个赛道，比赛开始之后大家都会抢内圈的赛道（`react`中就是抢优先级高的`Lane`），比赛的尾声，最后一名赛车如果落后了很多，它也会跑到内圈的赛道，最后到达目的地（对应`react`中就是饥饿问题，低优先级的任务如果被高优先级的任务一直打断，到了它的过期时间，它也会变成高优先级）
+10. `jsx`
+    * `jsx`是`ClassComponent`的`render`函数或者`FunctionComponent`的返回值，可以用来表示组件的内容，在经过`babel`编译之后，最后会被编译成`React.createElement`，这就是为什么`jsx`文件要声明`import React from 'react'`的原因，你可以在 `babel`编译`jsx `站点查看`jsx`被编译后的结果
+    * `React.createElement`的源码中做了如下几件事
+        * 处理`config`，把除了保留属性外的其他`config`赋值给`props`
+        * 把`children`处理后赋值给`props.children`
+        * 处理`defaultProps`
+        * 调用`ReactElement`返回一个jsx对象
+        ```js
+        export function createElement(type, config, children) {
+            let propName;
+
+            const props = {};
+
+            let key = null;
+            let ref = null;
+            let self = null;
+            let source = null;
+
+            if (config != null) {
+                //处理config，把除了保留属性外的其他config赋值给props
+                //...
+            }
+
+            const childrenLength = arguments.length - 2;
+            //把children处理后赋值给props.children
+            //...
+
+            //处理defaultProps
+            //...
+
+            return ReactElement(
+                type,
+                key,
+                ref,
+                self,
+                source,
+                ReactCurrentOwner.current,
+                props,
+            );
+            }
+
+            const ReactElement = function(type, key, ref, self, source, owner, props) {
+            const element = {
+                $$typeof: REACT_ELEMENT_TYPE,//表示是ReactElement类型
+
+                type: type,//class或function
+                key: key,//key
+                ref: ref,//useRef的ref对象
+                props: props,//props
+                _owner: owner,
+            };
+
+            return element;
+            };
+        ```
+    * `$$typeof`表示的是组件的类型，例如在源码中有一个检查是否是合法`Element`的函数，就是根`object.$$typeof === REACT_ELEMENT_TYPE`来判断的
+        ```js
+        export function isValidElement(object) {
+            return (
+                typeof object === 'object' &&
+                object !== null &&
+                object.$$typeof === REACT_ELEMENT_TYPE
+            );
+        }
+        ```
+    * 如果组件是`ClassComponent`则`type`是`class`本身，如果组件是`FunctionComponent`创建的，则`type`是这个`function`，源码中用`ClassComponent.prototype.isReactComponent`来区别二者。注意`class`或者`function`创建的组件一定要首字母大写，不然后被当成普通节点，type就是字符串。
+    * `jsx`对象上没有优先级、状态、`effectTag`等标记，这些标记在`Fiber`对象上，在`mount`时`Fiber`根据jsx对象来构建，在`update`是根据最新状态的jsx和`current Fiber`对比，形成新的`workInProgress Fiber`，最后`workInProgress Fiber`切换成`current Fiber`
+11. 
