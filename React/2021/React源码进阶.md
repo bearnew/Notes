@@ -121,4 +121,8 @@ const UI = commit(state);
         ```
     * 如果组件是`ClassComponent`则`type`是`class`本身，如果组件是`FunctionComponent`创建的，则`type`是这个`function`，源码中用`ClassComponent.prototype.isReactComponent`来区别二者。注意`class`或者`function`创建的组件一定要首字母大写，不然后被当成普通节点，type就是字符串。
     * `jsx`对象上没有优先级、状态、`effectTag`等标记，这些标记在`Fiber`对象上，在`mount`时`Fiber`根据jsx对象来构建，在`update`是根据最新状态的jsx和`current Fiber`对比，形成新的`workInProgress Fiber`，最后`workInProgress Fiber`切换成`current Fiber`
-11. 
+## 2.Fiber(内存中的dom)
+1. `react15`在`render`阶段的`reconcile`是不可打断的，这会在进行大量`dom`的`reconcile`时产生卡顿，因为浏览器所有的时间都交给了js执行，并且js的执行时单线程。为此`react16`之后就有了`scheduler`进行时间片的调度，给每个task一定的时间，如果在这个时间内没执行完，也要交出执行权给浏览器进行绘制和重排，所以异步可中断的更新需要一定的数据结构在内存中来保存dom的信息，这个数据结构就是`Fiber`（虚拟dom）。 
+2. `Fiber`双缓存
+    * `Fiber`可以保存真实的`dom`，真实`dom`对应在内存中的`Fiber`节点会形成`Fiber`树，这颗Fiber树在react中叫`current Fiber`，也就是当前dom树对应的Fiber树，而正在构建Fiber树叫`workInProgress Fiber`，这两颗树的节点通过`alternate`相连.
+3. 
