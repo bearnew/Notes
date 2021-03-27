@@ -157,3 +157,159 @@ const UI = commit(state);
 3. 不同模式对比
 * `legacy`模式是我们常用的，它构建dom的过程是同步的，所以在`render`的`reconciler`中，如果diff的过程特别耗时，那么导致的结果就是js一直阻塞高优先级的任务(例如用户的点击事件)，表现为页面的卡顿，无法响应。
 4. concurrent Mode是react未来的模式，它用时间片调度实现了异步可中断的任务，根据设备性能的不同，时间片的长度也不一样，在每个时间片中，如果任务到了过期时间，就会主动让出线程给高优先级的任务。这部分将在第11节 scheduler&lane模型 这章会具体讲解react是如何实现异步可中断的任务，以及任务的优先级和高优先级是如果插队的。
+## 4.state更新流程
+1. 在`react`中触发状态更新的方式
+    * `ReactDOM.render`
+    * `this.setState`
+    * `this.forceUpdate`
+    * `useState`
+    * `useReducer`
+2. `this.setState`内调用`this.updater.enqueueSetState`
+    ```js
+    Component.prototype.setState = function (partialState, callback) {
+        if (!(typeof partialState === 'object' || typeof partialState === 'function' ||         partialState == null)) {
+            {
+            throw Error( "setState(...): takes an object of state variables to update or a function which returns an object of state variables." );
+            }
+        }
+        this.updater.enqueueSetState(this, partialState, callback, 'setState');
+    };
+    ``` 
+3. `this.forceUpdate`和`this.setState`一样，只是会让tag赋值`ForceUpdate`
+    ```js
+    enqueueForceUpdate(inst, callback) {
+        const fiber = getInstance(inst);
+        const eventTime = requestEventTime();
+        const suspenseConfig = requestCurrentSuspenseConfig();
+        const lane = requestUpdateLane(fiber, suspenseConfig);
+    
+        const update = createUpdate(eventTime, lane, suspenseConfig);
+        
+        //tag赋值ForceUpdate
+        update.tag = ForceUpdate;
+        
+        if (callback !== undefined && callback !== null) {
+            update.callback = callback;
+        }
+        
+        enqueueUpdate(fiber, update);
+        scheduleUpdateOnFiber(fiber, lane, eventTime);
+    };
+
+    ```
+4. 如果标记`ForceUpdate`，`render`阶段组件更新会根据`checkHasForceUpdateAfterProcessing`，和`checkShouldComponentUpdate`来判断，如果`Update`的`tag`是`ForceUpdate`，则`checkHasForceUpdateAfterProcessing`为true，当组件是`PureComponent`时，`checkShouldComponentUpdate`会浅比较state和props，所以当使用`this.forceUpdate`一定会更新
+    ```js
+    const shouldUpdate =
+        checkHasForceUpdateAfterProcessing() ||
+        checkShouldComponentUpdate(
+            workInProgress,
+            ctor,
+            oldProps,
+            newProps,
+            oldState,
+            newState,
+            nextContext,
+        );
+    ```
+5. `enqueueForceUpdate`之后会经历创建`update`，调度`update`等过程，接下来就来讲这些过程
+    ```js
+    enqueueSetState(inst, payload, callback) {
+        const fiber = getInstance(inst);//fiber实例
+        
+        const eventTime = requestEventTime();
+        const suspenseConfig = requestCurrentSuspenseConfig();
+            
+        const lane = requestUpdateLane(fiber, suspenseConfig);//优先级
+        
+        const update = createUpdate(eventTime, lane, suspenseConfig);//创建update
+        
+        update.payload = payload;
+        
+        if (callback !== undefined && callback !== null) {  //赋值回调
+            update.callback = callback;
+        }
+        
+        enqueueUpdate(fiber, update);//update加入updateQueue
+        scheduleUpdateOnFiber(fiber, lane, eventTime);//调度update
+    }
+    ```
+6. 状态更新流程
+    * ![update_flow](https://github.com/bearnew/picture/blob/master/markdown_v2/2021/react%E6%BA%90%E7%A0%81/update_flow.png?raw=true)
+7. 创建update
+    ```js
+    // lane：优先级
+    // tag：更新的类型，例如UpdateState、ReplaceState
+    // payload：ClassComponent的payload是setState第一个参数，HostRoot的payload是ReactDOM.render的第一个参数
+    // callback：setState的第二个参数
+    // next：连接下一个Update形成一个链表，例如同时触发多个setState时会形成多个Update，然后用next 连接
+    export function createUpdate(eventTime: number, lane: Lane): Update<*> {//创建update
+        const update: Update<*> = {
+            eventTime,
+            lane,
+        
+            tag: UpdateState,
+            payload: null,
+            callback: null,
+        
+            next: null,
+        };
+        return update;
+    }
+    ```
+8. `updateQueue`
+    * 对于`HostRoot`或者`ClassComponent`会在`mount`的时候使用`initializeUpdateQueue`创建`updateQueue`，然后将`updateQueue`挂载到`fiber`节点上
+    * example
+    ```js
+    // baseState：初始state，后面会基于这个state，根据Update计算新的state
+    // firstBaseUpdate、lastBaseUpdate：Update形成的链表的头和尾
+    // shared.pending：新产生的update会以单向环状链表保存在shared.pending上，计算state的时候会剪开这个环状链表，并且链接在lastBaseUpdate后
+    // effects：calback不为null的update
+    export function initializeUpdateQueue<State>(fiber: Fiber): void {
+        const queue: UpdateQueue<State> = {
+            baseState: fiber.memoizedState,
+            firstBaseUpdate: null,
+            lastBaseUpdate: null,
+            shared: {
+                pending: null,
+            },
+            effects: null,
+        };
+        fiber.updateQueue = queue;
+    }
+    ```
+9. 调度
+    * 在`ensureRootIsScheduled`中，`scheduleCallback`会以一个优先级调度`render`阶段的开始函数`performSyncWorkOnRoot`或者`performConcurrentWorkOnRoot`
+    * example
+    ```js
+    if (newCallbackPriority === SyncLanePriority) {
+        // 任务已经过期，需要同步执行render阶段
+        newCallbackNode = scheduleSyncCallback(
+            performSyncWorkOnRoot.bind(null, root)
+        );
+    } else {
+        // 根据任务优先级异步执行render阶段
+        var schedulerPriorityLevel = lanePriorityToSchedulerPriority(
+            newCallbackPriority
+        );
+        newCallbackNode = scheduleCallback(
+            schedulerPriorityLevel,
+            performConcurrentWorkOnRoot.bind(null, root)
+        );
+    }
+    ```
+10. 状态更新
+    * 初始时`fiber.updateQueue`单链表上有`firstBaseUpdate（update1）`和`lastBaseUpdate（update2）`，以`next`连接
+    * `fiber.updateQueue.shared`环状链表上有`update3`和`update4，`以`next`连接互相连接
+    * 计算`state`时，先将`fiber.updateQueue.shared`环状链表‘剪开’，形成单链表，连接在`fiber.updateQueue`后面形成`baseUpdate`
+    * 然后遍历按这条链表，根据`baseState`计算出`memoizedState`
+11. 带优先级的状态更新
+    * 通过`ReactDOM.render`创建的应用没有优先级的概念，类比git提交，相当于先commit，然后提交c3
+    * 在`concurrent`模式下，类似`git rebase`，先暂存之前的代码，在`master`上开发，然后`rebase`到之前的分支上
+        * 在第一次render的时候，低优先级的update会跳过，所以只有c1和c3加入状态的计算
+        * 在第二次render的时候，会以第一次中跳过的update（c2）之前的update（c1）作为baseState，跳过的update和之后的update（c2，c3，c4）作为baseUpdate重新计算
+        * 在在`concurrent`模式下，`componentWillMount`可能会执行多次，和之前的版本不一致
+        * `fiber.updateQueue.shared`会同时存在于`workInprogress Fiber`和`current Fiber`，目的是为了防止高优先级打断正在进行的计算而导致状态丢失，这段代码也是发生在`processUpdateQueue`中
+
+
+12. 
+
