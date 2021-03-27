@@ -125,4 +125,35 @@ const UI = commit(state);
 1. `react15`在`render`阶段的`reconcile`是不可打断的，这会在进行大量`dom`的`reconcile`时产生卡顿，因为浏览器所有的时间都交给了js执行，并且js的执行时单线程。为此`react16`之后就有了`scheduler`进行时间片的调度，给每个task一定的时间，如果在这个时间内没执行完，也要交出执行权给浏览器进行绘制和重排，所以异步可中断的更新需要一定的数据结构在内存中来保存dom的信息，这个数据结构就是`Fiber`（虚拟dom）。 
 2. `Fiber`双缓存
     * `Fiber`可以保存真实的`dom`，真实`dom`对应在内存中的`Fiber`节点会形成`Fiber`树，这颗Fiber树在react中叫`current Fiber`，也就是当前dom树对应的Fiber树，而正在构建Fiber树叫`workInProgress Fiber`，这两颗树的节点通过`alternate`相连.
-3. 
+3. 在`mount`时：会创建`fiberRoot`和`rootFiber`，然后根据jsx对象创建Fiber节点，节点连接成`current Fiber`树。
+4. 在`update`时：会根据新的状态形成的jsx（`ClassComponent`的`render`或者`FuncComponent`的返回值）和`current Fiber`对比形（diff算法）成一颗叫`workInProgress`的Fiber树，然后将`fiberRoot`的current指向`workInProgress`树，此时workInProgress就变成了`current Fiber`。
+5. `fiberRoot`：指整个应用的根节点，只存在一个
+6. `rootFiber`：`ReactDOM.render`或者`ReactDOM.unstable_createRoot`创建出来的应用的节点，可以存在多个。
+7. 我们现在知道了存在`current Fiber`和`workInProgress Fiber`两颗Fiber树，Fiber双缓存指的就是，在经过`reconcile（diff）`形成了新的`workInProgress Fiber`然后将`workInProgress Fiber`切换成`current Fiber`应用到真实dom中，存在双Fiber的好处是在内存中形成视图的描述，在最后应用到dom中，减少了对dom的操作。
+## 3.入口
+1. `React` 有3种模式
+    * __`legacy`模式__： `ReactDOM.render(<App />, rootNode)`。这是当前`React app`使用的方式。当前没有计划删除该模式，但是这个模式可能不支持这些新功能。
+    * __`blocking`__: `ReactDOM.createBlockingRoot(rootNode).render()`。目前正在实验中，作为迁移到`concurrent`的第一步
+    * __`concurrent`模式__: `ReactDOM.createRoot(rootNode).render(<App />)`，目前正在实验中，未来稳定后，作为`React`的默认开发版本，该版本包含所有的新功能。
+2. 特性对比
+ 
+|feature|legacy模式|blocking模式|concurrent模式|
+|:--------:|:--------:|:--------:|:--------:|
+|String Refs|✅|🚫|🚫|
+|Leagcy Context|✅|🚫|🚫|
+|findDOMNode|✅|🚫|🚫|
+|Suspense|✅|✅|✅|
+|SuspenseList|🚫|✅|✅|
+|Suspense SSR + Hydration|🚫|✅|✅|
+|Progressive Hydration(渐进式注水)|🚫|✅|✅|
+|Selective Hydration|🚫|🚫|✅|
+|Cooperative Multitasking(协同多任务处理)|🚫|🚫|✅|
+|Automatic batching of multiple setStates(自动批处理setState)|🚫|✅|✅|
+|Priority-based Rendering(根据优先级分割state)|🚫|🚫|✅|
+|Interruptible Prerendering(可中断的渲染)|🚫|🚫|✅|
+|useTransition|🚫|🚫|✅|
+|useDeferredValue(延迟1个值)|🚫|🚫|✅|
+|Suspense Reveal “Train”(较低的延迟换取更少的布局变化)|🚫|🚫|✅|
+3. 不同模式对比
+* `legacy`模式是我们常用的，它构建dom的过程是同步的，所以在`render`的`reconciler`中，如果diff的过程特别耗时，那么导致的结果就是js一直阻塞高优先级的任务(例如用户的点击事件)，表现为页面的卡顿，无法响应。
+4. concurrent Mode是react未来的模式，它用时间片调度实现了异步可中断的任务，根据设备性能的不同，时间片的长度也不一样，在每个时间片中，如果任务到了过期时间，就会主动让出线程给高优先级的任务。这部分将在第11节 scheduler&lane模型 这章会具体讲解react是如何实现异步可中断的任务，以及任务的优先级和高优先级是如果插队的。
