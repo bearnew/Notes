@@ -353,4 +353,97 @@ const UI = commit(state);
       - 在在`concurrent`模式下，`componentWillMount`可能会执行多次，和之前的版本不一致
       - `fiber.updateQueue.shared`会同时存在于`workInprogress Fiber`和`current Fiber`，目的是为了防止高优先级打断正在进行的计算而导致状态丢失，这段代码也是发生在`processUpdateQueue`中
 
-12.
+## 5.render 阶段
+
+1. `render`阶段的入口
+
+- `render` 阶段的主要工作是构建 `Fiber` 树和生成 `effectList`，在第 5 章中我们知道了 `react` 入口的两种模式会进入 `performSyncWorkOnRoot` 或者 `performConcurrentWorkOnRoot`，而这两个方法分别会调用 `workLoopSync` 或者 `workLoopConcurrent`
+
+```js
+function workLoopSync() {
+  while (workInProgress !== null) {
+    performUnitOfWork(workInProgress);
+  }
+}
+
+function workLoopConcurrent() {
+  while (workInProgress !== null && !shouldYield()) {
+    performUnitOfWork(workInProgress);
+  }
+}
+```
+
+- 这两函数的区别是判断条件是否存在 `shouldYield` 的执行，如果浏览器没有足够的时间，那么会终止 `while` 循环，也不会执行后面的 `performUnitOfWork` 函数，自然也不会执行后面的 `render` 阶段和 `commit` 阶段，
+
+  - `workInProgress`：新创建的`workInProgress fiber`
+  - `performUnitOfWork：workInProgress fiber`和会和已经创建的`Fiber`连接起来形成`Fiber`树。这个过程类似深度优先遍历，我们暂且称它们为‘捕获阶段’和‘冒泡阶段’。执行的过程大概如下
+
+    ```js
+    function performUnitOfWork(fiber) {
+      if (fiber.child) {
+        performUnitOfWork(fiber.child); //beginWork
+      }
+
+      if (fiber.sibling) {
+        performUnitOfWork(fiber.sibling); //completeWork
+      }
+    }
+    ```
+
+2. 捕获阶段
+
+- 从根节点 `rootFiber` 开始，遍历到叶子节点，每次遍历到的节点都会执行 `beginWork`，并且传入当前 `Fiber`节点，然后创建或复用它的子 `Fiber` 节点，并赋值给 `workInProgress.child`。
+
+3. 冒泡阶段
+
+- 在捕获阶段遍历到子节点之后，会执行 completeWork 方法，执行完成之后会判断此节点的兄弟节点存不存在，如果存在就会为兄弟节点执行 completeWork，当全部兄弟节点执行完之后，会向上‘冒泡’到父节点执行 completeWork，直到 rootFiber。
+
+4. `beginwork`
+
+- `beginWork` 主要的工作是创建或复用子`fiber`节点
+
+* 参数中有 `current Fiber`，也就是当前真实 `dom `对应的 `Fiber` 树，在之前介绍 Fiber 双缓存机制中，我们知道在首次渲染时除了 `rootFiber` 外，`current` 等于 null，因为首次渲染 dom 还没构建出来，在 update 时 current 不等于 null，因为 update 时 dom 树已经存在了，所以 beginWork 函数中用 current === null 来判断是 mount 还是 update 进入不同的逻辑
+* `mount`：根据 fiber.tag 进入不同 fiber 的创建函数，最后都会调用到 `reconcileChildren` 创建子 `Fiber`
+* `update`：在构建 `workInProgress` 的时候，当满足条件时，会复用 `current Fiber` 来进行优化，也就是进入 `bailoutOnAlreadyFinishedWork` 的逻辑，能复用 `didReceiveUpdate` 变量是 `false`，复用的条件是
+* 为 `Fiber` 打上 `effectTag` 之后在 `commit` 阶段会被执行对应 dom 的增删改
+* `completeWork`主要工作是处理`fiber`的`props`、创建`dom`、创建`effectList`
+* update 时（除了判断 current===null 外还需要判断 workInProgress.stateNode===null），调用 updateHostComponent 处理 props（包括 onClick、style、children ...），并将处理好的 props 赋值给 updatePayload,最后会保存在 workInProgress.updateQueue 上
+* mount 时 调用 createInstance 创建 dom，将后代 dom 节点插入刚创建的 dom 中，调用 finalizeInitialChildren 处理 props（和 updateHostComponent 处理的逻辑类似）
+
+​ 之前我们有说到在 beginWork 的 mount 时，rootFiber 存在对应的 current，所以他会执行 mountChildFibers 打上 Placement 的 effectTag，在冒泡阶段也就是执行 completeWork 时，我们将子孙节点通过 appendAllChildren 挂载到新创建的 dom 节点上，最后就可以一次性将内存中的节点用 dom 原生方法反应到真实 dom 中。
+
+## 6.commit 阶段(听说 renderer 帮我们打好标记了,映射真实节点吧)
+
+- `render` 阶段的末尾会调用 `commitRoot(root)`;进入 `commit` 阶段，这里的 `root` 指的就是 `fiberRoot`，然后会遍历 `render` 阶段生成的 `effectList`，`effectList` 上的 `Fiber` 节点保存着对应的 `props` 变化。之后会遍历 `effectList` 进行对应的 `dom` 操作和生命周期、`hooks` 回调或销毁函数
+- `commit`步骤
+
+  - `mutation`前
+
+    - 调用`flushPassiveEffects`执行完所有`effect`的任务
+    - 初始化相关变量
+    - 赋值`firstEffect`给后面遍历`effectList`用
+
+  - `mutation` 阶段
+    - 遍历 `effectList` 分别执行三个方法 `commitBeforeMutationEffects`、`commitMutationEffects`、`commitLayoutEffects` 执行对应的 dom 操作和生命周期
+    - 我们在构建完 `workInProgress Fiber` 树之后会将 `fiberRoot`的 `current` 指向 `workInProgress Fiber`，让 `workInProgress Fiber` 成为 `current`，这个步骤发生在 `commitMutationEffects`函数执行之后，`commitLayoutEffects` 之前，因为 `componentWillUnmount` 发生在 `commitMutationEffects` 函数中，这时还可以获取之前的 Update，而 `componentDidMount` 和 `componentDidUpdate` 会在 `commitLayoutEffects` 中执行，这时已经可以获取更新后的真实 dom 了
+    - **`commitBeforeMutationEffects`**
+      - 执行`getSnapshotBeforeUpdate`
+      - 调度`useEffect`
+    - **`commitMutationEffects`**
+      - 调用 `commitDetachRef` 解绑 `ref`
+      - 根据`effectTag`执行对应的`dom`操作
+      - `useLayoutEffect`销毁函数在`UpdateTag`时执行
+  - `mutation`后
+    - 根据`rootDoesHavePassiveEffects`赋值相关变量
+    - 执行 `flushSyncCallbackQueue` 处理 `componentDidMount` 等生命周期或者 `useLayoutEffect` 等同步任务
+  - 操作`dom`的几个函数
+
+    - `commitPlacement`插入节点
+    - `commitWork` 更新节点
+    - `commitDeletion`删除节点
+
+      - 如果是 `ClassComponent` 会执行 `componentWillUnmount`，删除 fiber，如果是 FunctionComponent 会删除 `ref`、并执行 `useEffect` 的销毁函数，具体可在源码中查看 unmountHostComponents、commitNestedUnmounts、detachFiberMutation 这几个函数
+
+    - `commitLayoutEffects`
+      - 在 `commitMutationEffects` 之后所有的 `dom` 操作都已经完成，可以访问 `dom`
+      - 会执行 `useLayoutEffect` 的回调，然后调度 `useEffect`，`ClassComponent` 会执行 `componentDidMount` 或者 `componentDidUpdate`，`this.setState` 第二个参数也会执行，`HostRoot` 会执行 `ReactDOM.render` 函数的第三个参数，
