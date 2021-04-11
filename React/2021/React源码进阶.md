@@ -447,3 +447,28 @@ function workLoopConcurrent() {
     - `commitLayoutEffects`
       - 在 `commitMutationEffects` 之后所有的 `dom` 操作都已经完成，可以访问 `dom`
       - 会执行 `useLayoutEffect` 的回调，然后调度 `useEffect`，`ClassComponent` 会执行 `componentDidMount` 或者 `componentDidUpdate`，`this.setState` 第二个参数也会执行，`HostRoot` 会执行 `ReactDOM.render` 函数的第三个参数，
+
+## 7.diff 算法
+
+1. 在 `render` 阶段更新 `Fiber` 节点时，我们会调用 `reconcileChildFibers` 对比 `current Fiber` 和 jsx 对象构建 `workInProgress Fiber`，这里 `current Fiber` 是指当前 `dom` 对应的 `fiber` 树，jsx 是 `class` 组件 `render` 方法或者函数组件的返回值。
+2. 普通的两棵树 diff 复杂度是`O(n3)`
+3. `React`的`diff`
+
+   1. 最对同级比较，跨层级的 `dom` 不会进行复用
+   2. 不同类型节点生成的 `dom` 树不同，此时会直接销毁老节点及子孙节点，并新建节点
+   3. 可以通过 `key` 来对元素 `diff` 的过程提供复用的线索
+
+4. 单节点`diff`
+
+   1. `key` 和 `type` 相同表示可以复用节点
+   2. `key`不同直接标记删除节点，然后新建节点
+   3. `key` 相同 `type` 不同，标记删除该节点和兄弟节点，然后新创建节点
+
+5. 多节点`diff`
+   1. 多节点 diff 会经历三次遍历， 第一次遍历处理节点的更新（包括 props 更新和 type 更新和删除），第二次遍历处理其他的情况（节点新增），其原因在于在大多数的应用中，节点更新的频率更加频繁，第三次处理位节点置改变
+   2. **第一次遍历:**
+      1. `key` 不同，第一次循环结束
+      2. `newChildren` 或者 `oldFiber` 遍历完，第一次循环结束
+      3. `key` 同 `type` 不同，标记 `oldFiber` 为 `DELETION`
+      4. `key` 相同 `type`相同则可以复用
+6.
