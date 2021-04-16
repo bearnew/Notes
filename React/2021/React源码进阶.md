@@ -471,4 +471,11 @@ function workLoopConcurrent() {
       2. `newChildren` 或者 `oldFiber` 遍历完，第一次循环结束
       3. `key` 同 `type` 不同，标记 `oldFiber` 为 `DELETION`
       4. `key` 相同 `type`相同则可以复用
-6.
+      5. `newChildren`遍历完，`oldFiber`没遍历完，在第一次遍历完成之后将`oldFiber`中没遍历完的节点标记为`DELETION`，即删除的`DELETION Tag`
+   3. **第二次遍历:**
+      1. `newChildren`和`oldFiber`都遍历完：多节点`diff`过程结束
+      2. `newChildren`没遍历完，`oldFiber`遍历完，将剩下的`newChildren`的节点标记为`Placement`，即插入的 Tag
+      3. `newChildren`和`oldFiber`没遍历完，则进入节点移动的逻辑
+   4. **第三次遍历:**
+      1. 主要逻辑在 `placeChild` 函数中，例如更新前节点顺序是 `ABCD`，更新后是 `ACDB`
+      2. `newChild` 中第一个位置的 `D` 和 `oldFiber` 第一个位置的 `A`，`key` 不相同不可复用，将 `oldFiber` 中的 `ABCD` 保存在 `map` 中，`lastPlacedIndex=0`
