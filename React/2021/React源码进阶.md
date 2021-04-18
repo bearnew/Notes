@@ -479,3 +479,83 @@ function workLoopConcurrent() {
    4. **第三次遍历:**
       1. 主要逻辑在 `placeChild` 函数中，例如更新前节点顺序是 `ABCD`，更新后是 `ACDB`
       2. `newChild` 中第一个位置的 `D` 和 `oldFiber` 第一个位置的 `A`，`key` 不相同不可复用，将 `oldFiber` 中的 `ABCD` 保存在 `map` 中，`lastPlacedIndex=0`
+
+## 8.hooks 源码
+
+1. 在 hook 源码中 hook 存在于`Dispatcher`中，`Dispatcher`就是一个对象，不同 hook 调用的函数不一样，全局变量`ReactCurrentDispatcher.current`会根据是`mount`还是`update`赋值为`HooksDispatcherOnMount`或`HooksDispatcherOnUpdate`
+
+```js
+ReactCurrentDispatcher.current =
+  current === null || current.memoizedState === null //mount or update
+    ? HooksDispatcherOnMount
+    : HooksDispatcherOnUpdate;
+```
+
+2. ​ 在`FunctionComponen`t 中，多个`hook`会形成`hook`链表，保存在`Fiber`的`memoizedState`的上，而需要更新的`Update`保存在`hook.queue.pending`中
+
+```js
+const hook: Hook = {
+  memoizedState: null, //对于不同hook，有不同的值
+  baseState: null, //初始state
+  baseQueue: null, //初始queue队列
+  queue: null, //需要更新的update
+  next: null, //下一个hook
+};
+```
+
+3. `memoizedState`对应的值
+
+- `useState`：例如`const [state, updateState] = useState(initialState)`，`memoizedState`等于`state`的值
+- `useReducer`：例如`const [state, dispatch] = useReducer(reducer, {})`;，`memoizedState`等于`state`的值
+- `useEffect`：在`mountEffect`时会调用`pushEffect`创建`effect`链表，`memoizedState`就等于`effect`链表，`effect`链表也会挂载到`fiber.updateQueue`上，每个`effect`上存在`useEffect`的第一个参数回调和第二个参数依赖数组，例如，`useEffect(callback, [dep])，effect就是{create:callback, dep:dep,...}`
+- `useRef`：例如`useRef(0)，memoizedState`就等于`{current: 0}`
+- `useMemo`：例如`useMemo(callback, [dep])，memoizedState`等于`[callback(), dep]`
+- `useCallback`：例如`useCallback(callback, [dep])，memoizedState`等于`[callback, dep]`。`useCallback`保存`callback`函数，`useMemo`保存`callback`的执行结果
+
+4. 源码中`useState`就是有默认`reducer`参数的`useReducer`。
+
+```js
+function useState(initialState) {
+  var dispatcher = resolveDispatcher();
+  return dispatcher.useState(initialState);
+}
+function useReducer(reducer, initialArg, init) {
+  var dispatcher = resolveDispatcher();
+  return dispatcher.useReducer(reducer, initialArg, init);
+}
+```
+
+5. `useState` 执行 `setState` 后会调用 `dispatchAction`，`dispatchAction` 做的事情就是讲 `Update` 加入 `queue.pending` 中，然后开始调度
+6. `useEffect`
+
+```js
+export function useEffect(
+  create: () => (() => void) | void,
+  deps: Array<mixed> | void | null
+): void {
+  const dispatcher = resolveDispatcher();
+  return dispatcher.useEffect(create, deps);
+}
+```
+
+7. sring 类型的 ref 已经不在推荐使用，ForwardRef 只是把 ref 通过传参传下去，createRef 也是{current: any 这种结构，所以我们只讨论 function 或者{current: any}的 useRef
+
+```js
+//createRef返回{current: any}
+export function createRef(): RefObject {
+  const refObject = {
+    current: null,
+  };
+  return refObject;
+}
+//ForwardRef第二个参数是ref对象
+let children = Component(props, secondArg);
+
+export function useRef<T>(initialValue: T): {| current: T |} {
+  const dispatcher = resolveDispatcher();
+  return dispatcher.useRef(initialValue);
+}
+```
+
+8. update 时调用 updateRef 获取获取当前 useRef，然后返回 hook 链表
+9. useMemo&useCallback, mount 阶段 useMemo 和 useCallback 唯一区别是在 memoizedState 中存贮 callback 还是 callback 计算出来的函数, update 时也一样，唯一区别就是直接用回调函数还是执行回调后返回的 value 作为[?, nextDeps]赋值给 memoizedState
