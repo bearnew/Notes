@@ -117,4 +117,28 @@
    - 新版本的代理服务器理解该头部
      - 与客户端建立长连接
      - 与服务器使用`connection`替代`proxy-connection`
-4.
+
+## 7.代理服务器转发消息
+
+1. HTTP 头部`X-Forwarded-For`用于传递 IP，`X-Forwarded-For: 115.204.33.1 1.1.1.1`
+2. HTTP 头部`X-Real-IP`用于传递用户 IP，`X-Real-IP: 115.204.33.1`
+3. Max-Forwards 头部，限制`Proxy`代理服务器的最大转发次数，仅对`TRACE/OPTIONS`方法有效
+4. Via 头部，指明经过的代理服务器的名称和版本
+5. Cache-Control: no-transform，禁止代理服务器修改响应包体
+
+## 8.请求与响应的上下文
+
+1. 请求上下文
+   - User-Agent: 指明客户端的类型信息
+   - Referer: 浏览器对来自某一页面的请求自动添加的头部
+     - Referer 不会添加的场景：
+       - 来源页面采用的协议为本地文件的`file`或者`data`URI
+       - 当前页面采用的 http 协议，来源页面采用的 https 协议
+     - 作用：服务器用于统计分析、缓存优化、防盗链等
+   - From
+     - 用于网络爬虫，告诉服务器如何通过邮件联系到爬虫的负责人
+     - 例: From: webmaster@example
+2. 响应的上下文
+   - Server, 指明服务器上所用的软件信息，`Server: nginx`
+   - Allow，允许哪些方法，`Allow: GET,HEAD,PUT`
+   - Accept-Ranges: 告诉客户端服务器上该资源是否允许`range`请求

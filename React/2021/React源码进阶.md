@@ -559,3 +559,24 @@ export function useRef<T>(initialValue: T): {| current: T |} {
 
 8. update 时调用 updateRef 获取获取当前 useRef，然后返回 hook 链表
 9. useMemo&useCallback, mount 阶段 useMemo 和 useCallback 唯一区别是在 memoizedState 中存贮 callback 还是 callback 计算出来的函数, update 时也一样，唯一区别就是直接用回调函数还是执行回调后返回的 value 作为[?, nextDeps]赋值给 memoizedState
+
+## 9.scheduler&lane 模型(来看看 react 是暂停、继续和插队的)
+
+1. ​`Scheduler`主要的功能是时间切片和调度优先级
+2. 浏览器每帧`js`的执行如下
+
+- 宏任务->微任务->`requestAnimationFrame`->重绘/重排->`requestIdleCallback`
+
+3. `requestIdleCallback` 是在浏览器重绘重排之后，如果还有空闲就可以执行的时机，所以为了不影响重绘重排，可以在浏览器在 `requestIdleCallback` 中执行耗性能的计算
+4. 由于`requestIdleCallback`存在兼容和触发时机不稳定的问题，`scheduler`中采用`MessageChannel`来实现`requestIdleCallback`，当前环境不支持`MessageChannel`就采用`setTimeout`。
+5. `Lane` 的和 `Scheduler` 是两套优先级机制，相比来说` Lane` 的优先级粒度更细，`Lane` 的意思是车道，类似赛车一样，在` task` 获取优先级时，总是会优先抢内圈的赛道
+6. `Lane` 表示的优先级有一下几个特点
+   - 可以表示不同批次的优先级，每个优先级都是个 31 位二进制数字，1 表示该位置可以用，0 代表这个位置不能用，从第一个优先级 NoLanes 到 OffscreenLane 优先级是降低的，优先级越低 1 的个数也就越多
+   - 优先级的计算的性能高，通过二进制按位与来判断 a 和 b 代表的 lane 是否存在交集
+   ```js
+   export function includesSomeLane(a: Lanes | Lane, b: Lanes | Lane) {
+     return (a & b) !== NoLanes;
+   }
+   ```
+7. ​ 在 Lane 模型中如果一个低优先级的任务执行，并且还在调度的时候触发了一个高优先级的任务，则高优先级的任务打断低优先级任务，此时应该先取消低优先级的任务，因为此时低优先级的任务可能已经进行了一段时间，Fiber 树已经构建了一部分，所以需要将 Fiber 树还原，这个过程发生在函数 prepareFreshStack 中，在这个函数中会初始化已经构建的 Fiber 树
+8. 在调度优先级的过程中，会调用 `markStarvedLanesAsExpired` 遍历` pendingLanes`（未执行的任务包含的 `lane`），如果没过期时间就计算一个过期时间，如果过期了就加入 `root.expiredLanes` 中，然后在下次调用 `getNextLane` 函数的时候会优先返回 `expiredLanes`
