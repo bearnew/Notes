@@ -234,3 +234,39 @@
    - 正向代理
    - 反向代理
 4. ![http-cache](https://github.com/bearnew/picture/blob/master/markdown_v2/2021/web%E5%8D%8F%E8%AE%AE/http_cache.png?raw=true)
+5. 判断缓存是否过期的优先级
+   - `s-maxage > max-age > Expires > 预估过期时间`
+     - `Cache-Control: s-maxage=3600`，`s-maxage`同 max-age 作用一样，只在代理服务器中生效（比如 CDN 缓存）。比如当 s-maxage=60 时，在这 60 秒中，即使更新了 CDN 的内容，浏览器也不会进行请求。
+     - `Cache-Control: max-age=86400`
+     - `Expires: Fri,03 May 2019 03:15:20 GMT`
+     - 预估过期时间：(DownloadTime - LastModified)\*10%
+6. 什么样的 Http 可以被缓存
+   - 请求方法可以被缓存理解（不只是 GET 方法，其他方法加上适当的头文件也可被缓存）
+   - 响应码可以被缓存理解（404 206 也可以被缓存）
+   - 响应与请求的头部没有指明`no-store`
+   - 响应中至少包含以下头部 1 个或多个
+     - `Expires max-age s-maxage public`
+     - 当响应中没有明确指明过期时间的头部时，如果响应码非常明确，则也可以缓存
+   - 如果缓存在代理服务器上
+     - 不含有`private`
+     - 不含有`Authorization`
+7. 使用缓存作为当前请求响应的条件
+   - 缓存中的响应`Vary`头部指定的头部必须与请求中的头部相匹配
+     - 不同的客户端可能支持的压缩编码方式不同
+     - 要求输出的内容不一样
+     - 由服务器端添加，添加到响应头部用,在客户端缓存机制或者是缓存服务器在做缓存操作的时候，会使用到 Vary 头
+   - 当前请求以及缓存中的响应都不包含`no-cache`头部
+   - 缓存中的响应必须是以下之一
+     - 新鲜的（时间上未过期）
+     - 缓存中的响应头部明确告知可以使用过期的响应（`Cache-Control: max-stale=60`）
+     - 使用条件请求去服务器端验证请求是否过期，得到 304 响应
+8. 验证请求与响应
+   - 验证请求
+     - 若缓存中含有`Last-Modifiled`头部
+       - `if-Unmodified-Since`, 如果文件被修改: 则不传输, 服务器返回: 412 Precondition failed (预处理错误)
+       - `if-Modified-Since`
+       - `if-Range`
+     - 若缓存响应中含有`Etag`头部
+       - `if-None-Match`
+       - `if-Match`
+       - `if-Range`
