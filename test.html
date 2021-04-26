@@ -1,99 +1,35 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>test</title>
+    <style>
+      .box {
+          width: 200px;
+      }
+      .box>img {
+        height: 96px;
+      }
+    </style>
+  </head>
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<title>test</title>
-	<style>
-        .box {
-            display: block;
-        }
-		.bfc-wrap {
-			overflow: hidden;
-		}
-		.bfc {
-			width: 200px;
-			height: 200px;
-			margin: 10px;
-			background: red;
-		}
-		circular-ring:not(:defined)::after {
-    display: block;
-    content: '';
-    width: 100px;
-    height: 100px;
-    background-color: #dddddd;
-}
-
-	</style>
-</head>
-
-<body>
-	<div>
-		<button class="btn" id="btn-open-dialog">open dialog</button>
-		<my-dialog id="dialog">
-			<template id='my-dialog-tpl'>
-				<slot name="title"></slot>
-			</template>
-		</my-dialog>
+  <body>
+    <div class="box">
+        <img src="http://vip5.happyyou.net/static/picture/094d51f3b66845a6.jpg" />
     </div>
-	<!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
+    <!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
 	<script crossorigin src="https://cdn.bootcss.com/babel-standalone/6.10.3/babel.min.js"></script>
 	<script src="https://cdn.bootcss.com/lodash.js/4.17.15/lodash.js"></script>
 	<script src="https://cdn.bootcss.com/benchmark/2.1.4/benchmark.js"></script>
 	 <script type="text/javascript" src="co.js"></script> -->
-	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
-	<script type="text/javascript" src="test.js"></script>
-	<script>
-		class MyDialog extends HTMLElement {
-    constructor() {
-        super();
-        this._shadowRoot = this.attachShadow({ mode: 'open' });
-    }
-    get open() {
-        if (this.$wrapper&&this.$wrapper.hasAttribute('open')) {
-            return JSON.parse(this.$wrapper.getAttribute('open'));
-        }
-        return false;
-    }
-    set open(status) {
-        this.$wrapper.setAttribute('open', status);
-    }
-    connectedCallback() {
-		console.log(this.__shadowRoot)
-        this._tpl = document.querySelector('#my-dialog-tpl');
-        this._shadowRoot.appendChild(document.importNode(this._tpl.content, true));
-        const title = this.getAttribute('title');
-        const content = this.getAttribute('content');
-        if (title) {
-            const titleNode = document.createTextNode(title);
-            this.__shadowRoot.querySelector('.my-dialog__title').appendChild(titleNode);
-        }
-    }
-}
-
-customElements.define('my-dialog', MyDialog);
-
-let $dialog = null;
-document.getElementById('btn-open-dialog').addEventListener('click', ev => {
-    if (!$dialog) {
-        createDialog();
-    }
-    $dialog.open = true;
-}, false);
-
-function createDialog() {
-    const $dialog = document.createElement('my-dialog');
-    $dialog.setAttribute('title', 'My Dialog Title');
-    $dialog.setAttribute('content', 'My Dialog content');
-    $dialog.setAttribute('name', Math.random());
-    
-    document.body.appendChild($dialog);
-}
-	</script>
-	<!-- <script type="text/javascript" src="test1.js" type="module"></script> -->
-</body>
-
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script type="text/javascript" src="test.js"></script>
+    <script></script>
+    <!-- <script type="text/javascript" src="test1.js" type="module"></script> -->
+  </body>
 </html>
