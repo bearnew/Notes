@@ -847,4 +847,13 @@ label {
    11. 容器高度为 100px，图片高度为 95px, 设置图片`margin-top: -200px`, 图片并不会消失在容器中
        - 因为图片的位置被幽灵空白节点的`vertical-align: baseline`限死了
 
-8.
+8. 通过`font-size: 0`或者`line-height: 0`移除幽灵空白节点
+9. `vertical-align: top/bottom/middle`
+
+   - `vertical-align: top`垂直行框盒子的上边缘对齐
+   - `vertical-align: bottom`垂直行框盒子的下边缘对齐
+   - `vertical-align: middle`元素的垂直中心点和行框盒子基线往上 1/2 x-height 处对齐，但所有的字体中字符 x 的位置都是偏下的
+   - `vertical-align: text-top/text-bottom`盒子的顶部与父级内容顶部/底部对齐（与父级元素的`font-size`有关）
+   - `vertical-align: super/sub`提高盒子的基线到父级上标（`<sup></sup>`）/下标(`<sub></sub>`)位置
+
+10.
