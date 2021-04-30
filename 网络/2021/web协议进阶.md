@@ -142,3 +142,131 @@
    - Server, 指明服务器上所用的软件信息，`Server: nginx`
    - Allow，允许哪些方法，`Allow: GET,HEAD,PUT`
    - Accept-Ranges: 告诉客户端服务器上该资源是否允许`range`请求
+
+## 9.HTML form 表单
+
+1. `action`: 提交时发起 http 请求的 url
+2. `method`: 提交时发起 http 请求的 http 方法
+   - GET：通过 URI，将表单数据以 URI 参数的方式提交
+   - POST: 将表单数据放在请求包体中提交
+3. `enctype`: 在 POST 方法下，对表单内容在请求包体中的编码方式
+   - `application/x-www-form-urlencoded`: 数据被编码成以`&`分割的键-值对，同时以`=`分割键和值，字符以 URL 编码方式编码
+   - `multipart/form-data`
+     - `boundary`分隔符
+     - 每部分表述皆有 http 头部描述子包体，例如`Content-Type`
+     - `last boundary`结尾
+
+## 10.多线程、断点续传、随机点播等场景
+
+1. 下载文件的指定内容，下载完后拼装成统一的文件
+2. `HTTP Range`
+   - 允许服务端基于客户端的请求只发送响应包体的一部分给客户端，客户端自动将多个片段的包组合成完整的体积更大的包体
+     - 支持断点续传
+     - 支持多线程下载
+     - 支持视频播放器实时拖动
+   - 服务器通过`Accept-Range`头部表示是否支持`Range`请求
+     - `Accept-Ranges = acceptable-ranges`
+     - eg: `Accept-Ranges: bytes`表示支持, `Accept-Ranges: none`表示不支持
+3. `Range`请求范围的单位
+   - 基于字节，设包体总长度为 10000
+     - 第 1 个 500 字节，`bytes=0-499`
+     - 第 2 个 500 字节
+       - bytes=500-999
+       - bytes=500-600,601-999
+       - bytes=500-700,601-999
+     - 最后 1 个 500 字节
+       - bytes=-500
+       - bytes=9500-
+     - 仅要第 1 个和最后 1 个字节：bytes=0-0,-1
+   - 通过`Range`头部传递请求范围，如: Range: bytes=0-499
+4. Range 条件请求
+   1. `If-Range = entity-tag/HTTP-date`
+      - 可以使用`Etag`或者`Last-Modified`
+   2. 与`If-Unmodified-Since`或者`If-Match`头部共同使用
+5. 服务器响应
+   - `206 Partial Content`: 成功返回部分包体
+   - `Content-Range`头部: 显示当前片段包体在完整包体中的位置
+   - `416 Range Not Satisfiable`: 表示请求范围不满足实际资源大小
+   - `200 OK`: 服务器不支持`Range`请求，返回完整的响应包体
+
+## 11.同源策略的作用
+
+1. 限制了同一个源加载的文档或脚本如何与来自另一个源的资源进行交互
+2. 同源策略的作用
+   1. 站点 B 取出了站点 A 的 cookie 与 token，与服务端进行交互，是不安全的
+   2. 没有同源策略，站点 B 的脚本可以随意修改站点 A 的 DOM 结构
+
+## 12.Cors
+
+1. 简单请求的跨域访问
+   - 请求中携带`origin`头部告知来自哪个域
+   - 响应中携带`Access-Control-Allow-origin`头部表示允许哪些域
+   - 浏览器放行
+2. 复杂请求跨域访问
+   1. 预检请求
+      - 预检请求头部：`Access-Control-Request-Method`， `Access-Control-Request-Headers`
+      - 预检请求响应：`Access-Control-Allow-Methods`，`Access-Control-Allow-Headers`，`Access-Control-Max-Age`
+   2. 跨域访问资源：请求头部
+      - 请求头部
+        - `origin`: 一个页面的资源可能来自于多个域名，在`AJAX`等子请求中标明来源与某个域名下的脚本，以通过服务器的安全校验
+        - `Access-Control-Request-Mehod`：在`preflight`预检请求(`OPTIONS`)中，告知服务器接下来的请求会使用哪些方法
+        - `Access-Control-Request-Headers`: 在`preflight`预检请求(`OPTIONS`)中，告知服务器接下来的请求会传递哪些头部
+      - 响应头部
+        - `Access-Control-Allow-Methods`, 在`preflight`预请求的响应中告诉客户端后续请求允许使用的方法
+        - `Access-Control-Allow-Headers`, 在`preflight`预检请求的响应中，告知客户端后续请求允许携带的头部
+        - `Access-Control-Max-Age`，在`preflight`预检请求的响应中，告知客户端该响应的信息可以缓存多久
+        - `Access-Control-Expose-Headers`，告知浏览器哪些响应头部可以供客户端使用，默认情况下只有`Cache-Control`，`Content-Language`，`Content-Type`，`Expires`,`Last-Modified`,`Pragma`可供使用
+        - `Access-Control-Allow-Origin`,告知浏览器允许哪些域名访问当前资源，\*表示允许所有域。为避免缓存错乱，响应中需要携带`Vary:Origin`
+        - `Access-Control-Allow-Credential`,告知浏览器是否可以将`Credentials`暴露给客户端使用，`Credentials`包含`cookies`,`authorization`类头部，`TLS`证书
+
+## 13.条件请求
+
+- ![http-condition](https://github.com/bearnew/picture/blob/master/markdown_v2/2021/web%E5%8D%8F%E8%AE%AE/http_condition.PNG?raw=true)
+
+## 14. HTTP 缓存
+
+1. 目标：减少时延；降低贷款消耗
+2. 私有缓存
+   - 仅供 1 个用户使用的缓存，通常存在于浏览器这样的客户端上
+3. 共享缓存
+   - 可以供多个用户的缓存，存在于网络中负责转发消息的代理服务器（对热点资源常使用共享缓存，以减轻源服务器的压力，并提升网络资源）
+   - `Authentication`响应不可被代理服务器缓存
+   - 正向代理
+   - 反向代理
+4. ![http-cache](https://github.com/bearnew/picture/blob/master/markdown_v2/2021/web%E5%8D%8F%E8%AE%AE/http_cache.png?raw=true)
+5. 判断缓存是否过期的优先级
+   - `s-maxage > max-age > Expires > 预估过期时间`
+     - `Cache-Control: s-maxage=3600`，`s-maxage`同 max-age 作用一样，只在代理服务器中生效（比如 CDN 缓存）。比如当 s-maxage=60 时，在这 60 秒中，即使更新了 CDN 的内容，浏览器也不会进行请求。
+     - `Cache-Control: max-age=86400`
+     - `Expires: Fri,03 May 2019 03:15:20 GMT`
+     - 预估过期时间：(DownloadTime - LastModified)\*10%
+6. 什么样的 Http 可以被缓存
+   - 请求方法可以被缓存理解（不只是 GET 方法，其他方法加上适当的头文件也可被缓存）
+   - 响应码可以被缓存理解（404 206 也可以被缓存）
+   - 响应与请求的头部没有指明`no-store`
+   - 响应中至少包含以下头部 1 个或多个
+     - `Expires max-age s-maxage public`
+     - 当响应中没有明确指明过期时间的头部时，如果响应码非常明确，则也可以缓存
+   - 如果缓存在代理服务器上
+     - 不含有`private`
+     - 不含有`Authorization`
+7. 使用缓存作为当前请求响应的条件
+   - 缓存中的响应`Vary`头部指定的头部必须与请求中的头部相匹配
+     - 不同的客户端可能支持的压缩编码方式不同
+     - 要求输出的内容不一样
+     - 由服务器端添加，添加到响应头部用,在客户端缓存机制或者是缓存服务器在做缓存操作的时候，会使用到 Vary 头
+   - 当前请求以及缓存中的响应都不包含`no-cache`头部
+   - 缓存中的响应必须是以下之一
+     - 新鲜的（时间上未过期）
+     - 缓存中的响应头部明确告知可以使用过期的响应（`Cache-Control: max-stale=60`）
+     - 使用条件请求去服务器端验证请求是否过期，得到 304 响应
+8. 验证请求与响应
+   - 验证请求
+     - 若缓存中含有`Last-Modifiled`头部
+       - `if-Unmodified-Since`, 如果文件被修改: 则不传输, 服务器返回: 412 Precondition failed (预处理错误)
+       - `if-Modified-Since`
+       - `if-Range`
+     - 若缓存响应中含有`Etag`头部
+       - `if-None-Match`
+       - `if-Match`
+       - `if-Range`
