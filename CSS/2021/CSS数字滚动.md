@@ -30,7 +30,7 @@
 .item-0 {
   /* 使用rotateX和translateZ摆成1个圆 */
   /* 圆角为36deg的十边形 */
-  /* translateZ的值需大于 20px/sin36 */
+  /* translateZ的值需大于 20px/sin36，起空间效果 */
   transform: rotateX(36deg) translateZ(34px);
 }
 .item-1 {
