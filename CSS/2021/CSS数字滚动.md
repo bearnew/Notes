@@ -30,35 +30,35 @@
 .item-0 {
   /* 使用rotateX和translateZ摆成1个圆 */
   /* 圆角为36deg的十边形 */
-  /* translateZ的值需大于 20px/sin36，起空间效果 */
-  transform: rotateX(36deg) translateZ(34px);
+  /* translateZ的值需大于 (20px/sin36)*(sin72)=32px，起空间效果 */
+  transform: rotateX(36deg) translateZ(32px);
 }
 .item-1 {
-  transform: rotateX(72deg) translateZ(34px);
+  transform: rotateX(72deg) translateZ(32px);
 }
 .item-2 {
-  transform: rotateX(108deg) translateZ(34px);
+  transform: rotateX(108deg) translateZ(32px);
 }
 .item-3 {
-  transform: rotateX(144deg) translateZ(34px);
+  transform: rotateX(144deg) translateZ(32px);
 }
 .item-4 {
-  transform: rotateX(180deg) translateZ(34px);
+  transform: rotateX(180deg) translateZ(32px);
 }
 .item-5 {
-  transform: rotateX(216deg) translateZ(34px);
+  transform: rotateX(216deg) translateZ(32px);
 }
 .item-6 {
-  transform: rotateX(252deg) translateZ(34px);
+  transform: rotateX(252deg) translateZ(32px);
 }
 .item-7 {
-  transform: rotateX(288deg) translateZ(34px);
+  transform: rotateX(288deg) translateZ(32px);
 }
 .item-8 {
-  transform: rotateX(324deg) translateZ(34px);
+  transform: rotateX(324deg) translateZ(32px);
 }
 .item-9 {
-  transform: rotateX(360deg) translateZ(34px);
+  transform: rotateX(360deg) translateZ(32px);
 }
 ```
 
