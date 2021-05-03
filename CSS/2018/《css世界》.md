@@ -961,4 +961,170 @@ p {
 - right: 右侧抗浮动
 - both: 两侧抗浮动
 
-2.
+### 27.BFC
+
+1. 一个元素具有 BFC, 内部元素再怎么变化，都不会影响外部元素，因此 BFC 不会触发`margin`重叠，也可以用来清除浮动
+2. 触发 BFC
+   1. html 根元素
+   2. float 属性不为 none
+   3. position 为 absolute 或 fixed
+   4. display 为 inline-block tabbel-cell table-caption flex inline-flex\
+   5. overflow 不为 visible, 为 auto, scroll, hidden
+3. BFC 主要用于实现健壮、智能的自适应布局
+
+```css
+.father {
+  width: 200px;
+}
+img {
+  float: left;
+  width: 100px;
+  height: 100px;
+  margin-left: 10px;
+  padding-right: 10px;
+  border-right: 10px solid transparent;
+}
+p {
+  overflow: hidden;
+  padding-left: 10px;
+  border-left: 10px solid transparent;
+}
+```
+
+```html
+<div class="father">
+  <img
+    src="https://pics5.baidu.com/feed/f9198618367adab4e2feb7f7d42bdd148601e464.jpeg?token=c43840f792b113fff224c1adbbfb2282"
+  />
+  <p>
+    上课的开发将军澳隧道进口法拉士大夫艰苦ask到付即可拉开距离速度加快立法就流口水
+  </p>
+</div>
+```
+
+### 28.overflow
+
+1. `overflow-x`和`overflow-y`属性中一个值设置为`visible`另一个设置成`scroll auto hidden`,则`visible`的样式表现为`auto`
+2. 除非`overflow-x`和`overflow-y`的属性值都是`visible`，否则`visible`会被当成`auto`解析
+3. 永远不可能实现 1 个方向溢出裁剪或滚动，另一个方向溢出显示
+
+```css
+html {
+  overflow-x: hidden;
+  /* 多余 */
+  overflow-y: auto;
+}
+```
+
+4. 浏览器默认滚动条都来自<html>
+5. 去除页面默认滚动条
+
+```css
+html {
+  overflow: hidden;
+}
+```
+
+6. 在 PC 端窗体滚动高度可用`document.documentElement.scrollTop`获取，在移动端，可能要使用`document.body.scrollTop`获取
+7. 滚动条会占用容器的可用宽度或高度
+8. 滚动条的样式
+
+- 整体部分：`::-webkit-scrollbar`
+- 两端按钮：`::-webkit-scrollbar-button`
+- 外层轨道：`::-webkit-scrollbar-track`
+- 内层轨道: `::-webkit-scrollbar-track-piece`
+- 滚动滑块: `::-webkit-scrollbar-thumb`
+- 边角: `::-webkit-scrollbar-corner`
+
+9. 最多显示 2 行
+
+```css
+.ell-row-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+```
+
+10. 锚点定位
+1. 利用 name 定位
+
+```html
+<a href="#1">发展历程</a> <a name="1"></a>
+```
+
+2. 利用标签的 id 定位
+
+```html
+<a href="#1">发展历程</a>
+<h2 id="1">发展历程内容</h2>
+```
+
+11. 返回顶部
+
+```html
+<!-- 推荐 -->
+<a href="#">返回顶部</a>
+<!-- 不推荐 -->
+<a href="javascript:">返回顶部</a>
+```
+
+12. focus 锚点定位
+
+- url 锚点定位时让元素定位在浏览器窗体的的上边缘
+- focus 锚点定位让元素在窗体范围内显示即可
+
+```js
+document.querySelector("input").focus();
+```
+
+13. 利用锚点实现 tab 切换
+
+```css
+.box {
+  width: 20em;
+  height: 10em;
+  border: 1px solid #ddd;
+  overflow: hidden;
+}
+.list {
+  line-height: 10em;
+  background: #ddd;
+  text-align: center;
+}
+.list > input {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 1px;
+  border: 0;
+  clip: rect(0 0 0 0);
+}
+```
+
+```html
+<div class="box">
+  <div class="list" id="one">1</div>
+  <div class="list" id="two">2</div>
+  <div class="list" id="three">3</div>
+  <div class="list" id="four">4</div>
+</div>
+<div class="link">
+  <a class="click" href="#one">1</a>
+  <a class="click" href="#two">2</a>
+  <a class="click" href="#three">3</a>
+  <a class="click" href="#four">4</a>
+</div>
+```
+
+### 28.absolute
+
+1. absolute 与 float 同时存在时，float 属性没有效果
+2. span 元素是 inline，一旦设置成`position: absolute`,`display`计算值就变成了`block`
+3. width: 50%指的相对包含块宽度的一半
+4. 包含块
+   1. 根元素 html 是初始包含块，尺寸等于浏览器可视窗口的大小
+   2. 元素的 position 是`relative`或者`static`，包含块由其最近的块容器的祖先盒的`content box`边界形成
+   3. `position: fixed`则包含块是初始包含快 html
+   4. 元素 position: absolute 由最近的`position`不为`static`的祖先元素建立，如果没有，则为初始包含块
+5.

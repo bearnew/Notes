@@ -8,24 +8,39 @@
     />
     <title>test</title>
     <style>
-      .prev {
-       float: left;
+      .box {
+          width: 20em;
+          height: 10em;
+          border: 1px solid #ddd;
+          overflow: hidden;
       }
-      .next {
-        float: right;
+      .list {
+          line-height: 10em;
+          background: #ddd;
+          text-align: center;
       }
-      .title {
-        margin: 0 70px;
-        text-align: center;
+      .list>input {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: 1px;
+        border: 0;
+        clip: rect(0 0 0 0);
       }
     </style>
   </head>
-
   <body>
-    <div class="father">
-      <a class="prev">上一章</a>
-      <a class="next">下一章</a>
-      <h3 class="title">动物世界</h3>
+    <div class="box">
+      <div class="list" id="one">1</div>
+      <div class="list" id="two">2</div>
+      <div class="list" id="three">3</div>
+      <div class="list" id="four">4</div>
+    </div>
+    <div class="link">
+        <a class="click" href="#one">1</a>
+        <a class="click" href="#two">2</a>
+        <a class="click" href="#three">3</a>
+        <a class="click" href="#four">4</a>
     </div>
     <!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
