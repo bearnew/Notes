@@ -23,7 +23,9 @@
           return;
       }
 
+      console.log('aaaaaaa', row)
       for (let col = 0; col < n; col++) {
+          console.log('bbbbbb', col)
           if (!cols.has(col) && !diag1.has(row + col) && !diag2.has(row - col)) {
 
               board[row][col] = 'Q';
@@ -34,6 +36,7 @@
               // 执行2，行3，行4
               helper(row + 1);
 
+              console.log('ccccccccc')
               // 行4执行完会
               board[row][col] = '.';  // 撤销该点的皇后
               cols.delete(col);       // 对应的记录也删一下

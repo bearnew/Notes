@@ -731,6 +731,9 @@ label {
    }
    ```
    - `span`元素前会存在幽灵空白节点，`box`设置`line-height: 96px`，幽灵空白节点的高度为`96px`，设置`span`的`line-height: 96px`，`span`的高度则变成了`96px`，行框盒子的高度由高度最高的那个内联盒子决定，因此`box`的高度永远是最大的那个`line-height`
+
+### 24.vertical-align
+
 7. `line-height`的好朋友`vertical-align`
 
    1. `vertical-align`的值
@@ -856,4 +859,106 @@ label {
    - `vertical-align: text-top/text-bottom`盒子的顶部与父级内容顶部/底部对齐（与父级元素的`font-size`有关）
    - `vertical-align: super/sub`提高盒子的基线到父级上标（`<sup></sup>`）/下标(`<sub></sub>`)位置
 
-10.
+10. 基于`vertical-align`实现水平垂直居中弹窗
+
+```css
+.container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+  text-align: center;
+  font-size: 0;
+  white-space: nowrap;
+  overflow: auto;
+}
+.container::after {
+  content: "";
+  display: inline-block;
+  /* 设置height: 90%灵活控制垂直居中的比例 */
+  height: 100%;
+  vertical-align: middle;
+}
+.dialog {
+  display: inline-block;
+  vertical-align: middle;
+  text-align: left;
+  font-size: 14px;
+  white-space: nowrap;
+}
+```
+
+```html
+<div class="container">
+  <div class="dialog"></div>
+</div>
+```
+
+### 25.float
+
+1. float 属性不为`none`,display 计算值就是`block`或者`table`(通过`window.getComputedStyle(span).display`获取)
+2. `inline-table`计算值会转换成`table`, 其余会转换成`block`
+3. 行框盒子（内联元素）和浮动元素不会重叠
+4. `float`的 2 栏布局
+
+```css
+.father {
+  overflow: hidden;
+}
+.father img {
+  width: 60px;
+  height: 60px;
+  float: left;
+}
+p {
+  margin-left: 60px;
+}
+```
+
+```html
+<div class="father">
+  <img
+    src="https://dss0.baidu.com/6ONWsjip0QIZ8tyhnq/it/u=282157823,3788160238&fm=55&app=54&f=JPEG?w=1140&h=640"
+  />
+  <p>
+    上空的飞机阿贾克斯的flak圣诞节分厘卡即使刷卡大家flak时间的浪费凯撒的接口飞机喀什的肌肤
+  </p>
+</div>
+```
+
+5. `float`多栏布局
+
+```css
+.prev {
+  float: left;
+}
+.next {
+  float: right;
+}
+.title {
+  margin: 0 70px;
+  text-align: center;
+}
+```
+
+```html
+<div class="father">
+  <a class="prev">上一章</a>
+  <a class="next">下一章</a>
+  <h3 class="title">动物世界</h3>
+</div>
+```
+
+### 26.clear
+
+1. 让自身不能与前面的浮动元素相邻
+2. clear
+
+- none: 默认值，左右浮动来就来
+- left: 左侧抗浮动
+- right: 右侧抗浮动
+- both: 两侧抗浮动
+
+2.
