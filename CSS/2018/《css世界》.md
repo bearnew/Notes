@@ -275,7 +275,7 @@ img:after {
 }
 .inner::before {
   content: counter(wangxiaoer); // 14
-  counter-increment: wangxiaoer;
+  counter-increment: wangxiaoer;14counter-increment14counter-increment14counter-increment
 }
 ```
 
@@ -1127,4 +1127,4 @@ document.querySelector("input").focus();
    2. 元素的 position 是`relative`或者`static`，包含块由其最近的块容器的祖先盒的`content box`边界形成
    3. `position: fixed`则包含块是初始包含快 html
    4. 元素 position: absolute 由最近的`position`不为`static`的祖先元素建立，如果没有，则为初始包含块
-5.
+5. 不设置`top left right bottom`的`absolute`，与`relative`是一样的效果，但是不占据尺寸空间
