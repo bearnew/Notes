@@ -274,8 +274,9 @@ img:after {
   counter-increment: wangxiaoer;
 }
 .inner::before {
-  content: counter(wangxiaoer); // 14
-  counter-increment: wangxiaoer;14counter-increment14counter-increment14counter-increment
+  /* 14 */
+  content: counter(wangxiaoer);
+  counter-increment: wangxiaoer;
 }
 ```
 
@@ -1128,3 +1129,41 @@ document.querySelector("input").focus();
    3. `position: fixed`则包含块是初始包含快 html
    4. 元素 position: absolute 由最近的`position`不为`static`的祖先元素建立，如果没有，则为初始包含块
 5. 不设置`top left right bottom`的`absolute`，与`relative`是一样的效果，但是不占据尺寸空间
+6. absolute 和 text-align
+
+- img 是内联元素，p 标签中会有 👻 幽灵空白节点
+- 幽灵空白节点会居中显示，img 会挨着幽灵空白节点在 p 标签的中间显示
+
+```css
+p {
+  text-align: center;
+}
+img {
+  position: absolute;
+}
+```
+
+```html
+<p><img src="test.png" /></p>
+```
+
+7. `overflow`不是定位元素，同时绝对定位元素和`overflow`容器之间也没有定位元素，则`overflow`无法对`absolute`元素进行裁剪
+8. `clip`的元素必须是`absolute`或者`fixed`，属性才会起作用
+
+```css
+.test {
+  clip: rect(top, right, bottom, left);
+}
+```
+
+9. 可访问性隐藏
+
+```css
+.clip {
+  position: absolute;
+  /* 整块裁剪 */
+  clip: rect(0, 0, 0, 0);
+}
+```
+
+10.clip 是视觉上的隐藏，不会影响元素尺寸
