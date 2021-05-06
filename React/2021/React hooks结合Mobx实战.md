@@ -70,3 +70,81 @@ function AppWithMobx() {
 }
 
 ```
+
+## 3.react hooks 結合 mobx 的用法
+
+1. 直接使用`observer`
+
+```js
+const ArticleMeta = observer((props: any) => {
+  const article = props.article;
+  return <div className="article-meta">{article}</div>;
+});
+
+export default ArticleMeta;
+```
+
+2. 使用`useObserver`和`useLocalStore`
+
+```tsx
+// 子store
+class ArticleStore {}
+export default new ArticleStore();
+```
+
+```tsx
+// store
+import React from "react";
+import { useLocalStore } from "mobx-react-lite";
+
+const rootStore: RootStore = {
+  articleStore,
+  userStore,
+};
+
+const storeContext = React.createContext<RootStore | null>(null);
+
+export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
+  const store = useLocalStore(() => rootStore);
+  return (
+    <storeContext.Provider value={store}>{children}</storeContext.Provider>
+  );
+};
+
+export const useStore = () => {
+  const store = React.useContext(storeContext);
+  if (!store) {
+    // this is especially useful in TypeScript so you don't need to be checking for null all the time
+    throw new Error("useStore must be used within a StoreProvider.");
+  }
+  return store;
+};
+```
+
+```tsx
+// app
+ReactDOM.render(
+  <StoreProvider>
+    <App />
+  </StoreProvider>,
+  document.getElementById("root")
+);
+```
+
+```tsx
+// component
+interface IProps {
+	id: number;
+}
+
+const Article: React.FC<IProps> = (props) => {
+  const history = useHistory();
+  const {  userStore } = useStore();
+
+  return useObserver(() => {
+	  const { currentUser } = userStore;
+	  return (
+		  <div>{currentUser}</div>
+	  )
+  })
+```
