@@ -1166,4 +1166,15 @@ img {
 }
 ```
 
-10.clip 是视觉上的隐藏，不会影响元素尺寸
+10. clip 是视觉上的隐藏，不会影响元素尺寸
+11. `absolute`遇到`left/top/right/bottom`才会变成真正的绝对定位元素
+
+```css
+/* 水平方向绝对定位，垂直方向相对定位 */
+.box {
+  position: absolute;
+  left: 0;
+}
+```
+
+12.
