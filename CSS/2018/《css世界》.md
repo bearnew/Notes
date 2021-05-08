@@ -1177,4 +1177,157 @@ img {
 }
 ```
 
-12.
+12. `absolute`流体特性
+
+    1. 对立方向同时发生定位就会触发流体特性
+    2. `left`和`right`属于水平对立定位方向，`top`和`bottom`属于垂直对立定位的方向
+    3. 流体特性的元素宽高会自适应
+
+    ```css
+    <!-- 相对HTML定位，则宽度为100%-60px -- > .box {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      padding: 30px;
+    }
+    <!-- 宽度为100% + 60px -- > .box2 {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      padding: 30px;
+    }
+    ```
+
+    ```css
+    <!-- 上下左右留白30px -- > .box {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      margin: 30px;
+    }
+    <!-- 超出窗体 -- > .box2 {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      margin: 30px;
+    }
+    ```
+
+13. 利用流体特性居中元素
+
+```css
+.box {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+}
+```
+
+### 29.relative
+
+1. relative 的元素定位位移是相对于自身的，百分比的值根据包含块的高度来定，包含块的高度为`auto`，计算值就是 0
+2. `relative`的元素，`top`和`bottom`同时使用`bottom`被干掉，`left`和`right`同时使用`right`毙命
+
+```css
+.example {
+  position: relative;
+  top: 10px;
+  right: 10px; /* 无效 */
+  bottom: 10px; /* 无效 */
+  left: 10px;
+}
+```
+
+3. 普通元素变成`relative`元素，层叠顺序会提高
+
+### 30.fixed
+
+1. `position: fixed`的包含块是根元素
+2. 无依赖固定定位，没有设置`top/left/bottom/right`
+
+```html
+<div class="father">
+  <div class="right">
+    <div class="son"></div>
+  </div>
+</div>
+```
+
+```css
+.father {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+.right {
+  height: 0;
+  text-align: right;
+  overflow: hidden;
+}
+.son {
+  display: inline;
+  width: 40px;
+  height: 40px;
+  position: fixed;
+  margin-left: -40px;
+}
+```
+
+4. `absolute`模拟`fixed`
+
+```html
+<html>
+  <body>
+    <div class="page">固定定位元素</div>
+    <div class="fixed"></div>
+  </body>
+</html>
+```
+
+```css
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+.page {
+  height: 100%;
+  overflow: auto;
+}
+.fixed {
+  position: absolute;
+}
+```
+
+5. `position: fixed`蒙层出现背景滚动，是因为滚动元素是根元素，如果希望背景被锁定，可以使用`absolute`模拟`fixed`，让页面滚动条由内部普通元素产生
+6. 使用`border`隐藏滚动条
+
+```js
+var widthBar = 17,
+  root = document.documentElement;
+if (typeof window.innerWidth === "number") {
+  widthBar = window.innerWidth - root.clientWidth;
+}
+root.style.overflow = "hidden";
+root.style.borderRight = widthBar + "px solid transparent";
+```
+
+```js
+// 隐藏
+var root = document.documentElement;
+root.style.overflow = "";
+root.style.borderRight = "";
+```

@@ -8,25 +8,23 @@
     />
     <title>test</title>
     <style>
-      .box {
-        position: relative;
-        width: 200px;
-        height: 200px;
-        padding: 10px;
-        background: #cdcdcd;
-      }
-      .tag {
-        position: absolute;
-        top: 0;
-        right: 0;
-      }
+      html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+.page {
+  height: 100%;
+  overflow: auto;
+}
+.fixed {
+  position: absolute;
+}
     </style>
   </head>
   <body>
-    <div class="box">
-      索科洛夫开即可撒拉拉的看法
-      <div class="tag">标签</div>
-    </div>
+    <div class="page">固定定位元素</div>
+    <div class="fixed"></div>
     <!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
 	<script crossorigin src="https://cdn.bootcss.com/babel-standalone/6.10.3/babel.min.js"></script>
