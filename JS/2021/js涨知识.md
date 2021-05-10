@@ -239,3 +239,71 @@ function omit(obj, key) {
 let map = new Map([["a", 1]]);
 map.delete("a");
 ```
+
+## 13.Proxy 不支持的判断
+
+```js
+// proxy不支持的浏览器
+
+// Uncaught ReferenceError: Poxy is not defined
+const isSupport = typeof Proxy === "function";
+
+// false
+const isSupport = typeof window.Proxy === "function";
+```
+
+## 14. promise await 中的变量
+
+```js
+var obj = {
+  a: 1,
+  add: function () {
+    return new Promise((resolve) => {
+      this.a = this.a + 1;
+      resolve(this.a);
+    });
+  },
+  log: async () => {
+    const { a } = obj;
+    console.log("11111", a);
+
+    obj.add().then(() => {
+      console.log("22222", a); // 1
+      console.log("44444", obj.a); // 3
+    });
+
+    await obj.add();
+    console.log("33333", a); // 1
+    console.log("55555", obj.a); // 3
+  },
+};
+
+obj.log();
+```
+
+```js
+var obj = {
+  a: 1,
+  add: function () {
+    return new Promise((resolve) => {
+      this.a = this.a + 1;
+      resolve(this.a);
+    });
+  },
+  log: async () => {
+    const { a } = obj;
+    console.log("11111", a);
+
+    await obj.add();
+    console.log("33333", a); // 1
+    console.log("55555", obj.a); // 2
+
+    obj.add().then(() => {
+      console.log("22222", a); // 1
+      console.log("44444", obj.a); // 3
+    });
+  },
+};
+
+obj.log();
+```
