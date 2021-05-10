@@ -1331,3 +1331,8 @@ var root = document.documentElement;
 root.style.overflow = "";
 root.style.borderRight = "";
 ```
+
+### 31.z-index
+
+1. `z-index`属性只有与`position`不为`static`的元素在一起才有作用
+2. `flex`元素的子元素设置`z-index`也有效
