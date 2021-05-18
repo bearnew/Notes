@@ -31,3 +31,20 @@ function a() {
 
 a();
 ```
+
+3. 使用`throw error`
+
+```js
+function test() {
+  try {
+    throw new Error();
+  } catch (e) {
+    console.log(e);
+    const reg = /(\w+)@|at\s(\w+)/g;
+    const stack = e.stack;
+    const m = stack.match(reg);
+
+    console.log(m.join(","));
+  }
+}
+```
