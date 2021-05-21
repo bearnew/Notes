@@ -38,4 +38,72 @@ let x: ReturnType<typeof fn> = 0;
 x = fn(1, 2);
 ```
 
-4.
+4. 字面量类型
+
+```ts
+// n1 n2为联合类型
+// type为字面量类型
+function add(
+  n1: number | string,
+  n2: number | string,
+  type: "number" | "string"
+) {
+  if (type === "string") {
+    return String(n1) + String(n2);
+  } else {
+    return Number(n1) + Number(n2);
+  }
+}
+```
+
+5. `unknow` 的使用
+
+```ts
+function test(x: unknow) {
+  if (typeof x === "function") {
+    x();
+  }
+  if (typeof x === "string") {
+    x.toUpperCase();
+  }
+}
+```
+
+6. `void`,`undefined`,`never`
+
+```ts
+// 默认是void
+function test1() {
+  console.log("test1");
+}
+
+// 函数返回类型undefined，则必须return
+function test2(): undefined {
+  console.log("test2");
+  return;
+}
+
+// never表示函数永远执行不完成
+function throwError(message: string, errorCode: number): never {
+  throw { message, errorCode };
+}
+throwError("not found", 404);
+
+function whileLoop(): never {
+  while (true) {
+    console.log("continue");
+  }
+}
+```
+
+7. 类型适配
+
+```ts
+let message: any;
+message = "abc";
+
+let x = (<string>message).endsWith("c");
+let y = (message as string).endsWith("c");
+```
+
+8.
