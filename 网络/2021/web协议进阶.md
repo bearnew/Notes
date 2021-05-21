@@ -526,4 +526,45 @@
    - 流量缓冲：解决速度不匹配的问题
    - 可靠的传输服务：保证可达、丢包时通过重发进而增加时延实现可靠性
    - 拥塞控制
-8.
+
+## 35.TCP 协议的任务
+
+1. 主机内的进程寻址
+2. 创建、管理、终止连接
+3. 处理并将字节（8bit）流打包成报文段（如 IP 报文）
+4. 传输数据
+5. 保持可靠性与传输质量
+6. 流控制与拥塞控制
+
+## 36.使用 tcpdump 抓取 TCP 报文
+
+- 使用`netstat`命令查看网络状态
+
+## 37.三次握手建立连接
+
+1. 3 次握手的目标
+   - 同步`Sequence`序列号
+     - 初始序列号 ISN
+   - 交换 TCP 通讯参数
+     - 如 MSS、窗口比例因子、选择性确认、指定校验与算法
+2. 3 次握手
+   - `client`发送`SYN`同步帧给`server`，
+   - `server`发送`SYN/ACK`给`client`
+   - `client`回复`ACK`确认包给`server`
+3. 3 次握手状态
+   1. client 和 server 都处于`CLOSED`状态
+   2. 服务建立连接时，server 处于`LISTEN`状态
+   3. `client`发送`SYN`后，client 处于`SYN-SENT`状态
+   4. `server`收到`SYN`后，server 处于`SYN-RECEIVED`状态
+   5. `client`收到`SYN/ACK`后处于`ESTABLISHED`状态，`server`收到`ACK`后处于`ESTABLISHED`状态
+4. 3 次握手优化
+   1. 使用`Fast Open`降低时延
+      - `server`发送`SYN/ACK`给`client`时带上`cookie`，`client`第 2 次请求时带上`cookie`，`server`回给客户端`SYN/ACK`包和数据 DATA。从而减少了第 3 次握手，第 2 次握手时直接发回了数据。
+5. 应对 SYN 攻击
+   1. 攻击者短时间内伪造不同 IP 地址的 SYN 报文，快速占满 backlog 队列，使服务器不能为正常用户维护
+   2. 控制队列的大小来应对攻击
+   3. `tcp_syncookies`
+      - 当`SYN`队列满后，新的`SYN`不进入队列，计算出`cookie`再以`SYN+ACK`中的序列号返回客户端，正常客户端发报文时，服务器根据报文中携带的`cookie`重新恢复连接
+   4. `TCP_DEFER_ACCEPT`
+      - 服务器收到 tcp 连接时不处理，放到队列中，等收到报文时再处理，使应用程序效率更高
+6.
