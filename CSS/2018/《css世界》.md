@@ -1336,3 +1336,39 @@ root.style.borderRight = "";
 
 1. `z-index`属性只有与`position`不为`static`的元素在一起才有作用
 2. `flex`元素的子元素设置`z-index`也有效
+
+### 32.层叠上下文
+
+1. css 层叠顺序
+
+- ![层叠顺序](https://github.com/bearnew/picture/blob/master/markdown_v2/2021/css%E4%B8%96%E7%95%8C/zIndexStack.PNG?raw=true)
+- `inline`包括`inline/inline-block/inline-table`元素的层叠顺序
+- 从层叠水平上看，`z-index:0`和`z-index:auto`是一致的
+- 内容元素（内联元素）的层叠是高于布局元素（浮动和块状元素）
+
+2. 层叠上下文的特性
+
+- 层叠上下文的层叠水平要比普通元素高
+- 层叠上下文可以阻断元素的混合模式
+- 层叠上下文可以嵌套，内部层叠上下文及其所有子元素均受制于外部的层叠上下文
+- 每个层叠上下文和兄弟元素独立，也就是说，层叠变化或者渲染时，只需要考虑后代元素
+- 元素发生层叠的时候，整个元素被认为是在父层叠上下文的层叠顺序中
+
+3. 层叠上下文的创建
+
+   1. 根层叠上下文
+      - 页面根元素，html 元素，因此页面中所有的元素一定处于至少一个层叠结界中
+   2. 定位元素与传统层叠上下文
+      - 当`position`值为`relative/absolute`以及`Firebox/IE`浏览器下含有`position: fixed`声明的定位元素，当`z-index`不是`auto`时，会创建层叠上下文
+   3. 父级元素没有创建层叠上下文，子元素的层叠比较就不会受父级影响，父元素创建了层叠上下文，子元素的层叠上下文只在父元素的内部作用
+
+4. css3 的层叠上下文
+   - 元素为`flex`的布局元素，同时`z-index`不为`auto`
+   - 元素`opacity`不为 1
+   - 元素`transform`值不为`none`
+   - 元素`mix-blend-mode`的值不是`normal`
+   - 元素`filter`的值不是`none`
+   - 元素`isolation`的值是`isolate`
+   - 元素`will-change`是上面 2-6 中的值
+   - 元素`-webkit-overflow-scrolling`值为`touch`
+5.
