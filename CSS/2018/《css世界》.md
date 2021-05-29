@@ -1371,4 +1371,58 @@ root.style.borderRight = "";
    - 元素`isolation`的值是`isolate`
    - 元素`will-change`是上面 2-6 中的值
    - 元素`-webkit-overflow-scrolling`值为`touch`
-5.
+5. `z-index`为负值的元素在层叠上下文元素的上面，`block`元素的下面
+6. 尽量不使用`z-index`元素，元素一旦设置了`z-index`，就从普通定位元素变成了层叠上下文元素，层叠顺序就会发生变化
+
+### 33.vertical-align 文字居中
+
+```css
+p {
+  display: inline-block;
+  font-size: 40px;
+  line-height: 1.5;
+}
+img {
+  /* 相当于40px * 1.5 * 25% = 15px */
+  vertical-align: 25%;
+  vertical-align: 15px;
+  width: 16px;
+  height: 16px;
+  position: relative;
+  top: 8px;
+}
+```
+
+```html
+<p>文字x<img src="https://himg.bdimg.com/sys/portraitn/item/10aeae46" /></p>
+```
+
+### 34.ex,em
+
+1. ex 是字符 x 的高度
+2. 1em 的计算值等同于当前元素所在的`font-size`计算值
+
+### 35.chrome 设置的字体 12px，当文字小于 12px 会被当成 12px 处理，但 font-size 为 0 会被隐藏
+
+### 36.font-family 设置的值会从左到右依次识别
+
+### 37.font-weight
+
+1. font-weight 可设置的值
+
+- `normal`
+- `bold`
+- `lighter`, 相对于父元素
+- `bolder`，相对于父元素
+- 100-900
+
+### 38.font-style
+
+- normal,正常
+- italic,使用当前字体的斜体字体
+- oblique,单纯的让文字倾斜
+
+### 39.font-variant
+
+- normal
+- small-caps，让英文字符表现成小体型大写字母

@@ -8,23 +8,25 @@
     />
     <title>test</title>
     <style>
-      html,
-body {
-  height: 100%;
-  overflow: hidden;
-}
-.page {
-  height: 100%;
-  overflow: auto;
-}
-.fixed {
-  position: absolute;
-}
+      p {
+        display: inline-block;
+        font-size: 40px;
+        line-height: 1.5;
+      }
+      img {
+        vertical-align: 25%;
+        width: 16px;
+        height: 16px;
+        position: relative;
+        top: 8px;
+      }
     </style>
   </head>
   <body>
-    <div class="page">固定定位元素</div>
-    <div class="fixed"></div>
+    <div class="page">
+      <p>文字x<img src="https://himg.bdimg.com/sys/portraitn/item/10aeae46" /></p>
+      
+    </div>
     <!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
 	<script crossorigin src="https://cdn.bootcss.com/babel-standalone/6.10.3/babel.min.js"></script>
