@@ -1426,3 +1426,77 @@ img {
 
 - normal
 - small-caps，让英文字符表现成小体型大写字母
+
+### 40.font-face
+
+1. `example`
+
+```css
+@font-face {
+  font-family: "example";
+  src: url(example.ttf);
+  font-style: normal;
+  font-weight: normal;
+  unicode-range: U+0025-00FF;
+}
+```
+
+2. font-family，字体变量
+3. src
+
+- src 引入系统安装字体，使用`local()`功能符，使用外链字体，使用`url()`功能符
+- 字体格式：
+  - `.eof`，所有的 ie 浏览器都支持
+  - `.woff`，`web open font format`，优先使用的字体格式，字体尺寸更小，加载更快
+  - `.woff2`，比`woff`尺寸更小的字体，目前仅`chrome`和`firefox`支持较好
+  - `.ttf`，作为系统安装字体比较多，尺寸较大，能兼容老版本`Android`(Android4.3 之前的版本)
+  - `.svg`，可以兼容 ios4.1 以及之前的版本
+- `format()`功能符提前让浏览器知道字体格式
+- 最佳实践
+
+```css
+@font-face {
+  font-family: ICON;
+  src: url("icon.eot");
+  src: local("😊"), url("icon.woff2") format("woff2"), url("icon.woff") format("woff"),
+    url("icon.ttf");
+}
+```
+
+4. 使用`iconfont.cn`来生成字体图标
+5. 使用`iconfont`的 2 种方式
+
+- css
+
+```css
+.icon-microphone:before {
+  content: "\1f3a4";
+}
+```
+
+- html
+
+```html
+<i class="icon">&#x1f3a4</i>
+```
+
+### 41.text-indent
+
+1. 隐藏用于 SEO 的内容
+
+```css
+.logo {
+  width: 120px;
+  background: url(logo.png);
+  text-indent: -120px;
+}
+```
+
+```html
+<h1 class="logo">css世界</h1>
+```
+
+2. `text-indent`仅对第一行内联盒子内容有效
+3. 非替换元素以外的`display`计算值为`inline`的内联元素设置`text-indent`值无效，计算值是`inline-block/inline-table`则会生效。父级块状元素设置`text-indent`属性值，子`inline-block/inline-table`需要设置`text-indent: 0`重置。
+4. `<input>`标签按钮`text-indent`值无效
+5. `<button>`标签按钮`text-indent`值有效
