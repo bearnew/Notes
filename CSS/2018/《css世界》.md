@@ -1500,3 +1500,93 @@ img {
 3. 非替换元素以外的`display`计算值为`inline`的内联元素设置`text-indent`值无效，计算值是`inline-block/inline-table`则会生效。父级块状元素设置`text-indent`属性值，子`inline-block/inline-table`需要设置`text-indent: 0`重置。
 4. `<input>`标签按钮`text-indent`值无效
 5. `<button>`标签按钮`text-indent`值有效
+
+### 42.letter-spacing
+
+1. 继承性
+2. 默认值是`normal`而不是 0，正常情况的`normal`是 0，某些场景下`normal`的值会被调整
+3. 支持负值，负值足够大，文字会反向排列
+4. 无论值如何设置，第一个字符的值不会变化
+5. 支持小数点，不支持百分比
+6. 实现文本动效
+
+```css
+.title {
+  width: 8em;
+  margin: auto;
+  white-space: nowrap;
+  animation: textIn 1s both;
+}
+@keyframes textIn {
+  0% {
+    opacity: 0;
+    letter-spacing: -200px;
+  }
+  60% {
+    letter-spacing: 5px;
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: 0;
+  }
+}
+```
+
+```html
+<div class="title">我是标题内容测试letter-spacing</div>
+```
+
+### 43.word-spacing
+
+- 与`letter-spacing`相似，不过只作用于空白字符
+
+### 44.word-break
+
+- normal: 使用默认的换行规则
+- break-all: 允许任意非 CJK(chinese/Japanese/Korean)文本间的单词断行
+- keep-all: 不允许 CJK 文本中的单词换行，只能在半角字符或连字符处换行
+
+### 45.word-wrap
+
+- normal: 正常的换行
+- break-wrap: `word-break: break-all`是所有的都换行，`word-wrap:break-word`优先换行空格或 CJK 之类的，再换行单词或字符，尽量保证单词不被截断，但也会造成空白区域
+
+```css
+p {
+  width: 300px;
+  padding: 5px;
+  background-color: #f0f3f9;
+  font-size: 14px;
+}
+.word-break {
+  word-break: break-all;
+}
+.word-wrap {
+  word-wrap: break-word;
+}
+```
+
+```html
+<strong>word-break:break-all</strong>
+<p class="word-break">
+  如果您在阅读过程中有任何疑问或者发现表述不严谨的地方，欢迎去官方论坛http://bbs.cssworld.cn进行反馈与交流。
+</p>
+<strong>word-wrap: break-word;</strong>
+<p class="word-wrap">
+  如果您在阅读过程中有任何疑问或者发现表述不严谨的地方，欢迎去官方论坛http://bbs.cssworld.cn进行反馈与交流。
+</p>
+```
+
+### 46.white-space
+
+| 属性     | 换行 | 空格和制表 | 文本环绕 |
+| :------- | :--- | :--------- | :------- |
+| normal   | 合并 | 合并       | 环绕     |
+| nowrap   | 合并 | 合并       | 不环绕   |
+| pre      | 保留 | 保留       | 不环绕   |
+| pre-wrap | 保留 | 保留       | 环绕     |
+| pre-line | 保留 | 合并       | 环绕     |
+
+- 合并空格，会让多个空格变成 1 个
+- 合并换行，会将多个连续换行合并成 1 个
+- 文本环绕，一行文字内容超出容器宽度时，会自动从下一行开始显示

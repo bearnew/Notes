@@ -8,24 +8,30 @@
     />
     <title>test</title>
     <style>
-      p {
-        display: inline-block;
-        font-size: 40px;
-        line-height: 1.5;
-      }
-      img {
-        vertical-align: 25%;
-        width: 16px;
-        height: 16px;
-        position: relative;
-        top: 8px;
-      }
+      .title {
+  width: 8em;
+  margin: auto;
+  white-space: nowrap;
+  animation: textIn 1s both;
+}
+@keyframes textIn {
+  0% {
+    opacity: 0;
+    letter-spacing: -200px;
+  }
+  60% {
+    letter-spacing: 5px;
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: 0;
+  }
+}
     </style>
   </head>
   <body>
     <div class="page">
-      <p>文字x<img src="https://himg.bdimg.com/sys/portraitn/item/10aeae46" /></p>
-      
+      <div class="title">我是标题内容测试letter-spacing</div>
     </div>
     <!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>
