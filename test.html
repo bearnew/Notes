@@ -8,30 +8,19 @@
     />
     <title>test</title>
     <style>
-      .title {
-  width: 8em;
-  margin: auto;
-  white-space: nowrap;
-  animation: textIn 1s both;
-}
-@keyframes textIn {
-  0% {
-    opacity: 0;
-    letter-spacing: -200px;
-  }
-  60% {
-    letter-spacing: 5px;
-  }
-  100% {
-    opacity: 1;
-    letter-spacing: 0;
-  }
-}
+      .price {
+        font-size: 14px;
+      }
+      .price::first-letter {
+        font-size: 16px;
+      }
     </style>
   </head>
   <body>
     <div class="page">
-      <div class="title">我是标题内容测试letter-spacing</div>
+      <div class="price">
+        ¥1998
+      </div>
     </div>
     <!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>
 	<script crossorigin src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"></script>

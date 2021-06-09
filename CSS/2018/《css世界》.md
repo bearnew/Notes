@@ -1590,3 +1590,54 @@ p {
 - 合并空格，会让多个空格变成 1 个
 - 合并换行，会将多个连续换行合并成 1 个
 - 文本环绕，一行文字内容超出容器宽度时，会自动从下一行开始显示
+
+### 47.text-align
+
+1. `text-align: justify`两端对齐
+2. jusfify 生效需满足一有分割点，如空格，二是要超过一行，此时非最后一行内容会两端对齐
+
+```css
+.box {
+  width: 200px;
+  padding: 10px;
+  text-align: justify;
+}
+```
+
+```html
+<div class="box">
+  我是标题内容测试letter-spacing, 我是标题内容测试letter-spacing,
+  我是标题内容测试letter-spacing
+</div>
+```
+
+### 48.text-decoration
+
+- `underline`: 下划线
+- `line-through`: 中划线
+- `overline`: 上划线
+- 可使用`boder`模拟`underline`,省略`border-color`，会使用文字的颜色作为`border`的颜色
+
+### 49.text-transform
+
+- `uppercase` 全大写
+- `lowercase` 全小写
+
+### 50.:first-letter
+
+1. `:first-letter`对`display:table`和`display:flex`无效
+2. `:first-line`第一行元素
+3. 用于简化 html 元素
+
+```css
+.price {
+  font-size: 14px;
+}
+.price::first-letter {
+  font-size: 16px;
+}
+```
+
+```html
+<div class="price">¥1998</div>
+```

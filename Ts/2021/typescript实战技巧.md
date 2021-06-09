@@ -106,4 +106,31 @@ let x = (<string>message).endsWith("c");
 let y = (message as string).endsWith("c");
 ```
 
-8.
+8. class 类
+
+```ts
+interface IPoint {
+  x: number;
+  y: number;
+  drawPoint: () => void;
+  getDistances: (p: IPoint) => number;
+}
+
+class Point implements IPoint {
+  x: number;
+  y: number;
+
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+
+  drawPoint = () => {
+    console.log(`x:${this.x},y:${this.y}`);
+  };
+
+  getDistances = (p: IPoint) => {
+    return Math.pow(p.x - this.x, 2) + Math.pow(p.y - this.y, 2);
+  };
+}
+```
