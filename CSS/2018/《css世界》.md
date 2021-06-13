@@ -1715,4 +1715,60 @@ p {
 }
 ```
 
-9.
+### 53.元素隐藏
+
+1. `script`标签隐藏, 不占空间，不会渲染，不会请求
+
+```html
+<script type="text/html">
+  <img src="test.jpg" />
+</script>
+```
+
+2. `display: none`，不占空间，不会渲染，会请求
+3. `visibility: hidden`，显隐的时候可以有`transition`淡入淡出效果
+
+- 会占用空间，会渲染，会请求
+- 设置`absolute`则不占用空间
+
+4. `clip`
+
+- 不占空间，会渲染，会请求
+
+```css
+.clip {
+  position: absolute;
+  clip: rect(0, 0, 0, 0);
+}
+```
+
+5. `z-index: -1`
+
+- 占空间，有请求，有渲染
+
+```css
+.father {
+  background: red;
+}
+.child {
+  position: relative;
+  z-index: -1;
+}
+```
+
+6. `opacity: 0`
+
+### 54.visibility
+
+1. 父元素设置了`visibility: hidden`，子元素也会隐藏，但子元素设置`visibility: visible`后子元素又会显示出来
+2. 父元素设置了`display: none`，子元素也会隐藏，子元素设置`display: none`子元素不会显示
+
+### 55.outline
+
+1. 可以像`border`一样使用
+
+```css
+.outline {
+  outline: 1px solid #000;
+}
+```
