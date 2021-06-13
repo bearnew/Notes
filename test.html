@@ -8,18 +8,29 @@
     />
     <title>test</title>
     <style>
-      .price {
-        font-size: 14px;
+      .box {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        background-image: url('https://bkimg.cdn.bcebos.com/smart/bd315c6034a85edf1d90357446540923dd54754d-bkimg-process,v_1,rw_1,rh_1,maxl_300,pad_1');
+        background-attachment: fixed;
+        overflow: hidden;
       }
-      .price::first-letter {
-        font-size: 16px;
+      .drag {
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        filter: blur(5px);
+        right: 0;
+        cursor: grab;
+        background: inherit;
       }
     </style>
   </head>
   <body>
     <div class="page">
-      <div class="price">
-        ¥1998
+      <div class="box">
+        <div class="drag"></div>
       </div>
     </div>
     <!--<script crossorigin src="https://unpkg.com/react@16.9.0/umd/react.development.js"></script>

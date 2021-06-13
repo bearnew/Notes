@@ -1641,3 +1641,78 @@ p {
 ```html
 <div class="price">¥1998</div>
 ```
+
+### 51.css color
+
+1. `color:transparent`需要 IE9 以上才支持
+2. `currentColor`也是 IE9 以上才支持
+
+```css
+.test {
+  color: red;
+  /* border: 2px solid currentColor; */
+  border: 2px solid;
+}
+```
+
+### 52.background
+
+1. 元素或者父元素设置了`display: none`和`background-image`, 图片依然会去加载
+2. img 或父元素设置了`display: none`，图片会加载
+3. `backround` 缺省了偏移关键字，则会认为是`center`, `background-position: top center;`可以写成`background-position: top`
+4. `background`支持 4 个值
+
+```css
+.test {
+  background-position: right 40px bottom 20px;
+}
+```
+
+5. `position`百分比
+
+- `positionX = (容器的宽度 - 图片的宽度) * percentX`;
+- `positionY = (容器的高度 - 图片的高度) * percentY`
+
+6. `background-attachment`
+
+- `scroll`， 默认值平常使用背景图的表现
+- `fixed`， 表示背景相对于当前文档视区定位，页面如何滚动背景图片依然纹丝不动
+- `local`, 背景将随着元素的内容滚动
+
+7. 实现图片局部打码
+
+```css
+.box {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  background-image: url("https://bkimg.cdn.bcebos.com/smart/bd315c6034a85edf1d90357446540923dd54754d-bkimg-process,v_1,rw_1,rh_1,maxl_300,pad_1");
+  background-attachment: fixed;
+  overflow: hidden;
+}
+.drag {
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  filter: blur(5px);
+  right: 0;
+  cursor: grab;
+  background: inherit;
+}
+```
+
+```html
+<div class="box">
+  <div class="drag"></div>
+</div>
+```
+
+8. 多背景
+
+```css
+.bg {
+  background: url("icon.png"), linear-gradient(to top, transparent, transparent);
+}
+```
+
+9.
