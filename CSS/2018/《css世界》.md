@@ -1772,3 +1772,71 @@ p {
   outline: 1px solid #000;
 }
 ```
+
+2. `outline`不占据任何空间
+3. `outline`实现蒙层
+
+```css
+.crop-area {
+  width: 80px;
+  height: 80px;
+  outline: 256px solid rgba(0, 0, 0, 0.5);
+  cursor: move;
+}
+```
+
+### 56.cursor
+
+- auto: 光标形状根据内容类别浏览器进行自动处理
+- default: 默认
+- none: 隐藏光标
+- `pointer`: 光标为伸出食指的手
+- `help`: 光标头上带个问好
+- `progress`: 光标上带个`loading`
+- `wait`: 系统转圈，不要使用，真的不响应，浏览器自己会处理
+- `context-menu`: 上下文菜单
+- `text`: 文字可被选中，默认文本字符或可输入的单复选框
+- `vertical-text`: 文字可以垂直居中，给垂直文字排版用
+- `crosshair`: 十字光标
+- `cell`: 单元格
+- ...还有很多
+- 自定义光标
+
+```css
+.cur-none {
+  cursor: url(transparent.cur);
+}
+```
+
+### 57.direction
+
+1. direction
+
+- `ltr`: 文本方向从左到右
+- `rtl`: 文本方向从右到左
+
+```css
+p {
+  text-align: justify;
+  direction: rtl;
+}
+```
+
+```html
+<!-- 最后1张图片右对齐 -->
+<p>
+  <img src="1.jpg" />
+  <img src="1.jpg" />
+  <img src="1.jpg" />
+</p>
+```
+
+### 58.unicode-bidi
+
+- `normal`，正常排列，如设置了`direction: rtl`，图片按钮问好加号会从右往左排列，中文、英文还是从左往右排列
+- `embed`,字符排序是独立内嵌的，不受外部影响
+- `bidi-override`，强制所有字符按`direction`设置的方向反向排列
+
+### 59.writing-mode
+
+- 改变文本的垂直方向
