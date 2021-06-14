@@ -134,3 +134,51 @@ class Point implements IPoint {
   };
 }
 ```
+
+9. 访问修饰符
+
+- `private`，只能在`class`中调用`this`使用
+- `public`，默认是`public`
+- `protect`，在派生类中可以被访问
+
+```ts
+class Person {
+  protected name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
+}
+
+class Employee extends Person {
+  private department: string;
+
+  constructor(name: string, department: string) {
+    super(name);
+    this.department = department;
+  }
+
+  public getElevatorPitch() {
+    return `Hello, my name is ${this.name} and I work in ${this.department}.`;
+  }
+}
+
+let howard = new Employee("Howard", "Sales");
+console.log(howard.getElevatorPitch());
+console.log(howard.name); // 错误
+```
+
+10. 泛型
+
+```ts
+const lastInArray = <T>(arr: T[]) => {
+  return arr[arr.length - 1];
+};
+
+const l1 = lastInArray([1, 2, 3, 4]);
+const l2 = lastInArray(["a", "b", "c", "d"]);
+
+const makeTuple = <T, Y>(x: T, y: Y) => [x, y];
+
+const v1 = makeTuple(1, "one");
+const v2 = makeTuple<boolean, number>(true, 1);
+```
