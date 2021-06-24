@@ -965,7 +965,7 @@ p {
 ### 27.BFC
 
 1. 一个元素具有 BFC, 内部元素再怎么变化，都不会影响外部元素，因此 BFC 不会触发`margin`重叠，也可以用来清除浮动
-2. 触发 BFC
+2. 触发 BFC（在元素外层包 1 层 div 使用以下属性）
    1. html 根元素
    2. float 属性不为 none
    3. position 为 absolute 或 fixed
