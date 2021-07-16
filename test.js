@@ -1,26 +1,5 @@
-function test() {
-    var stack = [],
-    caller = arguments.callee.caller;
-
-    while (caller) {
-      stack.unshift(String(caller));
-      caller = caller && caller.caller;
-    }
-
-    // 111111 null function a() {
-    //     b();
-    // },function b() {
-    //     test();
-    // }
-    console.log('111111', caller, stack.join(','))
+let myname= '极客时间'
+{
+    console.log(myname) // Uncaught ReferenceError: Cannot access 'myname' before initialization
+    let myname = '极客邦';
 }
-
-function b() {
-    test();
-}
-
-function a() {
-    b();
-}
-
-a();
