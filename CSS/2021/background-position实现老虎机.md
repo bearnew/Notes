@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -9,7 +10,8 @@
       .num {
         width: 81px;
         height: 71.4px;
-        background: url('https://upload-images.jianshu.io/upload_images/7794209-45e3644b62215536.png?imageMogr2/auto-orient/strip|imageView2/2/w/81/format/webp') center 0 repeat-y;
+        background: url("https://upload-images.jianshu.io/upload_images/7794209-45e3644b62215536.png?imageMogr2/auto-orient/strip|imageView2/2/w/81/format/webp")
+          center 0 repeat-y;
         margin-right: 15px;
         background-size: 100%;
         transition-property: background-position-y;
@@ -88,3 +90,4 @@
     </script>
   </body>
 </html>
+```
