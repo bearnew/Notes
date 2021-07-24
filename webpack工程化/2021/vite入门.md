@@ -23,3 +23,10 @@
 
 1. Esbuild 使用 Go 编写，并且比以 JavaScript 编写的打包器预构建依赖快 10-100 倍。
 2. esbuild 就是和它的名字一样，只负责处理 ts 和 js 的……更适合作为 tsc 和 babel 的对标
+
+## 5.vite 命令
+
+```js
+// 查看vite命令
+npx vite --help
+```
