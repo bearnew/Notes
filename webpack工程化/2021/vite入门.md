@@ -63,4 +63,34 @@ import test from "my-vfiles";
 console.log(test); // vite plugin test
 ```
 
-3.
+## 7.命令行
+
+1. 创建 1 个命令行工具
+
+```js
+// 生成package.json时不敲回车，直接生成命令
+npm init -y
+```
+
+```js
+// 在package.json中
+{
+  "name": "testbin",
+  "bin": "index.js"
+}
+```
+
+```js
+#!/usr/bin/env node
+console.log("terminate test");
+```
+
+```js
+// 命令
+npm link
+```
+
+```js
+// 命令
+testbin; // terminate test
+```
