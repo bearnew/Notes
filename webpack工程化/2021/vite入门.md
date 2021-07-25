@@ -30,3 +30,37 @@
 // 查看vite命令
 npx vite --help
 ```
+
+## 6.插件
+
+1. `vite-plugin-md`
+   - 转换 md 为组件
+2. 插件实现
+
+```ts
+// vite-plugin-vFile
+export default function myPlugin() {
+  const vfileid = "my-vfiles";
+  return {
+    name: "my-vfiles-plugin",
+    resolveId(id) {
+      if (id === vFileid) {
+        return vFileid;
+      }
+    },
+    load(id) {
+      if (id === vFileid) {
+        return `export const msg = "vite plugin test"`;
+      }
+    },
+  };
+}
+```
+
+```ts
+import test from "my-vfiles";
+
+console.log(test); // vite plugin test
+```
+
+3.
