@@ -22,4 +22,5 @@
 ## 4.vite 使用 esbuild 预构建依赖
 
 1. Esbuild 使用 Go 编写，并且比以 JavaScript 编写的打包器预构建依赖快 10-100 倍。
-2. esbuild 就是和它的名字一样，只负责处理 ts 和 js 的……更适合作为 tsc 和 babel 的对标
+2. Esbuild 加载器的作用与 webpack 中 loader 作用类似，都是对于某种类型的文件进行编译。
+3. esbuild 提供了 api 调用的方式，在调用 api 时传入 option 进行相应功能的设置。在 esbuild 的 API 中，有两个主要的 API 调用方式：transform 和 build。两者的区别在于是否最终生成文件。
