@@ -1,21 +1,22 @@
-function foo() {
-    var myName = "极客时间"
-    let test1 = 1
-    const test2 = 2
-    var innerBar = {
-        getName:function(){
-            console.log(test1)
-            return myName
-        },
-        setName:function(newName){
-            myName = newName
-        }
-    }
-    return innerBar
-}
-var bar = foo()
-bar.setName("极客邦")
-bar.getName() // 1
-// 1
-// 极客邦
-console.log(bar.getName())
+let userInfo = {
+  name: "jack.ma",
+  age: 13,
+  sex: "male",
+  updateInfo: function () {
+    //模拟xmlhttprequest请求延时
+    var bar = () => {
+      setTimeout(function () {
+        console.log(this);
+        this.name = "pony.ma";
+        this.age = 39;
+        this.sex = "female";
+      }, 100);
+    };
+
+    bar();
+  },
+};
+userInfo.updateInfo(); // {name: "jack.ma", age: 13, sex: "male", updateInfo: ƒ}
+setTimeout(() => {
+  console.log(userInfo); // {name: "pony.ma", age: 39, sex: "female", updateInfo: ƒ}
+}, 200);
