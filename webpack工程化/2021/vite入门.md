@@ -24,3 +24,75 @@
 1. Esbuild 使用 Go 编写，并且比以 JavaScript 编写的打包器预构建依赖快 10-100 倍。
 2. Esbuild 加载器的作用与 webpack 中 loader 作用类似，都是对于某种类型的文件进行编译。
 3. esbuild 提供了 api 调用的方式，在调用 api 时传入 option 进行相应功能的设置。在 esbuild 的 API 中，有两个主要的 API 调用方式：transform 和 build。两者的区别在于是否最终生成文件。
+4. esbuild 就是和它的名字一样，只负责处理 ts 和 js 的……更适合作为 tsc 和 babel 的对标
+
+## 5.vite 命令
+
+```js
+// 查看vite命令
+npx vite --help
+```
+
+## 6.插件
+
+1. `vite-plugin-md`
+   - 转换 md 为组件
+2. 插件实现
+
+```ts
+// vite-plugin-vFile
+export default function myPlugin() {
+  const vfileid = "my-vfiles";
+  return {
+    name: "my-vfiles-plugin",
+    resolveId(id) {
+      if (id === vFileid) {
+        return vFileid;
+      }
+    },
+    load(id) {
+      if (id === vFileid) {
+        return `export const msg = "vite plugin test"`;
+      }
+    },
+  };
+}
+```
+
+```ts
+import test from "my-vfiles";
+
+console.log(test); // vite plugin test
+```
+
+## 7.命令行
+
+1. 创建 1 个命令行工具
+
+```js
+// 生成package.json时不敲回车，直接生成命令
+npm init -y
+```
+
+```js
+// 在package.json中
+{
+  "name": "testbin",
+  "bin": "index.js"
+}
+```
+
+```js
+#!/usr/bin/env node
+console.log("terminate test");
+```
+
+```js
+// 命令
+npm link
+```
+
+```js
+// 命令
+testbin; // terminate test
+```
