@@ -1,10 +1,10 @@
-function Book1(name) {
-  this.name = name;
-  return 1;
-}
-console.log(new Book1("Life")); // 打印 Book1 {name: "Life"}
-function Book2(name) {
-  this.name = name;
-  return [];
-}
-console.log(new Book2("Life")); // 打印 []
+// 箭头函数
+setTimeout(() => {
+  MyObj.showName();
+}, 1000);
+// 或者function函数
+setTimeout(function () {
+  MyObj.showName();
+}, 1000);
+// 使用bind
+setTimeout(MyObj.showName.bind(MyObj), 1000);
