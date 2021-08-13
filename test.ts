@@ -1,37 +1,10 @@
-export interface Listener<T> {
-  (event: T): any;
+function Book1(name) {
+  this.name = name;
+  return 1;
 }
-export interface Disposable {
-  dispose(): any;
+console.log(new Book1("Life")); // 打印 Book1 {name: "Life"}
+function Book2(name) {
+  this.name = name;
+  return [];
 }
-export class TypedEvent<T> {
-  private listeners: Listener<T>[] = [];
-  private listenersOncer: Listener<T>[] = [];
-  public on = (listener: Listener<T>): Disposable => {
-    this.listeners.push(listener);
-    return {
-      dispose: () => this.off(listener),
-    };
-  };
-  public once = (listener: Listener<T>): void => {
-    this.listenersOncer.push(listener);
-  };
-  public off = (listener: Listener<T>) => {
-    const callbackIndex = this.listeners.indexOf(listener);
-    if (callbackIndex > -1) this.listeners.splice(callbackIndex, 1);
-  };
-  public emit = (event: T) => {
-    this.listeners.forEach((listener) => listener(event));
-    this.listenersOncer.forEach((listener) => listener(event));
-    this.listenersOncer = [];
-  };
-  public pipe = (te: TypedEvent<T>): Disposable => {
-	  console.log('11111')
-    return this.on((e) => te.emit(e));
-  };
-}
-
-const te = new TypedEvent();
-const te1 = new TypedEvent();
-
-te.pipe(te1);
+console.log(new Book2("Life")); // 打印 []
