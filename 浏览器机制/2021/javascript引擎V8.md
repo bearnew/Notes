@@ -114,3 +114,134 @@ var a = (function () {
   return 1;
 })();
 ```
+
+## 5.V8 如何实现对象继承的
+
+1. 利用 `__proto__` 实现继承
+
+```js
+var animal = {
+  type: "Default",
+  color: "Default",
+  getInfo: function () {
+    return `Type is: ${this.type}，color is ${this.color}.`;
+  },
+};
+var dog = {
+  type: "Dog",
+  color: "Black",
+};
+dog.__proto__ = animal;
+
+// Type is: Dog，color is Black.
+console.log(dog.getInfo());
+```
+
+2. 我们不应该直接通过 _proto_ 来访问或者修改该属性
+
+- 首先，这是隐藏属性，并不是标准定义的。
+- 其次，使用该属性会造成严重的性能问题。
+
+3. 构造函数创建对象，实现继承
+
+```js
+function DogFactory(type, color) {
+  this.type = type;
+  this.color = color;
+}
+
+// V8引擎实现
+// var dog = {}
+// dog.__proto__ = DogFactory.prototype
+// DogFactory.call(dog,'Dog','Black')
+var dog = new DogFactory("Dog", "Black");
+```
+
+## 6.作用域链：V8 是如何查找变量的？
+
+1. 变量查找
+
+```js
+var name = "极客时间";
+var type = "global";
+function foo() {
+  var name = "foo";
+  console.log(name);
+  console.log(type);
+}
+function bar() {
+  var name = "bar";
+  var type = "function";
+  foo();
+}
+
+// foo
+// global
+bar();
+```
+
+```js
+var x = 4;
+var test;
+function test_scope() {
+  var name = "foo";
+  console.log(name);
+  console.log(type);
+  console.log(test);
+  var type = "function";
+  // 这里相当于执行this.test = 1
+  test = 1;
+  console.log(x);
+}
+// foo
+// undefined
+// undefined
+// 4
+test_scope();
+```
+
+2. 断点调试，可以看到浏览器`Scope`中包含`Local`作用域和`Global`作用域
+3. 全局作用域是在 V8 启动过程中就创建了，且一直保存在内存中不会被销毁的，直至 V8 退出。
+   - 全局的 this 值
+   - 浏览器，全局作用域中还有 `window`、`document`、`opener` 等非常多的方法和对象
+   - `node` 环境，那么会有`Global`、`File` 等内容。
+4. 而函数作用域是在执行该函数时创建的，当函数执行结束之后，函数作用域就随之被销毁掉了。
+5. `JavaScript` 是基于词法作用域的，词法作用域就是指，查找作用域的顺序是按照函数定义时的位置来决定的，所以我们也将词法作用域称为静态作用域
+   - 作用域查找顺序都是按照当前函数作用域–> 全局作用域这个路径来的
+
+## 7.类型转换：V8 是怎么实现 1+“2”的？
+
+1. 对机器语言来说，所有的数据都是一堆二进制代码，CPU 处理这些数据的时候，并没有类型的概念，CPU 所做的仅仅是移动数据，比如对其进行移位，相加或相乘
+2. V8 变量相加的转换过程
+3. `V8` 会提供了一个 `ToPrimitve` 方法，其作用是将 a 和 b 转换为原生数据类型
+4. 先检测该对象中是否存在 `valueOf` 方法，如果有并返回了原始类型，那么就使用该值进行强制类型转换
+5. 如果 `valueOf` 没有返回原始类型，那么就使用 `toString` 方法的返回值；
+6. 如果 `vauleOf` 和 `toString` 两个方法都不返回基本类型值，便会触发一个 `TypeError` 的错误。
+
+```js
+var Obj = {
+  toString() {
+    return "200";
+  },
+  valueOf() {
+    return 100;
+  },
+};
+
+// 103
+console.log(Obj + 3);
+```
+
+```js
+var Obj = {
+  toString() {
+    return new Object();
+  },
+  valueOf() {
+    return new Object();
+  },
+};
+
+// Uncaught TypeError: Cannot convert object to primitive value
+console.log(Obj + 3);
+```
