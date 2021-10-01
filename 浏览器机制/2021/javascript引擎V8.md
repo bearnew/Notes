@@ -395,3 +395,79 @@ foo();
   将监听到的数据写入一个称为反馈向量 (FeedBack Vector) 的结构中，同时 V8 会为每个
   执行的函数维护一个反馈向量。有了反馈向量缓存的临时数据，V8 就可以缩短对象属性的
   查找路径，从而提升执行效率。
+
+## 17 | 消息队列：V8 是怎么实现回调函数的？
+
+1. 回调函数
+
+   - 同步回调函数在执行函数内部调用
+
+   ```js
+   var myArray = ["water", "goods", "123", "like"];
+   function handlerArray(indexName, index) {
+     console.log(index + 1 + ". " + indexName);
+   }
+   myArray.forEach(handlerArray);
+   ```
+
+   - 异步回调函数在执行函数外部调用
+
+   ```js
+   function foo() {
+     alert("Hello");
+   }
+   setTimeout(foo, 3000);
+   ```
+
+2. UI 线程架构
+
+   - ![UI线程架构](https://github.com/bearnew/picture/blob/master/markdown_v2/2021/javascript%E5%BC%95%E6%93%8Ev8/UI%E7%BA%BF%E7%A8%8B%E6%9E%B6%E6%9E%84.png?raw=true)
+   - 从消息队列中取出事件执行
+
+   ```js
+   function UIMainThread() {
+     while (queue.waitForMessage()) { Task task = queue.getNext() processNextMessage(task) } }
+   ```
+
+## 18 | 异步编程（一）：V8 是如何实现微任务的？
+
+1. 调用栈
+   - 调用栈是一种数据结构，用来管理在主线程上执行的函数的调用关系
+   - 栈执行
+   ```js
+   function foo() {
+     foo();
+   }
+   foo();
+   ```
+   - ![栈溢出](https://github.com/bearnew/picture/blob/master/markdown_v2/2021/javascript%E5%BC%95%E6%93%8Ev8/%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8.png?raw=true)
+2. 宏任务
+
+   - 宏任务执行
+
+   ```js
+   // foo函数封装成宏任务，放入消息队列中
+   // 主线程从消息队列中取出该任务，执行回调函数foo
+   // foo函数执行完毕，V8结束当前宏任务，调用栈也会被清空
+   // 继续重复取宏任务
+   function foo() {
+     setTimeout(foo, 0);
+   }
+   foo();
+   ```
+
+   - 宏任务执行时间过久，会影响到消息队列后面宏任务的执行
+
+3. 微任务
+   - 微任务能精准的控制回调函数的执行时机
+   - V8 为每个宏任务维护一个微任务队列
+   - V8 执行`js`时，会创建一个环境对象，微任务队列存放在环境对象中
+   - `js`执行完毕后，环境对象被销毁
+   ```js
+   // V8每次执行微任务，都会退出当前foo函数的调用栈，不会造成栈溢出
+   // 存在循环嵌套的微任务，导致宏任务无法退出，导致其他任务无法被执行，页面卡死
+   function foo() {
+     return Promise.resolve().then(foo);
+   }
+   foo();
+   ```
