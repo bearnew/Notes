@@ -471,3 +471,90 @@ foo();
    }
    foo();
    ```
+
+## 19 ｜答疑：几种常见内存问题的解决策略
+
+1. `readFile`是异步`API`，将实际读写操作丢给文件读写线程，文件读写线程处理完成之后，将回调函数读取的结果封装成新的消息，添加到消息队列中，然后等主线执行该消息的时候，就会执行 `readFile` 设置的回调函数，这就是 `Node` 中的异步处理过程。
+2. `readFileSync` 是同步 API，同步 API 很简单，直接在主线程上执行，执行完成直接返回结果给它的调用函数
+3. 内存问题
+
+   - 内存泄漏 (`Memoryleak`)
+
+     - 是不再需要 (没有作用) 的内存数据依然被其他对象引用着
+     - 避免内存泄漏，我们需要避免引用那些已经没有用途的数据。
+     - 引起内存泄露的代码
+
+     ```js
+     // this 是指向 window 对象的，而 window 对象是常驻内存
+     // temp_array 已经是不再被使用的对象了，但是依然被 window 对象引用了，这就造成了 temp_array 的泄漏
+     function foo() {
+       //创建一个临时的temp_array
+       temp_array = new Array(200000);
+       /*** 使用temp_array */
+     }
+     ```
+
+     ```js
+     // this 是指向 window 对象的，而 window 对象是常驻内存
+     // temp_array 已经是不再被使用的对象了，但是依然被 window 对象引用了，这就造成了 temp_array 的泄漏
+     function foo() {
+       //创建一个临时的temp_array
+       this.temp_array = new Array(200000);
+       /*** this.temp_array */
+     }
+     ```
+
+     ```js
+     function foo() {
+       var temp_object = new Object();
+       temp_object.x = 1;
+       temp_object.y = 2;
+       temp_object.array = new Array(200000);
+       /** * 使用temp_object */
+       return function () {
+         console.log(temp_object.x);
+       };
+     }
+     ```
+
+     ```js
+     // 只有同时满足DOM 树和 JavaScript 代码都不引用某个 DOM 节点，该节点才会被作为垃圾进行回收。
+     let detachedTree;
+     function create() {
+       var ul = document.createElement("ul");
+       for (var i = 0; i < 100; i++) {
+         var li = document.createElement("li");
+         ul.appendChild(li);
+       }
+       detachedTree = ul; // 造成内存泄漏
+     }
+     create();
+     ```
+
+   - 内存膨胀 (`Memory bloat`)
+     - 内存膨胀主要是由于程序员对内存管理不科学导致的，比如只需要 50M 内存就可以搞定的，有些程序员却花费了 500M 内存
+     - 也有可能加载了一些不必要的资源
+     - 解决内存膨胀问题，我们需要对项目有着透彻的理解，也要熟悉各种能减少内存占用的技术方案
+   - 频繁垃圾回收
+     - 如果频繁使用大的临时变量，那么就会导致频繁垃圾回收，频繁的垃圾回收操作会让你感觉到页面卡顿
+     - 要解决这个问题，我们可以考虑将这些临时变量设置为全局变量
+     ```js
+     // 这段代码就会频繁创建临时变量，这种方式很快就会造成新生代内存内装满，从而频繁触发垃圾回收。
+     function strToArray(str) {
+       let i = 0;
+       const len = str.length;
+       let arr = new Uint16Array(str.length);
+       for (; i < len; ++i) {
+         arr[i] = str.charCodeAt(i);
+       }
+       return arr;
+     }
+     function foo() {
+       let i = 0;
+       let str = "test V8 GC";
+       while (i++ < 1e5) {
+         strToArray(str);
+       }
+     }
+     foo();
+     ```
