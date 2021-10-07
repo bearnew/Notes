@@ -16,3 +16,13 @@
 2. 首屏速度优化（服务端渲染）
 3. 用 Nodejs 做构建工具
 4. 用 Nodejs 客户端技术(`electron`)实现，最大限度复用现有工程
+
+```js
+// process.argv可以读取命令参数
+console.log(process.argv[process.argv.length - 1]); // rock
+console.log(process);
+```
+
+```shell
+node test.js rock
+```
