@@ -153,3 +153,8 @@ glob(__dirname + "/**/*", function (err, res) {
   result = res;
 });
 ```
+
+## 6.Node.js 事件循环
+
+1. Node.js 事件循环
+   - ![Node.js内置模块](https://github.com/bearnew/picture/blob/master/markdown_v2/2021/nodeJS%E5%AE%9E%E6%88%98/nodejs%E8%BF%90%E8%A1%8C%E6%B5%81%E7%A8%8B.PNG?raw=true)
