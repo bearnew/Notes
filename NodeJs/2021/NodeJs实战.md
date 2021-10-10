@@ -107,4 +107,49 @@ node test.js rock
 npm init
 ```
 
-2.
+## 5.Node.js 内置模块
+
+1. Node.js 内置模块流程
+
+- ![Node.js内置模块](https://github.com/bearnew/picture/blob/master/markdown_v2/2021/nodeJS%E5%AE%9E%E6%88%98/nodejs%E8%BF%90%E8%A1%8C%E6%B5%81%E7%A8%8B.PNG?raw=true)
+
+2. `Node.js`的事件模块
+
+```js
+const EventEmitter = require("events").EventEmitter;
+
+class GeekTime extends EventEmitter {
+  constructor() {
+    super();
+    setInterval(() => {
+      this.emit("newlesson", { price: Math.random() * 100 });
+    }, 3000);
+  }
+}
+
+const geektime = new GeekTime();
+
+geektime.addListener("newlesson", (res) => {
+  console.log("newlesson come", res);
+  if (res.price < 50) {
+    console.log("cheap!");
+  }
+});
+```
+
+## 5.Node.js 的非阻塞 I/O
+
+1. I/O 即`Input/Output`，即系统的输入/输出
+2. 阻塞 I/O 和非阻塞 I/O 的区别在于系统接收输入再到输出期间，能不能接收其他输入
+3. `glob`获取文件
+
+```js
+const glob = require("glob");
+
+// 阻塞I/O
+var result = glob.sync(__dirname + "/**/*");
+// 非阻塞I/O
+glob(__dirname + "/**/*", function (err, res) {
+  result = res;
+});
+```
