@@ -97,4 +97,14 @@ node test.js rock
    console.log(lib); // [Function: test] { test: 'test' }
    ```
 
-5.
+## 4.npm
+
+> Node.js 的包管理工具
+
+1. 初始化一个 npm 包
+
+```js
+npm init
+```
+
+2.
