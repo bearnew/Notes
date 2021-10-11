@@ -158,3 +158,14 @@ glob(__dirname + "/**/*", function (err, res) {
 
 1. Node.js 事件循环
    - ![Node.js内置模块](https://github.com/bearnew/picture/blob/master/markdown_v2/2021/nodeJS%E5%AE%9E%E6%88%98/nodejs%E8%BF%90%E8%A1%8C%E6%B5%81%E7%A8%8B.PNG?raw=true)
+
+## 7.HTTP
+
+1. 一次网页请求，包含 2 次`HTTP`包交换
+
+   - 浏览器向`HTTP`服务器发送请求`HTTP`包
+   - `HTTP`服务器向浏览器返回`HTTP`包
+
+2. HTTP 服务器作用
+   - 解析进来的`HTTP`请求报文
+   - 返回对应的`HTTP`返回报文
