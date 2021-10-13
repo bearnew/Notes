@@ -4,4 +4,4 @@
 11 月：计算机组成原理
 12 月：全链路性能优化
 1 月：serverless
-Notes，每日一题，leetcode，36 个 js
+Notes，每日一题，leetcode，36 个 js，https://overreacted.io/zh-hans/
