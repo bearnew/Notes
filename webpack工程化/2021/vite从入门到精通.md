@@ -96,3 +96,12 @@ npm link
 // 命令
 testbin; // terminate test
 ```
+
+## 8.React
+
+1. 使用`@vitejs/plugin-react-refresh`替换`react-hot-loader`
+   - 解决了很多`react-hot-loader`无法解决的问题
+   - 速度更快
+   - 支持局部更新
+
+## 9.Vite 使用 css
