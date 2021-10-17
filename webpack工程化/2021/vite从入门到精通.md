@@ -122,3 +122,61 @@ testbin; // terminate test
   "include": ["src/**/*"]
 }
 ```
+
+## 10.vite 处理静态文件
+
+1. `types`
+
+   - `url`
+     ```js
+     import test from "./test?url";
+     ```
+   - `raw`
+     ```js
+     import test from "./test?raw";
+     ```
+   - `worker/worker inline`
+
+     ```js
+     // worker.js
+     function timedCount() {
+       i = i + 1;
+       postMessage(i);
+       setTimeout(timedCount, 500);
+     }
+
+     timedCount();
+     ```
+
+     ```js
+     // test.js
+     import Worker from "./worker?worker";
+     const worker = new Worker();
+     ```
+
+     - `json`
+
+     ```js
+     import { version } from "../package.json";
+     ```
+
+## 11.vite 环境变量
+
+1. Build In（import.meta.env）
+   - MODE
+   - BASE_URL
+   - PROD
+   - DEV
+2. 在根目录的`.env`文件定义变量
+   ```js
+   // .env
+   // .env.development 测试环境生效
+   // .env.production 生产环境生效
+   VITE_AAA = xxx;
+   ```
+3. 在`vite-env.d.ts`中声明类型
+   ```js
+   interface ImportMetaEnv {
+     VITE_TITLE: string;
+   }
+   ```
