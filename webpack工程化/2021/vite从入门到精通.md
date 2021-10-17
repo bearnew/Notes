@@ -104,4 +104,21 @@ testbin; // terminate test
    - 速度更快
    - 支持局部更新
 
-## 9.Vite 使用 css
+## 9.Vite 使用 typescript
+
+```json
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node", // 通过node的方式解析模块
+    "jsx": "preserve", // ts不编译jsx的语法
+    "sourceMap": true, // 直接调试ts的代码
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "lib": ["esnext", "dom"],
+    "types": ["vite/client"] // 可以使用import.meta上的属性
+  },
+  "include": ["src/**/*"]
+}
+```
