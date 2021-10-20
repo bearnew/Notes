@@ -180,3 +180,34 @@ testbin; // terminate test
      VITE_TITLE: string;
    }
    ```
+
+## 12.hmr 热更新
+
+- 文件更新，`server`端通过`websocket`推送事件给客户端，客户端重新请求`js`替换执行
+
+## 13.使用 glob-import 批量导入
+
+```js
+const globModules = import.meta.glob("./glob/*-[0-9].js");
+
+Object.entries(globModules).forEach(([k, v]) => {
+  v().then((m) => console.log(k + ":" + m.default));
+});
+```
+
+## 14.预编译
+
+1. `vite`预编译会将`commonjs`的文件预编译成`ES module`文件，放到`.Vite`文件下
+2. `vite`预编译会将同一依赖下的多个文件打包成一个文件
+3. `optimizeDeps`
+
+```js
+export default defineConfig({
+  optimizeDeps: {
+    // include: [], // 需要预编译的文件
+    exclide: ["react"], // 不需要预编译的文件
+  },
+});
+```
+
+3.
