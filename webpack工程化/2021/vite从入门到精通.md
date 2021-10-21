@@ -210,4 +210,33 @@ export default defineConfig({
 });
 ```
 
-3.
+## 15.SSR
+
+```js
+const app = express();
+const { createServer: createViteServer } = require("vite");
+createViteServer({
+  server: {
+    middlewareMode: "ssr",
+  },
+}).then((vite) => {
+  app.use(vite.middlewares);
+
+  const url = req.originalUrl;
+
+  let template, render;
+  if (!isProd) {
+    // always read fresh template in dev
+    template = fs.readFileSync(resolve("index.html"), "utf-8");
+    // 热更新
+    template = await vite.transformIndexHtml(url, template);
+    // 加载
+    render = (await vite.ssrLoadModule("/src/entry-server.jsx")).render;
+  } else {
+    template = indexProd;
+    render = require("./dist/server/entry-server.js").render;
+  }
+
+  app.listen(4000);
+});
+```
