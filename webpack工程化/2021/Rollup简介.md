@@ -17,6 +17,8 @@
 ```
 
 ```js
+import ts from "@rollup/plugin-typescript";
+
 export default [
   {
     input: ["./src/index.js"],
@@ -29,6 +31,7 @@ export default [
     plugins: [
       resolve(),
       commonjs(),
+      ts(),
       json(),
       alias({
         entries: {
@@ -54,3 +57,15 @@ export default [
   },
 ];
 ```
+
+## 3.Rollup 插件
+
+1. `commonjs`
+2. `Babel`
+3. `Typescript`
+4. `Replace`
+5. `Node Resolve`
+6. `Eslint`
+7. `image`
+8. `strip`, 用于移除生产环境中的`console.log`之类
+9. `wasm`, 用于加载`webassembly`
