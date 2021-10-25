@@ -240,3 +240,48 @@ createViteServer({
   app.listen(4000);
 });
 ```
+
+## 16.vite 插件
+
+1. 插件执行时机
+
+- `pre`
+- `normal`
+- `post`
+
+2. 插件示例
+
+```js
+export default (enforce?: "pre" | "post") => {
+  return {
+    name: "test",
+    enforce,
+    buildStart() {
+      console.log("buildStart", enforce);
+    },
+    // 如何去找到文件
+    resolveId() {
+      console.log("resolved", enforce);
+    },
+    load() {
+      console.log("load", enforce);
+    },
+  };
+};
+```
+
+```js
+// 在vite启动之前执行
+// buildStart pre
+// buildStart undefined
+// buildStart post
+// resolved pre
+// load pre
+// load undefined
+// load post
+{
+  plugins: [testPlugin("post"), testPlugin(), testPlugin("pre")];
+}
+```
+
+3.
