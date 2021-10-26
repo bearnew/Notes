@@ -284,4 +284,53 @@ export default (enforce?: "pre" | "post") => {
 }
 ```
 
-3.
+3. 插件的钩子
+
+```js
+export default (enforce?: "pre" | "post"): Plugin => {
+  return {
+    name: "test",
+    config(userConfig) {
+      return {
+        resolve: {
+          alias: {
+            "@aaa": "/src/styles",
+          },
+        },
+      };
+    },
+    configResolved(config) {
+      console.log(config);
+    },
+    configureServer(server) {
+      return server.middlewares.use((req, res, next) => {
+        if (req.url === "/test") {
+          res.end("hello vite plugin");
+        } else {
+          next();
+        }
+      });
+    },
+    transformIndexHtml(html) {
+      return html.replace('<div id="app"></div>', '<div id="root"></div>');
+    },
+    handleHotUpdate(ctx) {
+      console.log(ctx);
+      ctx.server.ws.send({
+        type: "custom",
+        event: "test",
+      });
+    },
+  };
+};
+```
+
+```js
+if (import.meta.hot) {
+  import.meta.hot.on("test", (val) => {
+    console.log(val);
+  });
+}
+```
+
+4.
