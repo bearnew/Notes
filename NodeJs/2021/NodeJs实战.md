@@ -183,6 +183,7 @@ glob(__dirname + "/**/*", function (err, res) {
    - 应用层协议一般不使用`HTTP`
    - 使用基于`TCP`或`UDP`协议
 4. `RPC`调用
+
    - 寻址/负载均衡
      - `Ajax`: 使用`DNS`进行寻址
      - `RPC`：使用特定服务进行寻址
@@ -193,4 +194,56 @@ glob(__dirname + "/**/*", function (err, res) {
    - 二进制协议
      - 更小的数据包体积
      - 更快的编解码速率
-5.
+
+5. `net`
+
+- 全双工通信通道的搭建
+  - 关键在于应用层协议需要有标记包号的字段
+  - 处理以下情况，需要有标记包长的字段
+    - 粘包
+    - 不完整包
+  - 错误处理
+- server 端
+
+  ```js
+  const net = require("net");
+  const server = net.createServer((socket) => {
+    socket.on("data", (buffer) => {
+      const id = buffer.readInt16BE();
+      buffer.write(Buffer.from(data[id]));
+
+      console.log(buffer, buffer.toString());
+    });
+  });
+
+  server.listen(4000);
+
+  const data = {
+    1: "test-1",
+    2: "test-2",
+    3: "test-3",
+    4: "test-4",
+    5: "test-5",
+    6: "test-6",
+    7: "test-7",
+    8: "test-8",
+    9: "test-9",
+  };
+
+  const buffer = Buffer.alloc(4);
+  buffer.writeInt16BE(data[Math.random()]);
+  ```
+
+- client 端
+
+  ```js
+  const net = require("net");
+  const socket = new net.Scocket({});
+
+  socket.connect({
+    host: "127.0.0.1",
+    port: 4000,
+  });
+
+  socket.write("hello world");
+  ```
