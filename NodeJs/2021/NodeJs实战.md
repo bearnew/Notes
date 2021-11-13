@@ -247,3 +247,38 @@ glob(__dirname + "/**/*", function (err, res) {
 
   socket.write("hello world");
   ```
+
+## 9.vm 模块
+
+1. `vm`可以使用 v8 的`Virtual Machine contexts`动态地编译和执行代码，而代码的执行上下文是与当前进程隔离的，但是这里的隔离并不是绝对的安全，不完全等同浏览器的沙箱环境。
+2. `vm`渲染模板字符串
+
+```js
+const result = `<h2>${user.name}</h2>`;
+const vm = require("vm");
+
+const templateMap = {
+  templateA: `<h2>${include("templateB")}</h2>`,
+  templateB: fs.readFilesync("templateB"),
+};
+
+const html = vm.runInNewContext(`${escape(result)}`, {
+  user: { name: "test" },
+  escape: function (markup) {
+    if (!markup) return "";
+    return String(html)
+      .replace(/&(?!\w+;)/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;"); // IE不支持&apos, (单引号)转义
+  },
+  include: function (name) {
+    return templateMap(name);
+  },
+});
+```
+
+3. `easy-socket`用于`socket`连接
+
+## 11.GraphQL
