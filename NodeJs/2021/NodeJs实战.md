@@ -281,4 +281,59 @@ const html = vm.runInNewContext(`${escape(result)}`, {
 
 3. `easy-socket`用于`socket`连接
 
-## 11.GraphQL
+## 11.Node.js 性能分析工具
+
+1. profile
+
+```js
+node --prof entry.js
+```
+
+2. chrome devtool
+
+```js
+node --inspect-brk entry.js
+```
+
+```js
+// 浏览器中
+chrome://inspect/#devices
+```
+
+3. `clinic.js`
+
+- nodejs 运行分析图表工具
+
+## 12.代码优化
+
+1. 文件读取操作不要放在中间件中
+
+```js
+const buffer = fs.readFileSync(__dirname + "/source/index.html");
+app.use(
+  mount("/", async (ctx) => {
+    ctx.status = 200;
+    ctx.type = "html";
+    ctx.body = buffer;
+  })
+);
+```
+
+2. 内存优化管理
+
+- 内存泄漏
+  ```js
+  const leak = [];
+  app.use(
+    mount("/", async (ctx) => {
+      ctx.body = html;
+      // 一直push不释放
+      leak.push(leak);
+    })
+  );
+  ```
+- `Node.js Buffer`的内存分配策略
+  - `Buffer`对应`C++`的`char[]`数组
+  - `new`一个`8kb`的空间，小于`8kb`的都会分配`8kb`的`buffer`,然后后续小的`buffer`都会在前面`8kb`里面分配空间，不足，再分配新的`8KB`的空间
+
+3.
