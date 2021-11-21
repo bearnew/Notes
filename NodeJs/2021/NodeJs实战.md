@@ -281,4 +281,9 @@ const html = vm.runInNewContext(`${escape(result)}`, {
 
 3. `easy-socket`用于`socket`连接
 
-## 11.GraphQL
+## 13.Node.js C++插件
+
+1. 将计算量转移到 C++进行
+
+- 收益：C++运算比`javaScript`更快的部分
+- 成本：C++变量和 V8 变量的转换
