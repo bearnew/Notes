@@ -169,3 +169,116 @@ glob(__dirname + "/**/*", function (err, res) {
 2. HTTP 服务器作用
    - 解析进来的`HTTP`请求报文
    - 返回对应的`HTTP`返回报文
+
+## 8.RPC 调用
+
+1. `Remote Procedure Call`（远程过程调用）
+2. 和`Ajax`有什么相同点
+
+   - 都是两个计算机之间的网络通信
+   - 需要双方约定一个数据格式
+
+3. 和`Ajax`有什么不同点
+   - 不一定使用`DNS`作为寻址服务
+   - 应用层协议一般不使用`HTTP`
+   - 使用基于`TCP`或`UDP`协议
+4. `RPC`调用
+
+   - 寻址/负载均衡
+     - `Ajax`: 使用`DNS`进行寻址
+     - `RPC`：使用特定服务进行寻址
+   - `TCP`通信
+     - 单工通信（永远只有一端给另一端发数据）
+     - 半双工通信（同一时间只有一端给另一端发包）
+     - 全双工通信（两端可以同时发包）
+   - 二进制协议
+     - 更小的数据包体积
+     - 更快的编解码速率
+
+5. `net`
+
+- 全双工通信通道的搭建
+  - 关键在于应用层协议需要有标记包号的字段
+  - 处理以下情况，需要有标记包长的字段
+    - 粘包
+    - 不完整包
+  - 错误处理
+- server 端
+
+  ```js
+  const net = require("net");
+  const server = net.createServer((socket) => {
+    socket.on("data", (buffer) => {
+      const id = buffer.readInt16BE();
+      buffer.write(Buffer.from(data[id]));
+
+      console.log(buffer, buffer.toString());
+    });
+  });
+
+  server.listen(4000);
+
+  const data = {
+    1: "test-1",
+    2: "test-2",
+    3: "test-3",
+    4: "test-4",
+    5: "test-5",
+    6: "test-6",
+    7: "test-7",
+    8: "test-8",
+    9: "test-9",
+  };
+
+  const buffer = Buffer.alloc(4);
+  buffer.writeInt16BE(data[Math.random()]);
+  ```
+
+- client 端
+
+  ```js
+  const net = require("net");
+  const socket = new net.Scocket({});
+
+  socket.connect({
+    host: "127.0.0.1",
+    port: 4000,
+  });
+
+  socket.write("hello world");
+  ```
+
+## 9.vm 模块
+
+1. `vm`可以使用 v8 的`Virtual Machine contexts`动态地编译和执行代码，而代码的执行上下文是与当前进程隔离的，但是这里的隔离并不是绝对的安全，不完全等同浏览器的沙箱环境。
+2. `vm`渲染模板字符串
+
+```js
+const result = `<h2>${user.name}</h2>`;
+const vm = require("vm");
+
+const templateMap = {
+  templateA: `<h2>${include("templateB")}</h2>`,
+  templateB: fs.readFilesync("templateB"),
+};
+
+const html = vm.runInNewContext(`${escape(result)}`, {
+  user: { name: "test" },
+  escape: function (markup) {
+    if (!markup) return "";
+    return String(html)
+      .replace(/&(?!\w+;)/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;"); // IE不支持&apos, (单引号)转义
+  },
+  include: function (name) {
+    return templateMap(name);
+  },
+});
+```
+
+3. `easy-socket`用于`socket`连接
+
+## 11.GraphQL
