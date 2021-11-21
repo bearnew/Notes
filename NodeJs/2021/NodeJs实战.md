@@ -337,3 +337,37 @@ app.use(
   - `new`一个`8kb`的空间，小于`8kb`的都会分配`8kb`的`buffer`,然后后续小的`buffer`都会在前面`8kb`里面分配空间，不足，再分配新的`8KB`的空间
 
 3.
+
+## 13.Node.js C++插件
+
+1. 将计算量转移到 C++进行
+
+- 收益：C++运算比`javaScript`更快的部分
+- 成本：C++变量和 V8 变量的转换
+
+## 14.多进程优化
+
+1. 使用子进程
+
+```js
+// master.js
+const cp = require("child_process");
+const child_process = cp.fork(__dirname + "/child.js");
+
+child_process.send("haha");
+child_process.on("message", (str) => {
+  console.log("parent", str);
+});
+```
+
+```js
+// child.js
+process.on("message", (str) => {
+  console.log("child", str);
+  process.send("hehe");
+});
+```
+
+2. 使用子线程
+
+- `worker_threads`
