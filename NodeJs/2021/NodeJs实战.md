@@ -371,3 +371,10 @@ process.on("message", (str) => {
 2. 使用子线程
 
 - `worker_threads`
+
+3. `cluster`
+
+   - 通过`os.cpus().length`获取`cpu`的核数
+   - 需要余出一些`CPU`处理事件循环以及节省内存
+
+4.
