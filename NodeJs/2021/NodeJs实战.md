@@ -310,3 +310,7 @@ process.on("message", (str) => {
   process.send("hehe");
 });
 ```
+
+2. 使用子线程
+
+- `worker_threads`
