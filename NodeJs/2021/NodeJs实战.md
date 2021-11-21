@@ -287,3 +287,26 @@ const html = vm.runInNewContext(`${escape(result)}`, {
 
 - 收益：C++运算比`javaScript`更快的部分
 - 成本：C++变量和 V8 变量的转换
+
+## 14.多进程优化
+
+1. 使用子进程
+
+```js
+// master.js
+const cp = require("child_process");
+const child_process = cp.fork(__dirname + "/child.js");
+
+child_process.send("haha");
+child_process.on("message", (str) => {
+  console.log("parent", str);
+});
+```
+
+```js
+// child.js
+process.on("message", (str) => {
+  console.log("child", str);
+  process.send("hehe");
+});
+```
