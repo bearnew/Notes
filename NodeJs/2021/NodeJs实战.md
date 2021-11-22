@@ -377,4 +377,54 @@ process.on("message", (str) => {
    - 通过`os.cpus().length`获取`cpu`的核数
    - 需要余出一些`CPU`处理事件循环以及节省内存
 
-4.
+4. 进程守护与管理
+
+```js
+if (cluster.isMaster) {
+  // 监听是否是僵尸进程(心跳检测)
+  for(let i = 0;i < 1;i++) {
+    const worker = cluster.fork();
+    let missedPing = 0;
+    let timerId = setInterval(() => {
+      worker.send('ping');
+      missedPing++;
+
+      if (missedPing >= 3) {
+        // worker.exit(1);
+        clearInterval(timerId)
+        process.kill(worker.process.pid);
+      }
+    }, 3000)
+    worker.on('message', msg => {
+      if (msg === 'pong') }{
+        missedPing--;
+      }
+    })
+  }
+
+  cluster.on("exit", () => {
+    // 复活死掉的进程
+    setTimeout(() => {
+      cluster.fork();
+    }, 5000);
+  });
+} else {
+  process.on("uncaughtException", (err) => {
+    console.error(err);
+  });
+
+  process.on('message', str => {
+    if (str === 'ping') {
+      process.send('pong');
+    }
+  })
+
+  setInterval(() => {
+    if (process.memoryUsage().rss > 734003200) {
+      console.log("oom");
+      // 内存泄漏，推出程序
+      process.exit(1);
+    }
+  }, 5000);
+}
+```
