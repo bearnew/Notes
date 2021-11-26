@@ -432,8 +432,75 @@ if (cluster.isMaster) {
 ## 15.架构优化
 
 1. 动静分离
+   - 静态内容：`CDN` 分发，`HTTP` 缓存
+   - 动态内容：用大量的源站机器承载，结合反向代理进行负载均衡
+   - 使用`nginx`输出静态页面
+2. `nginx`反向代理
 
-- 静态内容：`CDN` 分发，`HTTP` 缓存
-- 动态内容：用大量的源站机器承载，结合反向代理进行负载均衡
+```js
+location ~ /node/(\d*) {
+	proxy_pass http://127.0.0.1:3000/detail?columnid=$1
+}
+```
 
-  2.使用`nginx`输出静态页面
+4. 负载均衡
+
+```js
+// 上游服务
+upstream node.com {
+  server 127.0.0.1:3000;
+  server 127.0.0.1:3001;
+}
+
+location ~ /node/(\d*) {
+	proxy_pass http://node.com/detail?columnid=$1;
+	proxy_cache
+}
+```
+
+5. `redis`
+
+```js
+const app = new (require("koa"))();
+const cacheRedis = require("redis")("cache");
+const backupRedis = require("redis")("backup");
+
+app.use(async (ctx, next) => {
+  const result = await cacheRedis(ctx.url);
+
+  if (result) {
+    ctx.body = result;
+    return;
+  }
+
+  await next();
+
+  if (ctx.status === 200) {
+    cacheRedis.set(ctx.url, ctx.body, { expire: 200 });
+    backupRedist.set(ctx.url, ctx.body, { expire: 200 });
+  }
+
+  if (ctx.status !== 200) {
+    // 请求失败，使用redis兜底
+    const result = await backupRedis();
+    ctx.status = 200;
+    ctx.body = result;
+  }
+});
+```
+
+## 16.serverless
+
+1. 云函数
+   - 不用再因为运维、架构的事情操心
+     - 缩短业务上线周期
+     - 减少出错的概率
+     - 业务开发的上手难度更低
+   - 渐进式
+2. serverless
+   - 屏蔽服务器细节
+3. 其他下沉框架，屏蔽细节
+   - Node.js => threadless
+   - Javascript => typeless
+   - Java/C# => 内存管理 less
+   - 可视化开发 => 编程 less
