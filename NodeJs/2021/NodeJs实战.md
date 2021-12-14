@@ -281,6 +281,63 @@ const html = vm.runInNewContext(`${escape(result)}`, {
 
 3. `easy-socket`用于`socket`连接
 
+## 11.Node.js 性能分析工具
+
+1. profile
+
+```js
+node --prof entry.js
+```
+
+2. chrome devtool
+
+```js
+node --inspect-brk entry.js
+```
+
+```js
+// 浏览器中
+chrome://inspect/#devices
+```
+
+3. `clinic.js`
+
+- nodejs 运行分析图表工具
+
+## 12.代码优化
+
+1. 文件读取操作不要放在中间件中
+
+```js
+const buffer = fs.readFileSync(__dirname + "/source/index.html");
+app.use(
+  mount("/", async (ctx) => {
+    ctx.status = 200;
+    ctx.type = "html";
+    ctx.body = buffer;
+  })
+);
+```
+
+2. 内存优化管理
+
+- 内存泄漏
+  ```js
+  const leak = [];
+  app.use(
+    mount("/", async (ctx) => {
+      ctx.body = html;
+      // 一直push不释放
+      leak.push(leak);
+    })
+  );
+  ```
+- `Node.js Buffer`的内存分配策略
+  - `Buffer`对应`C++`的`char[]`数组
+  - `new`一个`8kb`的空间，小于`8kb`的都会分配`8kb`的`buffer`,然后后续小的`buffer`都会在前面`8kb`里面分配空间，不足，再分配新的`8KB`的空间
+
+3.
+
 ## 13.Node.js C++插件
 
 1. 将计算量转移到 C++进行
@@ -314,3 +371,136 @@ process.on("message", (str) => {
 2. 使用子线程
 
 - `worker_threads`
+
+3. `cluster`
+
+   - 通过`os.cpus().length`获取`cpu`的核数
+   - 需要余出一些`CPU`处理事件循环以及节省内存
+
+4. 进程守护与管理
+
+```js
+if (cluster.isMaster) {
+  // 监听是否是僵尸进程(心跳检测)
+  for(let i = 0;i < 1;i++) {
+    const worker = cluster.fork();
+    let missedPing = 0;
+    let timerId = setInterval(() => {
+      worker.send('ping');
+      missedPing++;
+
+      if (missedPing >= 3) {
+        // worker.exit(1);
+        clearInterval(timerId)
+        process.kill(worker.process.pid);
+      }
+    }, 3000)
+    worker.on('message', msg => {
+      if (msg === 'pong') }{
+        missedPing--;
+      }
+    })
+  }
+
+  cluster.on("exit", () => {
+    // 复活死掉的进程
+    setTimeout(() => {
+      cluster.fork();
+    }, 5000);
+  });
+} else {
+  process.on("uncaughtException", (err) => {
+    console.error(err);
+  });
+
+  process.on('message', str => {
+    if (str === 'ping') {
+      process.send('pong');
+    }
+  })
+
+  setInterval(() => {
+    if (process.memoryUsage().rss > 734003200) {
+      console.log("oom");
+      // 内存泄漏，推出程序
+      process.exit(1);
+    }
+  }, 5000);
+}
+```
+
+## 15.架构优化
+
+1. 动静分离
+   - 静态内容：`CDN` 分发，`HTTP` 缓存
+   - 动态内容：用大量的源站机器承载，结合反向代理进行负载均衡
+   - 使用`nginx`输出静态页面
+2. `nginx`反向代理
+
+```js
+location ~ /node/(\d*) {
+	proxy_pass http://127.0.0.1:3000/detail?columnid=$1
+}
+```
+
+4. 负载均衡
+
+```js
+// 上游服务
+upstream node.com {
+  server 127.0.0.1:3000;
+  server 127.0.0.1:3001;
+}
+
+location ~ /node/(\d*) {
+	proxy_pass http://node.com/detail?columnid=$1;
+	proxy_cache
+}
+```
+
+5. `redis`
+
+```js
+const app = new (require("koa"))();
+const cacheRedis = require("redis")("cache");
+const backupRedis = require("redis")("backup");
+
+app.use(async (ctx, next) => {
+  const result = await cacheRedis(ctx.url);
+
+  if (result) {
+    ctx.body = result;
+    return;
+  }
+
+  await next();
+
+  if (ctx.status === 200) {
+    cacheRedis.set(ctx.url, ctx.body, { expire: 200 });
+    backupRedist.set(ctx.url, ctx.body, { expire: 200 });
+  }
+
+  if (ctx.status !== 200) {
+    // 请求失败，使用redis兜底
+    const result = await backupRedis();
+    ctx.status = 200;
+    ctx.body = result;
+  }
+});
+```
+
+## 16.serverless
+
+1. 云函数
+   - 不用再因为运维、架构的事情操心
+     - 缩短业务上线周期
+     - 减少出错的概率
+     - 业务开发的上手难度更低
+   - 渐进式
+2. serverless
+   - 屏蔽服务器细节
+3. 其他下沉框架，屏蔽细节
+   - Node.js => threadless
+   - Javascript => typeless
+   - Java/C# => 内存管理 less
+   - 可视化开发 => 编程 less
