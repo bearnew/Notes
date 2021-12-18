@@ -59,7 +59,15 @@
    ```
 
 4. `preset`是`babel`插件的组合
+
    1. Babel 提供了 "loose" 选项，用以在特定的转换情况下在符合规范、文件大小和速度之间做折中。
+
+      - 标准模式：转换时尽可能遵循、接近 ES6 语义
+      - 松散模式：转换为简单的 ES5 实现。
+      - `loose`模式优点：转换出来的代码更简洁，没有为了接近 ES6 而添加的繁杂逻辑，文件更小，运行速度更快，兼容性更好
+      - `loose`模式缺点：以后直接使用原生 ES6 时可能会遇到问题。需要留意。
+      - `100kb`能减少`5kb`
+
       ```js
       {
           "presets": [
@@ -70,6 +78,90 @@
           ]
       }
       ```
+
+      ```js
+      // 转换前的代码
+      class Person {
+        constructor(name) {
+          this.name = name;
+        }
+
+        sayHi() {
+          return `Hi, this is ${this.name}`;
+        }
+      }
+      ```
+
+      ```js
+      // 标准模式-转换后的代码
+      "use strict";
+      var _createClass = (function () {
+        function defineProperties(target, props) {
+          for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];
+            descriptor.enumerable = descriptor.enumerable || false;
+            descriptor.configurable = true;
+            if ("value" in descriptor) descriptor.writable = true;
+            Object.defineProperty(target, descriptor.key, descriptor);
+          }
+        }
+        return function (Constructor, protoProps, staticProps) {
+          if (protoProps) defineProperties(Constructor.prototype, protoProps);
+          if (staticProps) defineProperties(Constructor, staticProps);
+          return Constructor;
+        };
+      })();
+
+      function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+          throw new TypeError("Cannot call a class as a function");
+        }
+      }
+
+      var Person = (function () {
+        function Person(name) {
+          _classCallCheck(this, Person);
+
+          this.name = name;
+        }
+
+        _createClass(Person, [
+          {
+            key: "sayHi",
+            value: function sayHi() {
+              return "Hi, this is " + this.name;
+            },
+          },
+        ]);
+
+        return Person;
+      })();
+      ```
+
+      ```js
+      // loose模式转换后的代码
+      "use strict";
+      function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+          throw new TypeError("Cannot call a class as a function");
+        }
+      }
+
+      var Person = (function () {
+        function Person(name) {
+          _classCallCheck(this, Person);
+
+          this.name = name;
+        }
+
+        Person.prototype.sayHi = function sayHi() {
+          return "Hi, this is " + this.name;
+        };
+
+        return Person;
+      })();
+      ```
+
    2. options
       - targets
         - 定义项目需要支持的环境, 使用[browserlist](https://github.com/browserslist/browserslist) 参数
@@ -162,6 +254,7 @@
           ]
       }
       ```
+
 5. `@babel/polyfill`
    1. 用于业务项目中，而非库/工具中
    2. 使用`babel-node`时，`polyfill`将被自动加载
