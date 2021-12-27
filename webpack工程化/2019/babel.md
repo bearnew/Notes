@@ -502,6 +502,10 @@
   - `babel-node`
 - `?cacheDirectory`不支持`babel`中的`react-css-module`的`generateScopedName`使用函数
 
+## Babel 插件
+
+- https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/plugin-handbook.md
+
 ## 其他
 
 1. `tree shaking`
