@@ -182,3 +182,9 @@ const makeTuple = <T, Y>(x: T, y: Y) => [x, y];
 const v1 = makeTuple(1, "one");
 const v2 = makeTuple<boolean, number>(true, 1);
 ```
+
+11. `Infer`推断类型，`Infer`只能在条件类型里面使用
+
+```js
+type Flatten<Type> = Type extends Array<infer Item> ? Item : Type;
+```
