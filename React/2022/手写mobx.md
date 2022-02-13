@@ -1,4 +1,9 @@
-class EventEmitter {
+# 手写 mobx
+
+## 1.实现发布订阅
+
+```js
+export default class EventEmitter {
   list = new WeakMap();
   on(obj, event, fn) {
     let targetObj = this.list.get(obj);
@@ -27,24 +32,24 @@ class EventEmitter {
     }
   }
 }
+```
 
+## 2.实现 mobx
+
+```js
 const em = new EventEmitter();
 let currentFn;
 
 const autorun = (fn) => {
-  console.log("7777");
-  //   const warpFn = () => {
-  //     currentFn = warpFn;
-  //     console.log("aaaa");
-  //     fn();
-  //     console.log("bbbbb");
-  //     currentFn = null;
-  //     console.log("555555", currentFn);
-  //   };
-  //   warpFn();
-  currentFn = fn;
-  fn();
-  currentFn = null;
+  //   currentFn = fn;
+  //   fn();
+  //   currentFn = null;
+  const warpFn = () => {
+    currentFn = warpFn;
+    fn();
+    currentFn = null;
+  };
+  warpFn();
 };
 
 const observable = (obj) => {
@@ -53,9 +58,7 @@ const observable = (obj) => {
       if (typeof target[propKey] === "object") {
         return observable(target[propKey]);
       } else {
-        console.log("11111", currentFn);
         if (currentFn) {
-          console.log("ppppp", propKey);
           em.on(target, propKey, currentFn);
         }
         return target[propKey];
@@ -70,22 +73,4 @@ const observable = (obj) => {
     },
   });
 };
-
-const store = observable({ a: 1, b: { c: 1 } });
-
-console.log("33333");
-
-autorun(() => {
-  console.log("6666");
-  if (store.a === 2) {
-    console.log(store.b.c);
-  }
-  console.log("88888");
-});
-console.log("444444");
-
-store.a = 2;
-console.log("rrrrr");
-store.b.c = 5;
-console.log("yyyyy");
-store.b.c = 6;
+```
