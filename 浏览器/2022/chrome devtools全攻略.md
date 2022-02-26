@@ -62,3 +62,55 @@
 - 递增 100
   - Mac： ⌘+向上和 ⌘+向下
   - Windows： Ctrl +向上和 Ctrl +向下
+
+### 14.console settings
+
+- ![settings](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/console_settings.png?raw=true)
+
+### 15.event listener
+
+- ![event_listener](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/event_listener.png?raw=true)
+
+### 16.file global search
+
+- ![file_global_search](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/file_search.png?raw=true)
+
+### 17.lighthouse
+
+- ![lighthouse](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/lighthouse.png?raw=true)
+
+### 18.manifest
+
+- ![manifest](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/manifest.png)
+
+### 19.file coverage
+
+- ![coverage](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/more_tools_coverage2.png)
+
+### 20.code global search
+
+- ![search](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/more_tools_search.png)
+
+### 21.performance
+
+- ![performance](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/performance_reload.png)
+
+### 22.render painting
+
+- ![render_painting](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/render_paint_flashing.png)
+
+### 23.request blocking
+
+- ![request_blocking](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/request_blocking.png)
+
+### 24.security
+
+- ![security](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/security.png)
+
+### 25.source filesystem
+
+- ![source filesystem](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/sources_filesystem.png)
+
+### 26.web assets
+
+- ![web assets](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/web_assets.png)
