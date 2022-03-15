@@ -1,21 +1,23 @@
-let _state = [],
-    _index = 0;
-function useState(initialState) {
-    console.log(_index, initialState);
-    let curIndex = _index; // 记录当前操作的索引
-    _state[curIndex] =
-        _state[curIndex] === undefined ? initialState : _state[curIndex];
-    const setState = (newState) => {
-        _state[curIndex] = newState;
-        // ReactDOM.render(<App />, rootElement);
-        // _index = 0; // 每更新一次都需要将_index归零，才不会不断重复增加_state
-    };
-    _index += 1; // 下一个操作的索引
-    return [_state[curIndex], setState];
-}
+const a = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve(1);
+    }, 1000);
+});
 
-const [count, setCount] = useState(1);
-setCount(2);
-const [obj, setObj] = useState({ a: 1 });
-setObj({ a: 2 });
-console.log("222222", _state);
+const b = a.then((res) => {
+    return res;
+});
+const c = Promise.resolve(1);
+const d = Promise.reject(1);
+const e = async () => {
+    console.log("eeee");
+};
+e().then(() => {
+    console.log("after eeee");
+});
+console.log(typeof a, typeof b, typeof c, typeof d, typeof e);
+
+Promise.resolve(a).then((res) => {
+    // aaaaa 1(延迟1s后打印)
+    console.log("aaaaa", res);
+});
