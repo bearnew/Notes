@@ -538,6 +538,9 @@ const memoization = (fn) => {
         if (!map.has(key)) {
             map.set(key, fn.call(this, ...args));
             if (cache.size > 10) {
+                // 删除第1次存储的值
+                const firstKey = cache.keys().next().value;
+                cache.delete(firstKey);
             }
         } else {
             return map.get(key);
