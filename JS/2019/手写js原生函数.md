@@ -548,3 +548,228 @@ const memoization = (fn) => {
     };
 };
 ```
+
+#### 18.判断数据类型
+
+```js
+// typeof 可以正确识别：Undefined、Boolean、Number、String、Symbol、Function
+// myTypeof 识别Null、Date、Array
+const myTypeof = (obj) => {
+    return Object.prototype.toString.call(obj).slice(8, -1).toLowerCase();
+};
+
+typeOf([]); // 'array'
+typeOf({}); // 'object'
+typeOf(new Date()); // 'date'
+```
+
+#### 19.requestIdleCallback 实现
+
+```js
+if (typeof window !== "undefined" && !window.requestIdleCallback) {
+    window.requestIdleCallback = function (callback) {
+        return setTimeout(() => {
+            callback({
+                didTimeout: false,
+                timeRemaining() {
+                    return Infinity;
+                },
+            });
+        });
+    };
+
+    window.cancelIdleCallback = function (callbackID) {
+        clearTimeout(callbackID);
+    };
+}
+```
+
+#### 20.useState
+
+```js
+// // useState
+// const fiberStates = {}; // 当前组件所有states
+// let curr; // 当前state指针
+// const useState = (initialState) => {
+//     // state: 取链表里保存的或初始值
+//     const state = fiberStates[curr] || initialState;
+//     // setState
+//     const setState = (newState) => {
+//         fiberStates[curr] = newState;
+//         render(); // 进入渲染流程
+//     };
+
+//     curr = curr.next;
+//     return [state, setState];
+// };
+
+let _state = [],
+    _index = 0;
+function useState(initialState) {
+    let curIndex = _index; // 记录当前操作的索引
+    _state[curIndex] =
+        _state[curIndex] === undefined ? initialState : _state[curIndex];
+    const setState = (newState) => {
+        _state[curIndex] = newState;
+        ReactDOM.render(<App />, rootElement);
+    };
+    _index += 1; // 下一个操作的索引
+    return [_state[curIndex], setState];
+}
+
+const [count, setCount] = useState(1);
+setCount(2);
+const [obj, setObj] = useState({ a: 1 });
+setObj({ a: 2 });
+console.log("222222", _state);
+```
+
+#### 21.useEffect
+
+```js
+const lastDepsBox = [];
+const lastClearCallbacks = [];
+let index = 0;
+
+const useEffect = (callback, deps) => {
+    const lastDeps = lastDepsBox[index];
+    const changed =
+        !lastDeps || // 首次渲染，肯定触发
+        !deps || // deps不传，次次触发
+        deps.some((dep, index) => dep !== lastDeps[index]); // 正常比较
+
+    if (changed) {
+        lastDepsBox[index] = deps;
+        if (lastClearCallbacks[index]) {
+            // 清除函数
+            lastClearCallbacks[index]();
+        }
+        lastClearCallbacks[index] = callback();
+    }
+    index++;
+};
+```
+
+#### 22.数组去重
+
+```js
+// ES5
+function unique(arr) {
+    return arr.filter((item, index, rawArr) => {
+        return rawArr.indexOf(item) === index;
+    });
+}
+```
+
+```js
+// ES6
+function unique2(arr) {
+    return [...new Set(arr)];
+}
+```
+
+```js
+// 空间
+function unique3(arr) {
+    const map = new Map();
+    const result = [];
+    arr.forEach((item) => {
+        if (!map.has(item)) {
+            result.push(item);
+            map.set(item, 1);
+        }
+    });
+
+    return result;
+}
+```
+
+#### 23.数组扁平化
+
+```js
+const flatten1 = (arr) =>
+    arr.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
+```
+
+```js
+function flatten2(a) {
+    return Array.isArray(a) ? [].concat(...a.map(flatten)) : a;
+}
+```
+
+#### 24.解析 url 参数
+
+```js
+const url = "https://www.baidu.com:8080/aaa/1.html?id=1&key=test#ffff";
+const link = window.document.createElement("a");
+link.href = url;
+// '?id=1&key=test'
+console.log(link, link.search);
+
+function parseUrl(url) {
+    // ['https://www.baidu.com:8080/aaa/1.html?id=1&key=test#ffff', 'id=1&key=test#ffff', index: 0, input: 'https://www.baidu.com:8080/aaa/1.html?id=1&key=test#ffff', groups: undefined]
+    const str = /.+\?(.+)$/.exec(url);
+    const arr = str[1].split("&");
+    let obj = {};
+    arr.forEach((param) => {
+        if (/=/.test(param)) {
+            // 有value的参数
+            let [key, val] = param.split("=");
+            // 解码
+            val = decodeURIComponent(val);
+            // 转为数字
+            val = /^\d+$/.test(val) ? parseFloat(val) : val;
+            if (obj.hasOwnProperty(key)) {
+                obj[key] = [].concat(obj[key], val);
+            } else {
+                obj[key] = val;
+            }
+        } else {
+            // 没有value的参数
+            obj[param] = true;
+        }
+    });
+
+    return obj;
+}
+```
+
+#### 25.字符串模板
+
+```js
+function render(template, data) {
+    // 模板字符串正则
+    const reg = /\{\{(\w+)\}\}/;
+    if (reg.test(template)) {
+        const name = reg.exec(template)[1];
+        template = template.replace(reg, data[name]);
+        return render(template, data);
+    }
+
+    return template;
+}
+
+let template = "我是{{name}}，年龄{{age}}，性别{{sex}}";
+let person = {
+    name: "布兰",
+    age: 12,
+};
+var html = render(template, person);
+// 我是布兰，年龄12，性别undefined
+console.log(html);
+```
+
+#### 26.偏函数
+
+```js
+function partial(fn, ...args) {
+    return (...arg) => {
+        return fn(...args, ...arg);
+    };
+}
+function add(a, b, c) {
+    return a + b + c;
+}
+let partialAdd = partial(add, 1);
+partialAdd(2, 3);
+```

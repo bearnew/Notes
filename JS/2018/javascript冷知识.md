@@ -1,8 +1,11 @@
-## javascript冷知识
+## javascript 冷知识
+
 #### 1.运算符
-> 二进制，一个正数，按照绝对值大小转换成的二进制数；一个负数按照绝对值大小转换成的二进制数，然后最高位补1，称为原码。
-> <br/>比如 00000000 00000000 00000000 00000101 是 5的 原码。
-> <br/>10000000 00000000 00000000 00000101 是 -5的 原码。
+
+> 二进制，一个正数，按照绝对值大小转换成的二进制数；一个负数按照绝对值大小转换成的二进制数，然后最高位补 1，称为原码。
+> <br/>比如 00000000 00000000 00000000 00000101 是 5 的 原码。
+> <br/>10000000 00000000 00000000 00000101 是 -5 的 原码。
+
 <table border="1">
     <tr align="center">
         <th>name</th>
@@ -54,8 +57,8 @@
     </tr>
 </table>
 
-
 取整方法总结
+
 ```
 ~~1.23  两次否运算，舍弃小数部分
 1.23^0  异或运算符，舍弃小数部分
@@ -70,54 +73,64 @@ Math.ceil()向上取整
 ```
 
 #### 2.单行写一个评级组件
+
 ```js
-"★★★★★☆☆☆☆☆".slice(5 - rate, 10 - rate); 
+"★★★★★☆☆☆☆☆".slice(5 - rate, 10 - rate);
 ```
+
 #### 3.数组扁平化
+
 ```js
-const flatten = (ary) => ary.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
+const flatten = (ary) =>
+    ary.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
 ```
+
 ```js
 function flatten(a) {
     return Array.isArray(a) ? [].concat(...a.map(flatten)) : a;
 }
 ```
-#### 4.将arguments对象转换成数组
+
+#### 4.将 arguments 对象转换成数组
+
 ```js
 var argArray = Array.prototype.slice.call(arguments);
 
 // ES6：
-var argArray = Array.from(arguments)
+var argArray = Array.from(arguments);
 
 // or
 var argArray = [...arguments];
 ```
-#### 5.使用```~x.indexOf('y')```来简化```x.indexOf('y')>-1```
+
+#### 5.使用`~x.indexOf('y')`来简化`x.indexOf('y')>-1`
+
 ```js
-var str = 'hello world';
-if (str.indexOf('lo') > -1) {
+var str = "hello world";
+if (str.indexOf("lo") > -1) {
     // ...
 }
 
-if (~str.indexOf('lo')) {
+if (~str.indexOf("lo")) {
     // ...
 }
-
 ```
+
 #### 6.数据安全类型检查
+
 ```js
 // 对象
 function isObject(value) {
-  return Object.prototype.toString.call(value).slice(8, -1) === 'Object';
+    return Object.prototype.toString.call(value).slice(8, -1) === "Object";
 }
 
 // 数组
 function isArray(value) {
-  return Object.prototype.toString.call(value).slice(8, -1) === 'Array';
+    return Object.prototype.toString.call(value).slice(8, -1) === "Array";
 }
 
 // 函数
 function isFunction(value) {
-  return Object.prototype.toString.call(value).slice(8, -1) === 'Function';
+    return Object.prototype.toString.call(value).slice(8, -1) === "Function";
 }
 ```
