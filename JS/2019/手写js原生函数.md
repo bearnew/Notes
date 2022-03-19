@@ -697,6 +697,17 @@ function flatten2(a) {
 }
 ```
 
+```js
+const flatten3 = (arr) => {
+    return JSON.parse("[" + JSON.stringify(arr).replace(/\[|\]/g, "") + "]");
+};
+```
+
+```js
+// 拍平无数层
+[1, 2, [3, 4, [5]]].flat(Infinity);
+```
+
 #### 24.解析 url 参数
 
 ```js
@@ -739,23 +750,42 @@ function parseUrl(url) {
 ```js
 function render(template, data) {
     // 模板字符串正则
-    const reg = /\{\{(\w+)\}\}/;
+    // 字母、数字、下划线和点
+    const reg = /\{\{((\w|\.)+)\}\}/;
     if (reg.test(template)) {
         const name = reg.exec(template)[1];
-        template = template.replace(reg, data[name]);
+        if (name.includes(".")) {
+            const keys = name.split(".");
+            let index = 0;
+            let o = data;
+            while (index < keys.length) {
+                const key = keys[index];
+                o = o[key];
+                index++;
+            }
+            template = template.replace(reg, o);
+        } else {
+            template = template.replace(reg, data[name]);
+        }
+
         return render(template, data);
     }
 
     return template;
 }
 
-let template = "我是{{name}}，年龄{{age}}，性别{{sex}}";
+let template =
+    "我是{{name}}，年龄{{age}}，性别{{sex}}，我的爸爸是{{parent.father}}";
 let person = {
     name: "布兰",
     age: 12,
+    parent: {
+        father: "杰克",
+        mother: "丽萨",
+    },
 };
 var html = render(template, person);
-// 我是布兰，年龄12，性别undefined
+// 我是布兰，年龄12，性别undefined，我的爸爸是杰克
 console.log(html);
 ```
 
@@ -922,4 +952,191 @@ const obj2 = { c: 15 };
 const obj3 = { b: 20, d: 20 };
 // {0: 1, 1: 2, 2: 3, a: 18, b: 20, c: 15, d: 20}
 console.log("111111", Object.assign(obj1, obj2, obj3, [1, 2, 3]));
+```
+
+#### 32.实现 Object.is
+
+```js
+const myObjectIs = (x, y) => {
+    if (x === y) {
+        // +0与-0应该不相等
+        // x和y相等的时候，只处理+0和-0的情况
+        return x !== 0 || y !== 0 || 1 / x === 1 / y;
+    } else {
+        // NaN与NaN应该相等
+        return x !== x && y !== y;
+    }
+};
+
+console.log(+0 === -0); // true
+console.log(NaN === NaN); // false
+console.log(myObjectIs(+0, -0)); // false
+console.log(myObjectIs(NaN, NaN)); // true
+```
+
+#### 33.Promise 并行限制
+
+```js
+class Scheduler {
+    constructor() {
+        this.queue = [];
+        this.maxCount = 2;
+        this.runCount = 0;
+    }
+
+    add(promise) {
+        this.queue.push(promise);
+    }
+
+    taskStar() {
+        for (let i = 0; i < this.maxCount; i++) {
+            this.request();
+        }
+    }
+
+    request() {
+        if (
+            !this.queue ||
+            !this.queue.length ||
+            this.runCount >= this.maxCount
+        ) {
+            return;
+        }
+
+        this.queue
+            .shift()()
+            .then(() => {
+                this.runCount--;
+                this.request();
+            });
+        this.runCount++;
+    }
+}
+
+const timeOutRequest = (time) =>
+    new Promise((resolve, reject) => {
+        setTimeout(resolve, time);
+    });
+const scheduler = new Scheduler();
+const addTask = (time, order) => {
+    scheduler.add(() => timeOutRequest(time).then(() => console.log(order)));
+};
+addTask(1000, "1");
+addTask(500, "2");
+addTask(300, "3");
+addTask(400, "4");
+
+// 1、2两个任务开始执行
+// 500ms时，2任务执行完毕，输出2，任务3开始执行
+// 800ms时，3任务执行完毕，输出3，任务4开始执行
+// 1000ms时，1任务执行完毕，输出1，此时只剩下4任务在执行
+// 1200ms时，4任务执行完毕，输出4
+scheduler.taskStart();
+```
+
+#### 34.滚动加载
+
+```js
+window.addEventListener(
+    "scroll",
+    function () {
+        const clientHeight = document.documentElement.clientHeight;
+        const scrollTop = document.documentElement.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight;
+        if (clientHeight + scrollTop >= scrollHeight) {
+            // 检测到滚动至页面底部，进行后续操作
+            // ...
+        }
+    },
+    false
+);
+```
+
+#### 35.分片渲染
+
+```js
+// 分片渲染
+function fragmentRender(total, perCount) {
+    // 需要循环插入的次数
+    const loopCount = Math.ceil(total / perCount);
+    // 已经渲染了多少次
+    let renderCount = 0;
+    const ul = document.querySelector("ul");
+    loop();
+
+    function loop() {
+        if (renderCount < loopCount) {
+            window.requestAnimationFrame(add);
+        }
+    }
+    function add() {
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < perCount; i++) {
+            const li = document.createElement("li");
+            li.innerText = "test";
+            fragment.appendChild(li);
+        }
+
+        ul.appendChild(fragment);
+        renderCount++;
+        loop();
+    }
+}
+
+setTimeout(() => {
+    // 插入10万数据，每次插入20条
+    fragmentRender(100000, 20);
+}, 0);
+```
+
+#### 36.打印当前网页多少 HTML 元素
+
+```js
+const fn = () => {
+    return [
+        ...new Set([...document.querySelectorAll("*")].map((el) => el.tagName)),
+    ].length;
+};
+```
+
+#### 37.将 virtualDom 转换成真实 dom
+
+```js
+// vnode结构：
+// {
+//   tag,
+//   attrs,
+//   children,
+// }
+
+//Virtual DOM => DOM
+function render(vnode, container) {
+    container.appendChild(_render(vnode));
+}
+
+function _render(vnode) {
+    // 数字需要转换成字符串
+    if (typeof vnode === "number") {
+        vnode = String(vnode);
+    }
+    // 字符串直接创建文本节点
+    if (typeof vnode === "string") {
+        // createTextNode只接收字符串
+        return document.createTextNode(vnode);
+    }
+    // 普通dom
+    const dom = document.createElement(vnode.tag);
+    if (vnode.attrs) {
+        // 遍历属性
+        Object.keys(vnode.attrs).forEach((key) => {
+            const value = vnode.attrs[key];
+            dom.setAttribute(key, value);
+        });
+    }
+
+    // 子数组进行递归操作
+    vnode.children.forEach((child) => render(child, dom));
+
+    return dom;
+}
 ```

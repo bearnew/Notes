@@ -101,6 +101,9 @@ var argArray = Array.from(arguments);
 
 // or
 var argArray = [...arguments];
+
+// or
+var argArray = Array.prototype.concat.apply([], arguments);
 ```
 
 #### 5.使用`~x.indexOf('y')`来简化`x.indexOf('y')>-1`
