@@ -773,3 +773,153 @@ function add(a, b, c) {
 let partialAdd = partial(add, 1);
 partialAdd(2, 3);
 ```
+
+#### 27.手写 forEach
+
+```js
+Array.prototype.myForEach = function (callback, thisArg) {
+    if (this === null) {
+        throw new TypeError("this is null or undefined");
+    }
+    if (typeof callback !== "function") {
+        throw new TypeError(callback + "is not a function");
+    }
+    const Obj = Object(this);
+    // 保证转换后的值为正整数
+    // 底层做了 2 层转换，第一是非 number 转成 number 类型，第二是将 number 转成 Uint32 类型
+    const len = Obj.length >>> 0;
+    let k = 0;
+    while (k < len) {
+        if (k in Obj) {
+            callback.call(thisArg, Obj[k], k, Obj);
+        }
+        k++;
+    }
+};
+
+const arr = [1, 2, 3];
+arr.myForEach((item, idx) => {
+    console.log(idx, item);
+});
+```
+
+#### 28.手写 Map
+
+```js
+Array.prototype.myMap = function (callback, thisArg) {
+    if (this === null) {
+        throw new TypeError("this is null or undefined");
+    }
+    if (typeof callback !== "function") {
+        throw new TypeError(callback + "is not a function");
+    }
+    const Obj = Object(this);
+    // 保证转换后的值为正整数
+    // 底层做了 2 层转换，第一是非 number 转成 number 类型，第二是将 number 转成 Uint32 类型
+    const len = Obj.length >>> 0;
+    const res = [];
+    for (let k = 0; k < len; k++) {
+        res[k] = callback.call(thisArg, Obj[k], k, Obj);
+    }
+
+    return res;
+};
+
+const arr = [1, 2, 3];
+const arr2 = arr.myMap((item, idx) => {
+    return item + 1;
+});
+console.log("111111", arr2);
+```
+
+#### 29.手写 filter
+
+```js
+Array.prototype.myFilter = function (callback, thisArg) {
+    if (this === null) {
+        throw new TypeError("this is null or undefined");
+    }
+    if (typeof callback !== "function") {
+        throw new TypeError(callback + "is not a function");
+    }
+    const Obj = Object(this);
+    // 保证转换后的值为正整数
+    // 底层做了 2 层转换，第一是非 number 转成 number 类型，第二是将 number 转成 Uint32 类型
+    const len = Obj.length >>> 0;
+    const res = [];
+    for (let k = 0; k < len; k++) {
+        const isPass = callback.call(thisArg, Obj[k], k, Obj);
+        if (isPass) {
+            res.push(Obj[k]);
+        }
+    }
+
+    return res;
+};
+
+const arr = [1, 2, 3];
+const arr2 = arr.myFilter((item, idx) => {
+    return item > 1;
+});
+console.log("111111", arr2);
+```
+
+#### 30.手写 some
+
+```js
+Array.prototype.mySome = function (callback, thisArg) {
+    if (this === null) {
+        throw new TypeError("this is null or undefined");
+    }
+    if (typeof callback !== "function") {
+        throw new TypeError(callback + "is not a function");
+    }
+    // 使用Object包裹，使Obj.length不报错
+    const Obj = Object(this);
+    // 保证转换后的值为正整数
+    // 底层做了 2 层转换，第一是非 number 转成 number 类型，第二是将 number 转成 Uint32 类型
+    const len = Obj.length >>> 0;
+    for (let k = 0; k < len; k++) {
+        const isPass = callback.call(thisArg, Obj[k], k, Obj);
+        if (isPass) {
+            return isPass;
+        }
+    }
+
+    return false;
+};
+
+const arr = [1, 2, 3];
+const isExist = arr.mySome((item, idx) => {
+    return item > 1;
+});
+console.log("111111", isExist);
+```
+
+#### 31.Object.assign
+
+```js
+function myAssign(target, ...source) {
+    if (target == null) {
+        throw new TypeError("Cannot convert undefined or null to object");
+    }
+    const res = Object(target);
+    source.forEach((obj) => {
+        if (!!obj) {
+            for (let k in obj) {
+                if (obj.hasOwnProperty(k)) {
+                    res[k] = obj[k];
+                }
+            }
+        }
+    });
+
+    return res;
+}
+
+const obj1 = { a: 18, b: 30 };
+const obj2 = { c: 15 };
+const obj3 = { b: 20, d: 20 };
+// {0: 1, 1: 2, 2: 3, a: 18, b: 20, c: 15, d: 20}
+console.log("111111", Object.assign(obj1, obj2, obj3, [1, 2, 3]));
+```
