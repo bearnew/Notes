@@ -1140,3 +1140,228 @@ function _render(vnode) {
     return dom;
 }
 ```
+
+#### 38.数组转树
+
+```js
+function dfs(list, pid) {
+    const nodes = list.filter((item) => item.pid === pid) || []; // 找到第一层节点
+    return nodes.map((item) => ({ ...item, children: dfs(list, item.id) })); // 构建该层每个节点: 其子节点用dfs构造即可
+}
+
+// 测试
+const data = [
+    // 注意这里，专门把pid为1的元素放一个在前面
+    { id: 2, name: "部门2", pid: 1 },
+    { id: 1, name: "部门1", pid: 0 },
+    { id: 3, name: "部门3", pid: 1 },
+    { id: 4, name: "部门4", pid: 3 },
+    { id: 5, name: "部门5", pid: 4 },
+    { id: 7, name: "部门7", pid: 6 },
+];
+// pid为父元素的id
+console.log(dfs(data, 0));
+```
+
+#### 39.树转数组
+
+```js
+function treeToArr(tree) {
+    const list = [];
+    const queue = [...tree];
+    while (queue.length) {
+        const node = queue.shift();
+        const children = node.children;
+        // 取出当前节点的子节点，放到队列中，等待下一次循环
+        if (children.length > 0) {
+            queue.push(...children);
+        }
+        delete node.children;
+        list.push(node);
+    }
+
+    return list;
+}
+
+const tree = [
+    {
+        id: 1,
+        name: "部门1",
+        pid: 0,
+        children: [
+            { id: 2, name: "部门2", pid: 1, children: [] },
+            {
+                id: 3,
+                name: "部门3",
+                pid: 1,
+                children: [
+                    {
+                        id: 4,
+                        name: "部门4",
+                        pid: 3,
+                        children: [
+                            { id: 5, name: "部门5", pid: 4, children: [] },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+];
+console.log(treeToArr(tree));
+```
+
+#### 40.setInterval 实现 setTimeout
+
+```js
+function mySettimeout(fn, t) {
+    const timer = setInterval(() => {
+        fn();
+        clearInterval(timer);
+    }, t);
+    return () => {
+        clearInterval(timer);
+    };
+}
+function log() {
+    console.log("test test test");
+}
+const disposer = mySettimeout(log, 3000);
+setTimeout(() => {
+    disposer();
+}, 2000);
+```
+
+#### 41.setTimeout 实现 setInterval
+
+```js
+function myInterval(fn, t) {
+    let timer = null;
+    function interval() {
+        fn();
+        timer = setTimeout(interval, t);
+    }
+    timer = setTimeout(interval, t);
+    return () => {
+        clearTimeout(timer);
+    };
+}
+function log() {
+    console.log("test test test");
+}
+const disposer = myInterval(log, 1000);
+setTimeout(() => {
+    disposer();
+}, 3000);
+```
+
+#### 42.版本号排序
+
+```js
+const sortVersion = (arr) => {
+    return arr.sort((x, y) => {
+        let i = 0;
+        const list1 = x.split(".");
+        const list2 = y.split(".");
+
+        while (true) {
+            const s1 = list1[i];
+            const s2 = list2[i];
+            i++;
+            if (s1 === undefined || s2 === undefined) {
+                return list2.length - list1.length;
+            }
+            if (s1 === s2) continue;
+            return s2 - s1;
+        }
+    });
+};
+
+const versionList = ["0.1.1", "2.3.3", "0.302.1", "4.2", "4.3.5", "4.3.4.5"];
+console.log(sortVersion(versionList));
+```
+
+#### 43.LRU（Least rencently used）缓存
+
+```js
+//  一个Map对象在迭代时会根据对象中元素的插入顺序来进行
+// 新添加的元素会被插入到map的末尾，整个栈倒序查看
+class LRUCache {
+    constructor(capacity) {
+        this.capacity = capacity;
+        this.cache = new Map();
+    }
+
+    get(key) {
+        if (this.cache.has(key)) {
+            const tempVal = this.cache.get(key);
+            this.cache.delete(key);
+            this.cache.set(key, tempVal);
+            return tempVal;
+        } else {
+            return -1;
+        }
+    }
+
+    put(key, val) {
+        // key存在，仅修改值
+        if (this.cache.has(key)) {
+            this.cache.delete(key);
+            this.cache.set(key, val);
+        } else if (this.cache.size < this.capacity) {
+            // key不存在，cache还可以存储
+            this.cache.set(key, val);
+        } else {
+            // key不存在，cache已满
+            this.cache.delete(this.cache.keys().next().value);
+            this.cache.set(key, val);
+        }
+    }
+}
+
+let cache = new LRUCache(2);
+cache.put(1, 1);
+cache.put(2, 2);
+console.log("cache.get(1)", cache.get(1)); // 返回  1
+cache.put(3, 3); // 该操作会使得密钥 2 作废
+console.log("cache.get(2)", cache.get(2)); // 返回 -1 (未找到)
+cache.put(4, 4); // 该操作会使得密钥 1 作废
+console.log("cache.get(1)", cache.get(1)); // 返回 -1 (未找到)
+console.log("cache.get(3)", cache.get(3)); // 返回  3
+console.log("cache.get(4)", cache.get(4)); // 返回  4
+```
+
+#### 44.大数相加
+
+```js
+function bigNumAdd(a, b) {
+    let str1 = String(a);
+    let str2 = String(b);
+
+    const maxLen = Math.max(str1.length, str2.length);
+    str1 = str1.padStart(maxLen, 0);
+    str2 = str2.padStart(maxLen, 0);
+
+    let val = 0;
+    let decimal = 0; // 进位
+    let sum = "";
+    for (let i = maxLen - 1; i >= 0; i--) {
+        val = parseInt(str1[i]) + parseInt(str2[i]) + decimal;
+        decimal = Math.floor(val / 10);
+        sum = (val % 10) + sum;
+    }
+
+    if (decimal) {
+        sum = decimal + sum;
+    }
+
+    return sum;
+}
+
+let a = "9007199254740991";
+let b = "1234567899999999999";
+let c = "1243575099254740990";
+console.log(Number(b)); // 1234567900000000000
+console.log(Number(b) > Number.MAX_SAFE_INTEGER); // 大于最大安全数，或小于MIN_SAFE_INTEGER，精度会丢失
+console.log(bigNumAdd(a, b)); // 1243575099254740990
+```
