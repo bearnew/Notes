@@ -1365,3 +1365,78 @@ console.log(Number(b)); // 1234567900000000000
 console.log(Number(b) > Number.MAX_SAFE_INTEGER); // 大于最大安全数，或小于MIN_SAFE_INTEGER，精度会丢失
 console.log(bigNumAdd(a, b)); // 1243575099254740990
 ```
+
+#### 45.闭包打印
+
+```js
+// 依次打印1 2 3 4 5
+for (var i = 1; i <= 5; i++) {
+    (function (i) {
+        setTimeout(() => console.log(i), 1000 * i);
+    })(i);
+}
+```
+
+#### 46.生成随机数
+
+```js
+function getRandom(min, max) {
+    // random返回介于 0（包含） ~ 1（不包含） 之间的一个随机数
+    return Math.floor(Math.random() * (max - min)) + min;
+}
+```
+
+#### 47.正则千分位
+
+```js
+//无小数点
+let num1 = "1321434322222";
+num1.replace(/(\d)(?=(\d{3})+$)/g, "$1,");
+//有小数点
+let num2 = "342243242322.34";
+num2.replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
+
+function formatNum(num) {
+    return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+console.log("1000000".replace(/\b/g, ",")); // ,1000000, 单词的开始和结束
+console.log("1000000".replace(/\B/g, ",")); // 1,0,0,0,0,0,0 每个字符间位置
+console.log(/React(?=DOM|Native)/g.test("ReactDOM")); // true 正向肯定预查
+console.log(/React(?!Router)/g.test("ReactDOM")); // false 正向否定预查
+console.log(formatNum(num1)); // 1,321,434,322,222
+console.log(formatNum(num2)); // 342,243,242,322.34
+```
+
+#### 48.转驼峰
+
+```js
+var formatCamel = function (s) {
+    return s.replace(/-\w/g, function (x) {
+        return x.slice(1).toUpperCase();
+    });
+};
+
+console.log(formatCamel("get-element-by-id")); // getElementById
+```
+
+#### 49.出现最多的字符和个数
+
+```js
+let str = "abcabcabcbbccccc";
+let num = 0;
+let char = "";
+
+// 使其按照一定的次序排列
+str = str.split("").sort().join("");
+// "aaabbbbbcccccccc"
+
+// \1表示重复第一个括号里面的内容
+let re = /(\w)\1+/g;
+str.replace(re, (match, val, index, str) => {
+    if (num < match.length) {
+        num = match.length;
+        char = val;
+    }
+});
+console.log(`字符最多的是${char}，出现了${num}次`);
+```
