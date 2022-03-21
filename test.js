@@ -1,17 +1,20 @@
-let str = "abcabcabcbbccccc";
-let num = 0;
-let char = "";
-
-// 使其按照一定的次序排列
-str = str.split("").sort().join("");
-// "aaabbbbbcccccccc"
-
-// \1表示重复第一个括号里面的内容
-let re = /(\w)\1+/g;
-str.replace(re, (match, val, index, str) => {
-    if (num < match.length) {
-        num = match.length;
-        char = val;
+function myGet(obj, path, defaultVal) {
+    let pathArr = path;
+    if (!Array.isArray(path)) {
+        pathArr = path.replace(/\[("|')?(\w+)("|')?\]/, ".$1");
     }
-});
-console.log(`字符最多的是${char}，出现了${num}次`);
+    let res = obj;
+    for (const p of pathArr) {
+        res = (res || {})[p];
+    }
+
+    return res === undefined ? defaultVal : res;
+}
+
+var object = { a: [{ b: { c: 3 } }] };
+// => 3
+console.log(myGet(object, "a[0].b.c"));
+// => 3
+console.log(myGet(object, ["a", "0", "b", "c"]));
+// => 'default'
+console.log(myGet(object, "a.b.c", "default"));

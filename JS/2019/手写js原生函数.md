@@ -1440,3 +1440,20 @@ str.replace(re, (match, val, index, str) => {
 });
 console.log(`字符最多的是${char}，出现了${num}次`);
 ```
+
+#### 50.实现 delay
+
+```js
+function delay(fn, ms, ...args) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            Promise.resolve(fn(...args)).then(resolve);
+        }, ms);
+    });
+}
+
+function log(name) {
+    console.log("111111" + name);
+}
+delay(log, 2000, "jay");
+```
