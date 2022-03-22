@@ -1,23 +1,20 @@
-const a = new Promise((resolve, reject) => {
-    setTimeout(() => {
-        resolve(1);
-    }, 1000);
-});
+function myGet(obj, path, defaultVal) {
+    let pathArr = path;
+    if (!Array.isArray(path)) {
+        pathStr = path.replace(/\[(?:"|')?(\w+)("|')?\]/, ".$1");
+        pathArr = pathStr.split(".");
+    }
+    let res = obj;
+    for (const p of pathArr) {
+        res = (res || {})[p];
+    }
 
-const b = a.then((res) => {
-    return res;
-});
-const c = Promise.resolve(1);
-const d = Promise.reject(1);
-const e = async () => {
-    console.log("eeee");
-};
-e().then(() => {
-    console.log("after eeee");
-});
-console.log(typeof a, typeof b, typeof c, typeof d, typeof e);
+    return res === undefined ? defaultVal : res;
+}
 
-Promise.resolve(a).then((res) => {
-    // aaaaa 1(延迟1s后打印)
-    console.log("aaaaa", res);
-});
+var object = { a: [{ b: { c: 3 } }] };
+
+console.log(myGet(object, "a[0].b.c")); // 3
+console.log(myGet(object, "a['0'].b.c")); // 3
+console.log(myGet(object, ["a", "0", "b", "c"])); // 3
+console.log(myGet(object, "a.b.c", "default")); // default
