@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+            }
+            .title {
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+            .section {
+                display: flex;
+                overflow: hidden;
+                height: 48px; /*定一个高度*/
+                flex-direction: column;
+                font-size: 30px;
+            }
+            .excerpt {
+                flex: 1; /*自适应剩余空间*/
+                overflow: hidden;
+            }
+            .excerpt::before {
+                content: "...";
+                float: right;
+                height: 100%;
+                display: flex;
+                align-items: flex-end;
+                shape-outside: inset(calc(100% - 1.5em) 0 0);
+            }
+            .excerpt::after {
+                content: "";
+                position: absolute;
+                width: 999vh;
+                height: 999vh;
+                background: #fff;
+                box-shadow: -2em 2em #fff; /*左下的阴影*/
+            }
+        </style>
+    </head>
+    <body>
+        <div class="section">是靠近对方</div>
+        <div class="section">是靠近对方</div>
+        <ul></ul>
+        <script src="./test.ts"></script>
+        <script src="./test.js"></script>
+    </body>
+</html>
