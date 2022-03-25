@@ -23,6 +23,51 @@ var baz = New(foo)(3);
 console.log(baz.a); // 3
 ```
 
+```js
+// 1. 检测 new 的目标是不是非函数，如果是非函数，抛出错误
+// 2. 新建一个空的实例对象。注意不能使用 Object.create 创建，否则当构造函数原型为 null 的时候，实例对象隐式原型也为 null
+// 3. 检测构造函数原型是否为 null，如果不是，则将其作为实例对象的隐式原型，否则将 Object 的原型作为实例对象的隐式原型
+// 4. 执行构造函数，将其 this 指向实例对象，同时传入参数
+// 5. 获得构造函数返回值，判断是不是对象，如果是对象，则作为 new 的返回值，否则将实例对象作为 new 的返回值
+function myNew(Fn, ...args) {
+    // 检测异常
+    if (typeof Fn != "function") {
+        throw new TypeError(Fn + "is not a constructor");
+    }
+    // 创建空的实例对象
+    const instance = {};
+    // 检测构造函数原型是不是对象
+    instance.__proto__ =
+        Fn.prototype instanceof Object ? Fn.prototype : Object.prototype;
+    // 执行构造函数
+    const returnValue = Fn.call(instance, ...args);
+    // 决定 new 的返回值
+    return returnValue instanceof Object ? returnValue : instance;
+}
+
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+}
+const kasong = myNew(Person, "KaSong", 18);
+console.log(kasong); // Person {name: 'KaSong', age: 18}
+
+function Something(name) {
+    this.name = name;
+    return { name: "something" };
+}
+const something = myNew(Something, "XiaoMing");
+console.log(something); // {name: 'something'}
+
+// 构造函数原型为空的情况
+function Fn() {}
+Fn.prototype = null;
+const fn1 = myNew(Fn);
+const fn2 = new Fn();
+console.log(Object.getPrototypeOf(fn1) === Object.prototype); // true
+console.log(Object.getPrototypeOf(fn2) === Object.prototype); // true
+```
+
 #### 2.JSON.stringify
 
 1. 存在 toJSON()方法，序列化时会直接调用该方法
@@ -1482,4 +1527,68 @@ console.log(myGet(object, "a[0].b.c")); // 3
 console.log(myGet(object, "a['0'].b.c")); // 3
 console.log(myGet(object, ["a", "0", "b", "c"])); // 3
 console.log(myGet(object, "a.b.c", "default")); // default
+```
+
+#### 52.实习 lazyMan
+
+```js
+function lazyMan(name) {
+    const { log } = console;
+    const sleep = (s) =>
+        new Promise((res) =>
+            setTimeout(() => log(`Wake up after ${s}`) || res(), s * 1000)
+        );
+    const queue = [() => log(`Hi! This is ${name}!`)];
+    // 这个里用了 push(x) && ctx
+    // push 的返回值是数组 push 后的长度 所以不会出现 0 , 可以放心在箭头函数里使用
+    const ctx = {
+        eat: (food) => queue.push(() => log(`Eat ${food}~`)) && ctx,
+        sleep: (s) => queue.push(() => sleep(s)) && ctx,
+        sleepFirst: (s) => queue.unshift(() => sleep(s)) && ctx,
+    };
+
+    // 微任务，和Promise.resolve()执行时机一样
+    queueMicrotask(async () => {
+        while (queue.length) {
+            await queue.shift()();
+        }
+    });
+
+    return ctx;
+}
+
+lazyMan("Hank");
+// 打印：Hi! This is Hank!
+
+lazyMan("Hank").sleep(10).eat("dinner");
+// 打印：Hi! This is Hank!
+// 等待了 10 秒后
+// 打印：Wake up after 10
+// 打印：Eat dinner~
+lazyMan("Hank").eat("dinner").eat("supper");
+// 打印：Hi This is Hank!
+// 打印：Eat dinner~
+// 打印：Eat supper~
+lazyMan("Hank").sleepFirst(5).eat("supper");
+// 等待了 5 秒后
+// 打印：Wake up after 5
+// 打印：Hi This is Hank!
+// 打印：Eat supper
+
+lazyMan("Hank").eat("supper").sleepFirst(5);
+// 等待了 5 秒后
+// 打印：Wake up after 5
+// 打印：Hi This is Hank!
+// 打印：Eat supper
+```
+
+#### 53.实现 Promise 串行
+
+```js
+function runPromiseInSequence(arr, input) {
+    return arr.reduce(
+        (promiseChain, currentFunction) => promiseChain.then(currentFunction),
+        Promise.resolve(input)
+    );
+}
 ```
