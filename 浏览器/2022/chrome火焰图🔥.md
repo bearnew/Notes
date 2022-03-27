@@ -6,7 +6,16 @@
 2. `CPU`: 面积越大，`CPU`在消耗越大，越耗性能
 3. `NETWORK`: 每个时间节点网络请求和帧画面
 
-### 2.火焰图颜色
+### 2.像素管道
+
+1. 重排: 宽度、高度、位置
+    - ![render](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/render.png?raw=true)
+2. 重绘：背景图片、文字颜色或阴影
+    - ![paint](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/paint.png?raw=true)
+3. 合成：`transform` 和 `opacity` 属性更改来实现动画
+    - ![composite](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/composite.png?raw=true)
+
+### 3.火焰图颜色
 
 <table>
     <tr>
@@ -68,7 +77,7 @@
     </tr>
 </table>
 
-### 3.图解
+### 4.图解
 
 -   ![performance](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/chrome_performance.png?raw=true)
 -   ![js_time](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/chrome_performance_js_time.png?raw=true)
