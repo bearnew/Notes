@@ -616,6 +616,7 @@ if (typeof window !== "undefined" && !window.requestIdleCallback) {
         return setTimeout(() => {
             callback({
                 didTimeout: false,
+                // 剩余在当前空闲时段的毫秒
                 timeRemaining() {
                     return Infinity;
                 },
