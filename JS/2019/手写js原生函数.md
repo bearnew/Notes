@@ -751,7 +751,28 @@ const flatten3 = (arr) => {
 
 ```js
 // 拍平无数层
-[1, 2, [3, 4, [5]]].flat(Infinity);
+const flatten4 = (arr) => {
+    return arr.flat(Infinity);
+};
+// [1, 2, [3, 4, [5]]].flat(Infinity);
+```
+
+```js
+// 全部为数字
+const flatten5 = (arr) => {
+    return arr.toString().split(",").map(Number);
+};
+```
+
+```js
+// 正则过滤
+const flatten6 = (arr) => {
+    let str = JSON.stringify(arr);
+    // 过滤所有的中中括号
+    str = str.replace(/(\[|\])/g, "");
+    str = "[" + str + "]";
+    return JSON.parse(str);
+};
 ```
 
 #### 24.解析 url 参数
