@@ -1614,3 +1614,39 @@ function runPromiseInSequence(arr, input) {
     );
 }
 ```
+
+#### 53.ES5 实现 let、const
+
+1. let
+
+```js
+(function () {
+    var c = 3;
+    console.log(c); //1
+})();
+console.log(c); //c is not defined
+```
+
+2. const
+
+```js
+function _const(key, value) {
+    window[key] = value;
+    Object.defineProperty(window, key, {
+        enumerable: false,
+        configurable: false,
+        get: function () {
+            return value;
+        },
+        set: function (newValue) {
+            if (newValue !== value) {
+                throw TypeError("这是只读变量，不可修改");
+            } else {
+                return value;
+            }
+        },
+    });
+}
+_const("a", 1);
+a = 2;
+```
