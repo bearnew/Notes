@@ -1,34 +1,33 @@
-function isObj(obj) {
-    const typeStr = Object.prototype.toString.call(obj);
-    return typeStr === "[object Object]" || typeStr === "[object Array]";
-}
+var values = [3, 4, 5],
+    weights = [2, 3, 4],
+    capacity = 5;
 
-function deepCopy(obj, hash = new WeakMap()) {
-    if (hash.has(obj)) return hash.get(obj);
-    const reference = [Date, RegExp, Set, WeakSet, Map, WeakMap, Error];
-    if (reference.includes(obj?.constructor)) {
-        res = new obj.constructor(obj);
+console.log(knapSack(capacity, weights, values));
+
+// 背包价值
+function knapSack(capacity, weights, values) {
+    var i,
+        w,
+        a,
+        b,
+        ks = [];
+    var n = values.length;
+
+    for (i = 0; i <= n; i++) {
+        ks[i] = [];
+        for (w = 0; w <= capacity; w++) {
+            if (i === 0 || w === 0) {
+                ks[i][w] = 0;
+            } else if (weights[i - 1] <= w) {
+                a = values[i - 1] + ks[i - 1][w - weights[i - 1]];
+                b = ks[i - 1][w];
+                ks[i][w] = a > b ? a : b;
+            } else {
+                ks[i][w] = ks[i - 1][w];
+            }
+        }
     }
+    console.log(ks);
 
-    let cloneObj = Array.isArray(obj) ? [] : {};
-    hash.set(obj, cloneObj);
-
-    for (let key in obj) {
-        cloneObj[key] = isObj(obj[key]) ? deepCopy(obj[key], hash) : obj[key];
-    }
-
-    return cloneObj;
+    return ks[n][capacity];
 }
-
-obj = {
-    x: { x: { a: 1 } },
-    y: { z: 30 },
-    arr: [111],
-    obj: { key: "对象拷贝" },
-    a: () => {
-        console.log("函数拷贝");
-    },
-    date: new Date(),
-    reg: /正则拷贝/gi,
-};
-console.log(obj);
