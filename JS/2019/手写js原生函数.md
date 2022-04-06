@@ -1593,3 +1593,20 @@ function runPromiseInSequence(arr, input) {
     );
 }
 ```
+
+#### 54.实现 Promise.finally
+
+```js
+if (!Promise.prototype.finally) {
+    Promise.prototype.finally = function (callback = noopFunc) {
+        let P = this.constructor;
+        return this.then(
+            (value) => P.resolve(callback()).then(() => value),
+            (reason) =>
+                P.resolve(callback()).then(() => {
+                    throw reason;
+                })
+        );
+    };
+}
+```
