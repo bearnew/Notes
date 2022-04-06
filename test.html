@@ -10,43 +10,25 @@
                 margin: 0;
                 padding: 0;
             }
-            .title {
-                overflow: hidden;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-            }
-            .section {
-                display: flex;
-                overflow: hidden;
-                height: 58px; /*定一个高度*/
-                flex-direction: column;
-            }
-            .excerpt {
-                flex: 1; /*自适应剩余空间*/
-                overflow: hidden;
-            }
-            .excerpt::before {
-                content: "...";
-                float: right;
-                height: 100%;
-                display: flex;
-                align-items: flex-end;
-                shape-outside: inset(calc(100% - 1.5em) 0 0);
-            }
-            .excerpt::after {
-                content: "";
+            .sign {
+                width: 100px;
+                height: 100px;
+                border-radius: 50px;
                 position: absolute;
-                width: 999vh;
-                height: 999vh;
-                background: #fff;
-                box-shadow: -2em 2em #fff; /*左下的阴影*/
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%) rotate(30deg); /* 1.相对父级元素垂直水平居中 2.调整起笔角度 */
+                background: repeating-conic-gradient(
+                    black,
+                    black 63deg,
+                    /* 黑色转60度 */ yellow 60deg,
+                    yellow 120deg /* 黄色转60度 */
+                );
             }
         </style>
     </head>
     <body>
-        <div class="section">是靠近对方</div>
-        <div class="section">是靠近对方</div>
+        <div class="sign"></div>
         <ul></ul>
         <script src="./test.ts"></script>
         <script src="./test.js"></script>

@@ -751,7 +751,28 @@ const flatten3 = (arr) => {
 
 ```js
 // 拍平无数层
-[1, 2, [3, 4, [5]]].flat(Infinity);
+const flatten4 = (arr) => {
+    return arr.flat(Infinity);
+};
+// [1, 2, [3, 4, [5]]].flat(Infinity);
+```
+
+```js
+// 全部为数字
+const flatten5 = (arr) => {
+    return arr.toString().split(",").map(Number);
+};
+```
+
+```js
+// 正则过滤
+const flatten6 = (arr) => {
+    let str = JSON.stringify(arr);
+    // 过滤所有的中中括号
+    str = str.replace(/(\[|\])/g, "");
+    str = "[" + str + "]";
+    return JSON.parse(str);
+};
 ```
 
 #### 24.解析 url 参数
@@ -1594,19 +1615,38 @@ function runPromiseInSequence(arr, input) {
 }
 ```
 
-#### 54.实现 Promise.finally
+#### 54.ES5 实现 let、const
+
+1. let
 
 ```js
-if (!Promise.prototype.finally) {
-    Promise.prototype.finally = function (callback = noopFunc) {
-        let P = this.constructor;
-        return this.then(
-            (value) => P.resolve(callback()).then(() => value),
-            (reason) =>
-                P.resolve(callback()).then(() => {
-                    throw reason;
-                })
-        );
-    };
+(function () {
+    var c = 3;
+    console.log(c); //1
+})();
+console.log(c); //c is not defined
+```
+
+2. const
+
+```js
+function _const(key, value) {
+    window[key] = value;
+    Object.defineProperty(window, key, {
+        enumerable: false,
+        configurable: false,
+        get: function () {
+            return value;
+        },
+        set: function (newValue) {
+            if (newValue !== value) {
+                throw TypeError("这是只读变量，不可修改");
+            } else {
+                return value;
+            }
+        },
+    });
 }
+_const("a", 1);
+a = 2;
 ```
