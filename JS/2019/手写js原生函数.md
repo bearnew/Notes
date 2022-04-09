@@ -1615,7 +1615,7 @@ function runPromiseInSequence(arr, input) {
 }
 ```
 
-#### 53.ES5 实现 let、const
+#### 54.ES5 实现 let、const
 
 1. let
 
