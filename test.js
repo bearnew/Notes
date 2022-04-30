@@ -1,11 +1,4 @@
-const arr = [1, 2, 3, 4];
-
-function test() {
-    arr.forEach((i) => {
-        if (i > 3) return;
-        console.log(i);
-    });
-    console.log("end");
+function division(a, b) {
+    return division(a, b);
 }
-
-test();
+console.log(division(1, 2));
