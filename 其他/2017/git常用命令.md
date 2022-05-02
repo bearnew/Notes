@@ -141,3 +141,10 @@ git revert -m 1 <commitHash>
 // 记录所有commit操作记录，便于错误操作后找回记录
 git reflog
 ```
+
+#### git commit
+
+```js
+// 修改commit message
+git commit --amend --only -m 'xxxxxxxx'
+```
