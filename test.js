@@ -1,11 +1,4 @@
-const arr = [1, 2, 3, 4];
+const obj = { a: null };
 
-function test() {
-    arr.forEach((i) => {
-        if (i > 3) return;
-        console.log(i);
-    });
-    console.log("end");
-}
-
-test();
+const { a = {} } = obj;
+console.log("1111", a);
