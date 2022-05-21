@@ -95,7 +95,8 @@ https://zhuanlan.zhihu.com/p/140700610
         1. translate3d, translateZ
         2. opacity/过渡动画（动画执行中，才会创建复合图层）
         3. will-change(提前告诉浏览器，有哪些属性需要变化，达到页面优化)
-        4. <video>, <iframe>, <canvas>, <webgl>, 等元素
+        4. filter
+        5. <video>, <iframe>, <canvas>, <webgl>, 等元素
 4. 进程的流程
     - 首先，当我们是要浏览一个网页，我们会在浏览器的地址栏里输入 URL，这个时候 Browser Process 会向这个 URL 发送请求，获取这个 URL 的 HTML 内容，然后将 HTML 交给 Renderer Process，
     - Renderer Process 解析 HTML 内容，解析遇到需要请求网络的资源又返回来交给 Browser Process 进行加载，同时通知 Browser Process，
