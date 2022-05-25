@@ -15,3 +15,45 @@ plugins: [
     });
 ]
 ```
+
+2. 使用`@anatine/esbuild-decorators`处理`decorator`包中的`es`语法
+3. `esbuildOptions`配置预编译的配置
+
+```js
+ optimizeDeps: {
+    esbuildOptions: {
+        loader: {
+            // npm第3方包的js文件也走tsx编译，用于处理`<div></div>`和`@test`等写法
+            '.js': 'tsx'
+        },
+        define: {
+            global: 'globalThis'
+        },
+        plugins: [
+            GlobalsPolyfills({
+                process: true,
+                define: {
+                    'process.env.BROWSER': JSON.stringify(true),
+                }
+            }),
+            ChangeLazyloadRequire(),
+            {
+                // 解决无法解析的js中的组件写法<div></div>
+                name: 'load-js-files-as-tsx',
+                setup(build) {
+                    build.onLoad({ filter: /\.*\.js$/ }, args => ({
+                        // i modified the regex here
+                        loader: 'jsx',
+                        contents: fs.readFileSync(args.path, 'utf8')
+                    }));
+                }
+            },
+            esbuildDecorators()
+        ]
+    }
+},
+```
+
+4. 控制台报错`No matching export for import typescript interface`
+
+-   写法问题
