@@ -153,3 +153,65 @@ const Demo = () => {
     ```
 8. useContext
     - 为了能够进行数据的绑定。当这个 Context 的数据发生变化时，使用这个数据的组件就能够自动刷新。简单的全局变量，就很难去实现
+
+## 3.模拟 class 中的一次性代码执行
+
+```js
+import { useRef } from "react";
+// 创建一个自定义 Hook 用于执行一次性代码
+function useSingleton(callback) {
+    // 用一个 called ref 标记 callback 是否执行过
+    const called = useRef(false);
+    // 如果已经执行过，则直接返回
+    if (called.current) return;
+    // 第一次调用时直接执行
+    callBack();
+    // 设置标记为已执行过
+    called.current = true;
+}
+```
+
+```js
+import useSingleton from "./useSingleton";
+const MyComp = () => {
+    // 使用自定义 Hook
+    useSingleton(() => {
+        console.log("这段代码只执行一次");
+    });
+    return <div>My Component</div>;
+};
+```
+
+## 4.useEffect 的回调
+
+1. 在下一次依赖发生变化以及组件销毁之前执行
+2. 传统的`componentWillUnmount`只在组件销毁时才会执行
+3. `example`
+
+```js
+import React, { useEffect } from "react";
+import comments from "./comments";
+function BlogView({ id }) {
+    const handleCommentsChange = useCallback(() => {
+        // 处理评论变化的通知
+    }, []);
+    useEffect(() => {
+        // 获取博客内容
+        fetchBlog(id);
+        // 监听指定 id 的博客文章的评论变化通知
+        const listener = comments.addListener(id, handleCommentsChange);
+        return () => {
+            // 当 id 发生变化时，移除之前的监听
+            comments.removeListener(listener);
+        };
+    }, [id, handleCommentsChange]);
+}
+```
+
+## 5.hooks 无法实现的生命周期
+
+-   getSnapshotBeforeUpdate
+-   componentDidCatch
+-   getDerivedStateFromError
+
+## 6.用 hooks 去实现高阶组件
