@@ -215,3 +215,156 @@ function BlogView({ id }) {
 -   getDerivedStateFromError
 
 ## 6.用 hooks 去实现高阶组件
+
+## 7.自定义 Hooks
+
+-   函数内部使用了 hooks，它就是 1 个 hooks
+-   封装异步请求 hooks
+-   hooks 不仅用于复用，还用于业务逻辑隔离，减少每个组件代码
+
+```js
+// useAsync
+import { useState } from "react";
+const useAsync = (asyncFunction) => {
+    // 设置三个异步逻辑相关的 state
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    // 定义一个 callback 用于执行异步逻辑
+    const execute = useCallback(() => {
+        // 请求开始时，设置 loading 为 true，清除已有数据和 error 状态
+        setLoading(true);
+        setData(null);
+        setError(null);
+        return asyncFunction()
+            .then((response) => {
+                // 请求成功时，将数据写进 state，设置 loading 为 false
+                setData(response);
+                setLoading(false);
+            })
+            .catch((error) => {
+                // 请求失败时，设置 loading 为 false，并设置错误状态
+                setError(error);
+                setLoading(false);
+            });
+    }, [asyncFunction]);
+    return { execute, loading, data, error };
+};
+```
+
+```js
+import React from "react";
+import useAsync from './useAsync';
+export default function UserList() {
+    // 通过 useAsync 这个函数，只需要提供异步逻辑的实现
+    const {
+        execute: fetchUsers,
+        data: users,
+        loading,
+        error,
+    } = useAsync(async () => {
+        const res = await fetch("https://reqres.in/api/users/");
+        const json = await res.json();
+        return json.data;
+    });
+    return (
+    // 根据状态渲染 UI...
+    );
+}
+```
+
+```js
+// useScroll
+import { useState, useEffect } from "react";
+// 获取横向，纵向滚动条位置
+const getPosition = () => {
+    return {
+        x: document.body.scrollLeft,
+        y: document.body.scrollTop,
+    };
+};
+const useScroll = () => {
+    // 定一个 position 这个 state 保存滚动条位置
+    const [position, setPosition] = useState(getPosition());
+    useEffect(() => {
+        const handler = () => {
+            setPosition(getPosition(document));
+        };
+        // 监听 scroll 事件，更新滚动条位置
+        document.addEventListener("scroll", handler);
+        return () => {
+            // 组件销毁时，取消事件监听
+            document.removeEventListener("scroll", handler);
+        };
+    }, []);
+    return position;
+};
+```
+
+```js
+import React, { useCallback } from "react";
+import useScroll from "./useScroll";
+function ScrollTop() {
+    const { y } = useScroll();
+    const goTop = useCallback(() => {
+        document.body.scrollTop = 0;
+    }, []);
+    const style = {
+        position: "fixed",
+        right: "10px",
+        bottom: "10px",
+    };
+    // 当滚动条位置纵向超过 300 时，显示返回顶部按钮
+    if (y > 300) {
+        return (
+            <button onClick={goTop} style={style}>
+                Back to Top
+            </button>
+        );
+    }
+    // 否则不 render 任何 UI
+    return null;
+}
+```
+
+## 8.hooks 场景
+
+1. 抽取业务逻辑
+2. 封装通用逻辑
+3. 监听浏览器状态
+4. 拆分复杂组件
+
+## 9.定义自己的 ApiClient
+
+```js
+import axios from "axios";
+// 定义相关的 endpoint
+const endPoints = {
+    test: "https://60b2643d62ab150017ae21de.mockapi.io/",
+    prod: "https://prod.myapi.io/",
+    staging: "https://staging.myapi.io/",
+};
+// 创建 axios 的实例
+const instance = axios.create({
+    // 实际项目中根据当前环境设置 baseURL
+    baseURL: endPoints.test,
+    timeout: 30000,
+    // 为所有请求设置通用的 header
+    headers: { Authorization: "Bear mytoken" },
+});
+// 听过 axios 定义拦截器预处理所有请求
+instance.interceptors.response.use(
+    (res) => {
+        // 可以假如请求成功的逻辑，比如 log
+        return res;
+    },
+    (err) => {
+        if (err.response.status === 403) {
+            // 统一处理未授权请求，跳转到登录界面
+            document.location = "/login";
+        }
+        return Promise.reject(err);
+    }
+);
+export default instance;
+```
