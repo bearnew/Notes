@@ -368,3 +368,17 @@ instance.interceptors.response.use(
 );
 export default instance;
 ```
+
+## 10.事件处理
+
+1. `useCallback`
+    - 事件处理函数传递给原生节点，不写`useCallback`
+    - 事件处理函数传递给自定义组件，需要用`useCallback`才会避免重新渲染
+2. React 原生事件的原理：合成事件（`Synthetic Events`）
+    - 由于虚拟 DOM 的存在，在 React 中即使绑定一个事件到原生的 DOM 节点，事件也并不是绑定在对应的节点上
+    - 而是所有的事件都是绑定在根节点上。然后由 React 统一监听和
+      管理，获取事件后再分发到具体的虚拟 DOM 节点上。
+    - 在 React 17 之前，所有的事件都是绑定在 document 上的，而从 React 17 开始，所有的事件都绑定在整个 App 上的根节点上，
+3. React 使用合成事件的原因
+    1. 虚拟 `DOM render` 的时候， DOM 很可能还没有真实地 `render` 到页面上，所以无法绑定事件。
+    2. `React` 可以屏蔽底层事件的细节，避免浏览器的兼容性问题。同时呢，对于 `React Native` 这种不是通过浏览器 `render` 的运行时，也能提供一致的 `API`。
