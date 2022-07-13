@@ -11,7 +11,9 @@
                 padding: 0;
             }
             .right {
-                animation: MoveRight linear 0.4s 1 forwards;
+                /* animation: MoveRight linear 0.4s 1 forwards; */
+                transform: translateX(400px);
+                transition: all 2s linear;
             }
             .top {
                 width: 100px;
@@ -27,8 +29,9 @@
                     yellow 120deg /* 黄色转60度 */
                 );
                 /* https://cubic-bezier.com/#.55,1.56,.74,1.25 */
-                animation: MoveTop cubic-bezier(0.55, 1.56, 0.74, 1.25) 0.4s 1
-                    forwards;
+                /* animation: MoveTop cubic-bezier(0.55, 1.56, 0.74, 1.25) 0.4s 1 forwards; */
+                transform: translateY(-400px);
+                transition: all 2s cubic-bezier(0.55, 1.56, 0.74, 1.25);
             }
             .box {
                 width: 100%;
