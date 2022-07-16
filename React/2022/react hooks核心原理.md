@@ -417,3 +417,26 @@ export default instance;
             );
         };
         ```
+
+## 11.按业务领域组织文件夹结构
+
+1. 扩展点机制
+
+```js
+function ArticleView({ id }) {
+    const { article } = useArticle(id);
+    return (
+        <div className="article-view">
+            <MainContent article={article} />
+            {/* 定义了一个名为 article.footer 的扩展点 */}
+            <Extension name="article.footer" args={article} />
+        </div>
+    );
+}
+```
+
+```js
+extensionEngine.register("article.footer", (article) => {
+    return <CommentList article={article} />;
+});
+```
