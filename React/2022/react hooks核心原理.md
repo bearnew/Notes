@@ -440,3 +440,23 @@ extensionEngine.register("article.footer", (article) => {
     return <CommentList article={article} />;
 });
 ```
+
+## 12.其他
+
+1. `react17`之后使用`rootNode.addEventListener()`代替`document.addEventListener()`
+    - 解决了多版本 `React` 的问题
+    - `React` 在和其它一些技术栈（比如 `JQuery`）一起使用时，降低事件冲突的可能性。
+
+```js
+// legacy 旧模式 渲染时同步的
+// ReactDom.render(<h1>hello</h1>, document.getElementById('root'));
+
+// 启用并发渲染模式
+ReactDom.createRoot(document.getElementById('root')!).render(<h1>hello</h1>)
+```
+
+2. 无需创建`jsx`文件
+
+```js
+import { jsx as _jsx } from "react/jsx-runtime";
+```
