@@ -371,14 +371,92 @@ export default instance;
 
 ## 10.事件处理
 
-1. `useCallback`
-    - 事件处理函数传递给原生节点，不写`useCallback`
-    - 事件处理函数传递给自定义组件，需要用`useCallback`才会避免重新渲染
-2. React 原生事件的原理：合成事件（`Synthetic Events`）
-    - 由于虚拟 DOM 的存在，在 React 中即使绑定一个事件到原生的 DOM 节点，事件也并不是绑定在对应的节点上
-    - 而是所有的事件都是绑定在根节点上。然后由 React 统一监听和
-      管理，获取事件后再分发到具体的虚拟 DOM 节点上。
-    - 在 React 17 之前，所有的事件都是绑定在 document 上的，而从 React 17 开始，所有的事件都绑定在整个 App 上的根节点上，
-3. React 使用合成事件的原因
+1.  `useCallback`
+    -   事件处理函数传递给原生节点，不写`useCallback`
+    -   事件处理函数传递给自定义组件，需要用`useCallback`才会避免重新渲染
+2.  React 原生事件的原理：合成事件（`Synthetic Events`）
+    -   由于虚拟 DOM 的存在，在 React 中即使绑定一个事件到原生的 DOM 节点，事件也并不是绑定在对应的节点上
+    -   而是所有的事件都是绑定在根节点上。然后由 React 统一监听和
+        管理，获取事件后再分发到具体的虚拟 DOM 节点上。
+    -   在 React 17 之前，所有的事件都是绑定在 document 上的，而从 React 17 开始，所有的事件都绑定在整个 App 上的根节点上，
+3.  React 使用合成事件的原因
     1. 虚拟 `DOM render` 的时候， DOM 很可能还没有真实地 `render` 到页面上，所以无法绑定事件。
     2. `React` 可以屏蔽底层事件的细节，避免浏览器的兼容性问题。同时呢，对于 `React Native` 这种不是通过浏览器 `render` 的运行时，也能提供一致的 `API`。
+4.  自定义事件（回调行为）
+
+        ```js
+        import { useEffect, useState } from "react";
+        // 使用 document.body 作为默认的监听节点
+        const useKeyPress = (domNode = document.body) => {
+            const [key, setKey] = useState(null);
+            useEffect(() => {
+                const handleKeyPress = (evt) => {
+                    setKey(evt.keyCode);
+                };
+                // 监听按键事件
+                domNode.addEventListener("keypress", handleKeyPress);
+                return () => {
+                    // 接触监听按键事件
+                    domNode.removeEventListener("keypress", handleKeyPress);
+                };
+            }, [domNode]);
+
+            return key;
+        };
+        ```
+        ```jsx
+        import useKeyPress from './useKeyPress';
+
+        function UseKeyPressExample() => {
+            const key = useKeyPress();
+            return (
+                <div>
+                    <h1>UseKeyPress</h1>
+                    <label>Key pressed: {key || "N/A"}</label>
+                </div>
+            );
+        };
+        ```
+
+## 11.按业务领域组织文件夹结构
+
+1. 扩展点机制
+
+```js
+function ArticleView({ id }) {
+    const { article } = useArticle(id);
+    return (
+        <div className="article-view">
+            <MainContent article={article} />
+            {/* 定义了一个名为 article.footer 的扩展点 */}
+            <Extension name="article.footer" args={article} />
+        </div>
+    );
+}
+```
+
+```js
+extensionEngine.register("article.footer", (article) => {
+    return <CommentList article={article} />;
+});
+```
+
+## 12.其他
+
+1. `react17`之后使用`rootNode.addEventListener()`代替`document.addEventListener()`
+    - 解决了多版本 `React` 的问题
+    - `React` 在和其它一些技术栈（比如 `JQuery`）一起使用时，降低事件冲突的可能性。
+
+```js
+// legacy 旧模式 渲染时同步的
+// ReactDom.render(<h1>hello</h1>, document.getElementById('root'));
+
+// 启用并发渲染模式
+ReactDom.createRoot(document.getElementById('root')!).render(<h1>hello</h1>)
+```
+
+2. 无需创建`jsx`文件
+
+```js
+import { jsx as _jsx } from "react/jsx-runtime";
+```
