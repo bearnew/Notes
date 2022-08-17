@@ -1,121 +1,121 @@
 ## TS 面经
 
 1. TS 的访问修饰符
-   - `public`: 任何地方
-   - `private`: 只能在类的内部访问
-   - `protected`: 能在类的内部访问和子类中访问
-   - `readonly`: 属性设置为只读
+    - `public`: 任何地方
+    - `private`: 只能在类的内部访问
+    - `protected`: 能在类的内部访问和子类中访问
+    - `readonly`: 属性设置为只读
 2. `const`和`readonly`的区别
-   - `const`用于变量，`readonly`用于属性
-   - `const`在运行时检查，`readonly`在编译时检查
-   - 使用`const`保存的数组，可以使用`push`，`pop`等方法，使用`ReadonlyArray<number>`声明的数组不能使用`push`和`pop`
+    - `const`用于变量，`readonly`用于属性
+    - `const`在运行时检查，`readonly`在编译时检查
+    - 使用`const`保存的数组，可以使用`push`，`pop`等方法，使用`ReadonlyArray<number>`声明的数组不能使用`push`和`pop`
 3. 枚举和常量枚举(`const`枚举)的区别
-   - 枚举会被编译时编译成一个对象，可以被当作对象使用
-   - `const`枚举会在`ts`编译期间被删除，避免额外的性能开销
-   ```ts
-   // 普通枚举
-   enum Witcher {
-     Ciri = "Queen",
-     Geralt = "Geralt of Rivia",
-   }
-   function getGeraltMessage(arg: { [key: string]: string }): string {
-     return arg.Geralt;
-   }
-   getGeraltMessage(Witcher); // Geralt of Rivia
-   ```
-   ```ts
-   // const枚举
-   const enum Witcher {
-     Ciri = "Queen",
-     Geralt = "Geralt of Rivia",
-   }
-   const witchers: Witcher[] = [Witcher.Ciri, Witcher.Geralt];
-   // 编译后
-   // const witchers = ['Queen', 'Geralt of Rivia'
-   ```
+    - 枚举会被编译时编译成一个对象，可以被当作对象使用
+    - `const`枚举会在`ts`编译期间被删除，避免额外的性能开销
+    ```ts
+    // 普通枚举
+    enum Witcher {
+        Ciri = "Queen",
+        Geralt = "Geralt of Rivia",
+    }
+    function getGeraltMessage(arg: { [key: string]: string }): string {
+        return arg.Geralt;
+    }
+    getGeraltMessage(Witcher); // Geralt of Rivia
+    ```
+    ```ts
+    // const枚举
+    const enum Witcher {
+        Ciri = "Queen",
+        Geralt = "Geralt of Rivia",
+    }
+    const witchers: Witcher[] = [Witcher.Ciri, Witcher.Geralt];
+    // 编译后
+    // const witchers = ['Queen', 'Geralt of Rivia'
+    ```
 4. `interface`给`Function`/`Array`/`Class`做声明
 
-   ```ts
-   // 函数类型
-   interface SearchFunc {
-     (source: string, subString: string): boolean;
-   }
-   let mySearch: SearchFunc;
-   mySearch = function (source: string, subString: string) {
-     let result = source.search(subString);
-     return result > -1;
-   };
-   ```
+    ```ts
+    // 函数类型
+    interface SearchFunc {
+        (source: string, subString: string): boolean;
+    }
+    let mySearch: SearchFunc;
+    mySearch = function (source: string, subString: string) {
+        let result = source.search(subString);
+        return result > -1;
+    };
+    ```
 
-   ```ts
-   // Array
-   interface StringArray {
-     [index: number]: string;
-   }
+    ```ts
+    // Array
+    interface StringArray {
+        [index: number]: string;
+    }
 
-   let myArray: StringArray;
-   myArray = ["Bob", "Fred"];
-   ```
+    let myArray: StringArray;
+    myArray = ["Bob", "Fred"];
+    ```
 
-   ```ts
-   // Class, constructor存在于类的静态部分，所以不会检查
-   interface ClockInterface {
-     currentTime: Date;
-     setTime(d: Date);
-   }
+    ```ts
+    // Class, constructor存在于类的静态部分，所以不会检查
+    interface ClockInterface {
+        currentTime: Date;
+        setTime(d: Date);
+    }
 
-   class Clock implements ClockInterface {
-     currentTime: Date;
-     setTime(d: Date) {
-       this.currentTime = d;
-     }
-     constructor(h: number, m: number) {}
-   }
-   ```
+    class Clock implements ClockInterface {
+        currentTime: Date;
+        setTime(d: Date) {
+            this.currentTime = d;
+        }
+        constructor(h: number, m: number) {}
+    }
+    ```
 
 5. ts 中枚举联合类型的 key
 
-   ```ts
-   type Name = { name: string };
-   type Age = { age: number };
-   type Union = Name | Age;
+    ```ts
+    type Name = { name: string };
+    type Age = { age: number };
+    type Union = Name | Age;
 
-   type UnionKey<P> = P extends infer P ? keyof P : never;
+    type UnionKey<P> = P extends infer P ? keyof P : never;
 
-   type T = UnionKey<Union>;
-   ```
+    type T = UnionKey<Union>;
+    ```
 
 6. ts 中 `?.、??、!.、\_、\*\*` 等符号的含义？
 
-   - `?.` 可选链
-   - `??` 类似与短路或，`??`避免了一些意外情况 `0`，`NaN` 以及`""`,`false` 被视为 `false` 值。只有 `undefind`,`null` 被视为 `false` 值。
-   - `!` 在变量名后添加`!`，可以断言排除`undefined`和`null`类型
-   - `_`, 声明该函数将被传递一个参数，但您并不关心它
-   - `**` 求幂
-   - `!:`，待会分配这个变量，ts 不要担心
+    - `?.` 可选链
+    - `??` 类似与短路或，`??`避免了一些意外情况 `0`，`NaN` 以及`""`,`false` 被视为 `false` 值。只有 `undefind`,`null` 被视为 `false` 值。
+    - `!` 在变量名后添加`!`，可以断言排除`undefined`和`null`类型
+    - `_`, 声明该函数将被传递一个参数，但您并不关心它
+    - `**` 求幂
+    - `!:`，待会分配这个变量，ts 不要担心
 
-   ```ts
-   // ??
-   let x = foo ?? bar();
-   // 等价于
-   let x = foo !== null && foo !== undefined ? foo : bar();
+    ```ts
+    // ??
+    let x = foo ?? bar();
+    // 等价于
+    let x = foo !== null && foo !== undefined ? foo : bar();
 
-   // !.
-   let a: string | null | undefined;
-   a.length; // error
-   a!.length; // ok
-   ```
+    // !.
+    let a: string | null | undefined;
+    a.length; // error
+    a!.length; // ok
+    ```
 
 7. 什么是抗变、双变、协变和逆变？
-   - `Covariant` 协变，TS 对象兼容性是协变，父类 <= 子类，是可以的。子类 <= 父类，错误。
-   - `contravariant` 逆变，禁用 `strictFunctionTypes` 编译，函数参数类型是逆变的，父类 <= 子类，是错误。子类 <= 父类，是可以的。
-   - `Bivariant` 双向协变，函数参数的类型默认是双向协变的。父类 <= 子类，是可以的。子类 <= 父类，是可以的。
+    - `Covariant` 协变，TS 对象兼容性是协变，父类 <= 子类，是可以的。子类 <= 父类，错误。
+    - `contravariant` 逆变，禁用 `strictFunctionTypes` 编译，函数参数类型是逆变的，父类 <= 子类，是错误。子类 <= 父类，是可以的。
+    - `Bivariant` 双向协变，函数参数的类型默认是双向协变的。父类 <= 子类，是可以的。子类 <= 父类，是可以的。
 8. ts 中同名的 interface 或者同名的 interface 和 class 可以合并吗？
-   - `interface` 会合并
-   - `class` 不可以合并
+    - `interface` 会合并
+    - `class` 不可以合并
 9. 如何使 ts 项目引入并识别编译为 js 的 npm 库包？
-   - `npm install @types/xxxx`
-   - 自己添加描述文件
+    - `npm install @types/xxxx`
+    - 自己添加描述文件
 10. ts 如何自动生成库包的声明文件？
     - 可以配置 `tsconfig.json` 文件中的 `declaration` 和 `outDir`
     - `declaration: true`, 将会自动生成声明文件
@@ -153,8 +153,34 @@
 18. 在`window`中扩展类型
     ```ts
     declare global {
-      interface Window {
-        myCustomFn: () => void;
-      }
+        interface Window {
+            myCustomFn: () => void;
+        }
     }
     ```
+19. `implements`与`extends`的定位
+
+-   `implements`: 实现，一个新的类，从父类或者接口实现所有的属性和方法，同时可以重写属性和方法，包含一些新的功能
+-   `extends`: 继承，一个新的接口或者类，从父类或者接口继承所有的属性和方法，不可以重写属性，但可以重写方法
+
+```js
+// 接口不能实现接口或者类，所以实现只能用于类身上,即类可以实现接口或类
+// 接口可以继承接口或类
+// 类不可以继承接口，类只能继承类
+// 可多继承或者多实现
+interface IPerson {
+    age: number;
+    name: string;
+}
+
+interface IPeoPle extends IPerson {
+    sex: string;
+}
+
+class User implements IPerson {
+    age: number;
+    name: string;
+}
+interface IRoles extends User {}
+class Roles extends User {}
+```
