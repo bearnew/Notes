@@ -68,3 +68,21 @@ class Bus extends Auto implements AutoInterface {
 
 }
 ```
+
+## 3.泛型
+
+1. 泛型：不预先确定的数据类型，具体类型在使用的时候确定
+
+```js
+type Log = <T>(value: T) => T;
+let myLog: Log = log;
+
+interface Log2 {
+    <T>(value: T): T;
+}
+
+interface Log3<T = string> {
+    (value: T): T;
+}
+let myLog3: Log3<number> = (value) => {};
+```
