@@ -86,9 +86,34 @@ interface Log3<T = string> {
 }
 let myLog3: Log3<number> = (value) => {};
 ```
+
+2. 泛型继承
+
+```js
+interface Length {
+    length: number;
+}
+
+// 必须传入带有length属性的值
+function log<T extends Length>(value: T): T {
+    return value.length;
+}
+
+log([1]);
+log('123');
+log({ length: 1 });
+```
+
+3. 泛型的优点
+    - 函数和类轻松的支持多种类型，增强程序扩展性
+    - 不必写多余函数重载，冗长的联合类型声明，增强代码可读性
+    - 灵活控制类型之间的约束
+
 ## 4.deprecate
+
 1. `depracate`废弃属性
 2. `depracate`废弃方法
+
 ```js
 interface TestOptions {
     (stock: string): void;
@@ -101,5 +126,5 @@ interface TestOptions {
 
 const deprecatedTest: TestOptions = (options: number | string) => {};
 deprecatedTest(1); // 会被下划线掉
-deprecatedTest('1');
+deprecatedTest("1");
 ```
