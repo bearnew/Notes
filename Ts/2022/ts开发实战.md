@@ -86,3 +86,20 @@ interface Log3<T = string> {
 }
 let myLog3: Log3<number> = (value) => {};
 ```
+## 4.deprecate
+1. `depracate`废弃属性
+2. `depracate`废弃方法
+```js
+interface TestOptions {
+    (stock: string): void;
+
+    /** @deprecated
+     * Use string instead
+     * */
+    (stock: number): void;
+}
+
+const deprecatedTest: TestOptions = (options: number | string) => {};
+deprecatedTest(1); // 会被下划线掉
+deprecatedTest('1');
+```
