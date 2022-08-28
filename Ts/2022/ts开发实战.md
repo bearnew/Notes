@@ -128,3 +128,23 @@ const deprecatedTest: TestOptions = (options: number | string) => {};
 deprecatedTest(1); // 会被下划线掉
 deprecatedTest("1");
 ```
+
+## 5.类型检查
+
+1. 类型检查机制
+    - 类型推断
+    - 类型兼容性
+    - 类型保护
+2. 类型推断
+    - 基础类型推断
+    - 最佳通用类型推断
+    - 上下文类型推断
+3. 使用类型断言
+
+```ts
+interface Foo {
+    bar: number;
+}
+let foo = {} as Foo;
+foo.bar = 1;
+```
