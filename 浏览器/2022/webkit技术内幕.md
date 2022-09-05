@@ -67,3 +67,18 @@ Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
     3. 通用的资源加载器`ResourceLoader`
         - 从网络或者文件系统获取资源
         - 被特定资源加载器共享
+    4. 资源的缓存是 LRU(Least Recent Used 最近最少使用)算法
+3. DNS 解析
+    - chrome://net-internals/#dns
+    - dns 的解析时间 60-120ms
+    - TCP3 次握手需要几十毫秒
+    - DNS 预解析，TCP 预连接
+4. 浏览器的会对`scheme`进行补全
+    - 返回的消息头：Strict-Transport-Security: max-age=16070400; includesSubDomains
+5. HTTP 管线化
+    - 将多个 HTTP 请求填充到 1 个 TCP 数据包中
+    - HTTP 管线化传输较少的 TCP 数据包，减少了网络负载
+    - 管线化依赖持久连接
+    - 只有 HEAD 和 GET 请求可以管线化
+
+## 四、HTML 解释器和 DOM 模型
