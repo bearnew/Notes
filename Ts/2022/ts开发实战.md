@@ -267,3 +267,116 @@ let obj1: Empty<number> = {}; // error
 let obj2: Empty<string> = {}; // error
 obj1 = obj2; // error
 ```
+
+-   类型保护
+
+```js
+enum Type { Strong, Week };
+
+class Java {
+    helloJava() {
+        console.log('Hello Java');
+    },
+    java: any;
+}
+
+class JavaScript {
+    helloJavaScript() {
+        console.log('Hello JavaScript');
+    },
+    javascript: any;
+}
+
+function getLanguage(type: Type, x: string | number) {
+    let lang = type === Type.Strong ? new Java() : new Javascript();
+
+    // 使用instanceOf
+    if (lang instanceof Java) {
+        lang.helloJava();
+    } else {
+        lang.helloJavaScript();
+    }
+
+    // in
+    if ('java' in lang) {
+        lang.hellowJava();
+    } else {
+        lang.helloJavaScript();
+    }
+
+    // typeof
+    if (typeof x === 'string') {
+        x.length;
+    } else {
+        x.toFixed(2);
+    }
+
+    // 类型保护函数
+    function isJava(lang: Java | JavaScript): lang is Java {
+        return (lang as Java).helloJava !== undefined;
+    }
+
+    if (isJava(lang)) {
+        lang.helloJava();
+    } else {
+        lang.helloJavaScript();
+    }
+
+    return lang;
+}
+
+
+```
+
+## 6.类型检查-交叉类型和联合类型
+
+```js
+interface DogInterface {
+    run(): void;
+}
+interface CatInterface {
+    jump(): void;
+}
+
+// 交叉类型
+let pet: DogInterface & CatInterface = {
+    run() {},
+    jump() {},
+};
+
+// 联合类型
+let a: number | string = "a";
+let b: "a" | "b" | "c";
+let c: 1 | 2 | 3;
+
+// 可区分的联合类型
+interface Square {
+    kind: "square";
+    size: number;
+}
+
+interface Rectangle {
+    kind: "rectangle";
+    width: number;
+    height: number;
+}
+
+interface Circle {
+    kind: "circle";
+    r: number;
+}
+
+type Shape = Square | Rectangle | Circle;
+function area(s: Shape): number {
+    // 利用共用属性，创建类型保护区块
+    switch (s.kind) {
+        case "square":
+            return s.size * s.size;
+        case "rectangle":
+            return s.height * s.width;
+        default:
+            // never表示永远不会走到，此处缺少circle，会报错
+            return ((e: never) => throw new Error(e))(s);
+    }
+}
+```
