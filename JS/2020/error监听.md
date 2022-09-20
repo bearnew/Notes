@@ -1,7 +1,7 @@
 ## error监听
 ```js
-// window.error监听同步错误
-window.error = function() {
+// window.onerror监听同步错误
+window.onerror = function() {
 
 }
 
@@ -26,7 +26,8 @@ try{var a = undefined; a.gametype}catch(err) {console.log(JSON.stringify(err.mes
 ```
 ## window.addEventListener('error')与window.onerror的异同点在于
 1. 前者能够捕获到资源加载错误，后者不能。
-2. 都能捕获js运行时错误，捕获到的错误参数不同。前者参数为一个event对象；后者为 msg, url, lineNo, columnNo, error一系列参数。event对象中都含有后者参数的信息。
+2. 比window.onerror先触发
+3. 都能捕获js运行时错误，捕获到的错误参数不同。前者参数为一个event对象；后者为 msg, url, lineNo, columnNo, error一系列参数。event对象中都含有后者参数的信息。
 ```js
 window.addEventListener('error', function (event) {
   console.log(event)
