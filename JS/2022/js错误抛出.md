@@ -287,6 +287,7 @@
     ```
 ## 4.监听node错误
 1. 使用`process.on('uncaughtException', function (err) {})`监听同步错误
+- 无法捕获路由里面的错误（todo）
 ```js
 // code start
 // function start
