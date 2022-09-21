@@ -95,6 +95,7 @@ reaction(
     - 帮助你查找为什么计算值、 reactions 或组件会重新计算
     - 传入 true 作为最后参数来自动地进入 debugger
 
+
 ### 6.mobx 性能优化
 
 -   细粒度拆分视图组件
@@ -112,3 +113,10 @@ reaction(
     - `set`修改时通知所有的依赖做更新，属性变成了`this[$mobx].setObservablePropValue_(key, value)`
     - 代理以后的方法都变成了 `excuteAction`，执行方法会 `dispatch` 一个 `acition`。
     - `mobx` 创建了一个 `ObservableObjectAdministration` 的对象放到了 `$mobx` 属性上。
+### 8.observable
+1. `observable.deep`，默认的`observable`，会递归调用`observable(value)`
+2. `observable.ref`，不可变对象，只追踪引用
+```js
+@observable.ref author = null
+```
+3. `observable.shallow`只对第1层调用`observable(value)`
