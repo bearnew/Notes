@@ -82,6 +82,31 @@
     test();
     console.log('code end')
     ```
+    ```js
+    // SyntaxError: Unexpected identifier
+    // let age b = 1;
+
+    process.on('uncaughtException', function (err) {
+        console.log('uncaughtException', err)
+    });
+
+    console.log('code start')
+    const func = async () => {
+        console.log('promise start')
+        let age b = 1;
+        console.log(noValid)
+        console.log('promise end')
+    }
+
+    const test = () => {
+        console.log('function start')
+        func();
+        console.log('function end')
+    }
+
+    test();
+    console.log('code end')
+    ```
 2. 代码执行的时候出错(非`SyntaxError`语法错误)
     - 同步错误，阻塞后续代码执行
     ```js

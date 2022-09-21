@@ -1,19 +1,16 @@
 
 
-// code start
-// function start
-// promise start
-// function end
-// code end
-// (node:14182) UnhandledPromiseRejectionWarning: ReferenceError: noValid is not defined
+// SyntaxError: Unexpected identifier
+// let age b = 1;
 
 process.on('uncaughtException', function (err) {
     console.log('uncaughtException', err)
 });
 
 console.log('code start')
-const func = () => {
+const func = async () => {
     console.log('promise start')
+    let age b = 1;
     console.log(noValid)
     console.log('promise end')
 }
