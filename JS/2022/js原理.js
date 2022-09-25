@@ -345,4 +345,4 @@ Subject.prototype.notify = function(params){
 // 表单格式化数据（不包含文件）
 const formData = new FormData(document.getElementById('form'))
 // 文件实例
-const fileReader = new FileReader(),
+const fileReader = new FileReader();

@@ -1,25 +1,13 @@
 
-
-// SyntaxError: Unexpected identifier
-// let age b = 1;
-
-process.on('uncaughtException', function (err) {
-    console.log('uncaughtException', err)
-});
-
-console.log('code start')
-const func = async () => {
-    console.log('promise start')
-    let age b = 1;
-    console.log(noValid)
-    console.log('promise end')
+function test() {
+    
+    for (let i = 0; i < 10; i++) {
+        console.log('start', i)
+        if (i > 5) {
+            return 'a';
+        }
+        console.log('end', i);
+    }
 }
 
-const test = () => {
-    console.log('function start')
-    func();
-    console.log('function end')
-}
-
-test();
-console.log('code end')
+console.log('test', test());
