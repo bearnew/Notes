@@ -328,7 +328,7 @@ function getLanguage(type: Type, x: string | number) {
 
 ```
 
-## 6.类型检查-交叉类型和联合类型
+## 6.交叉类型和联合类型
 
 ```js
 interface DogInterface {
@@ -379,4 +379,20 @@ function area(s: Shape): number {
             return ((e: never) => throw new Error(e))(s);
     }
 }
+```
+
+## 7.索引类型
+
+```ts
+// keyof T
+interface Obj {
+    a: number;
+    b: string;
+}
+
+function getValues<T, K extends keyof T>(obj: T, keys: K[]): T[K][] {
+    return keys.map((key) => obj[key]);
+}
+
+getValues(obj, ["a", "b"]);
 ```

@@ -82,3 +82,6 @@ Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
     - 只有 HEAD 和 GET 请求可以管线化
 
 ## 四、HTML 解释器和 DOM 模型
+
+1. HTML 解释器
+    - 字节流->字符流->词语->节点->DOM 树
