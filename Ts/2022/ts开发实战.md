@@ -396,3 +396,33 @@ function getValues<T, K extends keyof T>(obj: T, keys: K[]): T[K][] {
 
 getValues(obj, ["a", "b"]);
 ```
+## 8.映射类型
+```ts
+interface Obj {
+    a: string;
+    b?: number;
+}
+
+// type Readonly<T> = {
+//     readonly [P in keyof T]: T[P];
+// }
+type ReadonlyObj = Readonly<Obj>;
+
+// type Partial<T> = {
+//     [P in keyof T]?: T[P];
+// }
+type PartialObj = Partial<Obj>;
+
+// type Required<T> = {
+//     [P in keyof T]-?: T[P];
+// }
+type RequiredObj = Required<Obj>; // 可选变成必填，b变成必填
+
+// type Pick<T, K extends keyof T> = {
+//     [P in K]: T[P];
+// }
+type PickObj = Pick<Obj, 'a'>;
+
+
+type RecordObj = Record<'x' | 'y', Obj>;
+```
