@@ -396,7 +396,9 @@ function getValues<T, K extends keyof T>(obj: T, keys: K[]): T[K][] {
 
 getValues(obj, ["a", "b"]);
 ```
+
 ## 8.映射类型
+
 ```ts
 interface Obj {
     a: string;
@@ -421,8 +423,45 @@ type RequiredObj = Required<Obj>; // 可选变成必填，b变成必填
 // type Pick<T, K extends keyof T> = {
 //     [P in K]: T[P];
 // }
-type PickObj = Pick<Obj, 'a'>;
+type PickObj = Pick<Obj, "a">;
 
+type RecordObj = Record<"x" | "y", Obj>;
+```
 
-type RecordObj = Record<'x' | 'y', Obj>;
+## 9.条件类型
+
+```ts
+// T extends U ? X : Y
+type TypeName<T> = T extends string ? "string" : "object";
+
+type T1 = TypeName<string>;
+type T2 = TypeName<string[]>;
+type T3 = TypeName<string | string[]>;
+
+// 从类型T中过滤掉可以继承类型U的类型
+// Exclude<T, U>
+type Diff<T, U> = T extends U ? never : T;
+
+// nerver | "b" | "c"
+// "b" | "c"
+type T4 = Diff<"a" | "b" | "c", "a" | "e">;
+
+// 过滤掉非空(非undefined 非null)属性
+// NonNullable<T>
+type NotNull<T> = Diff<T, undefined | null>;
+type TS = NotNull<string | number | undefined | null>;
+
+// Extract<T, U> 抽取T中可以继承类型U的类型
+// 'a'
+type T6 = Extract<"a" | "b" | "c", "a" | "e">;
+
+// ReturnType<T>
+type ReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R ? R : any;
+
+type T7 = ReturnType<{} => string> // string
+
+function getInt(a: string) {
+    return parseInt(a);
+}
+type T8 = ReturnType<typeof getInt>; // number
 ```
