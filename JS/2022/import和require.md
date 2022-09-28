@@ -79,3 +79,16 @@ console.log(obj.name); // Freddie Mercury
         console.log('read count after 1000ms in es6 is', count)
     }, 1000)
     ```
+    6.`es6`模块导出给`require`引用
+    ```js
+    // 相等于module.exports，顶级导出，不能有其他导出了
+    export = function() {
+        console.log('i am default')
+    }
+    ```
+    ```js
+    // 配置项为esModuleInterop
+    import c4 = require('./test.js');
+    import c4 from './test.js';
+    c4(); // i am default
+    ```
