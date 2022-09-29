@@ -1,13 +1,15 @@
-
-function test() {
-    
-    for (let i = 0; i < 10; i++) {
-        console.log('start', i)
-        if (i > 5) {
-            return 'a';
-        }
-        console.log('end', i);
-    }
+const test = () => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            return reject(1)
+        }, 1000)
+    }).catch(err => {
+        console.log('5555', err)
+    })
 }
 
-console.log('test', test());
+test().then(() => {
+    console.log('success')
+}).catch(err => {
+    console.log('66666', err)
+})
