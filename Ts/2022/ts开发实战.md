@@ -465,3 +465,50 @@ function getInt(a: string) {
 }
 type T8 = ReturnType<typeof getInt>; // number
 ```
+
+## 10.命名空间
+
+```ts
+// a.ts
+namespace Shape {
+    const pi = Math.PI;
+    export function circle(r: number) {
+        return pi * r ** 2;
+    }
+}
+```
+
+```ts
+// b.ts
+/// <reference path="a.ts" />
+namespace Shape {
+    export function square(x: number) {
+        return x * x;
+    }
+}
+
+console.log(Shape.circle(1));
+console.log(Shape.square(1));
+```
+
+## 11.声明合并
+
+```ts
+interface A {
+    x: number;
+    // y: string; // ts error
+    foo(bar: number): number; // 4
+}
+interface A {
+    y: number;
+    foo(bar: string): string; // 2
+    foo(bar: number[]): number[]; // 3
+    foo(bar: "b"): number; // 1
+}
+
+// a必须具备x和y
+let a: A = {
+    x: 1,
+    y: 1,
+};
+```
