@@ -1,15 +1,19 @@
-const test = () => {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            return reject(1)
-        }, 1000)
-    }).catch(err => {
-        console.log('5555', err)
-    })
+process.on('uncaughtException', function (err) {
+    console.log('uncaughtException', err)
+});
+
+console.log('code start')
+const func = async () => {
+    console.log('promise start')
+    console.log(noValid)
+    console.log('promise end')
 }
 
-test().then(() => {
-    console.log('success')
-}).catch(err => {
-    console.log('66666', err)
-})
+const test = () => {
+    console.log('function start')
+    func();
+    console.log('function end')
+}
+
+test();
+console.log('code end')
