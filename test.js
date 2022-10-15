@@ -1,19 +1,10 @@
-process.on('uncaughtException', function (err) {
-    console.log('uncaughtException', err)
-});
-
-console.log('code start')
-const func = async () => {
-    console.log('promise start')
-    console.log(noValid)
-    console.log('promise end')
-}
-
-const test = () => {
-    console.log('function start')
-    func();
-    console.log('function end')
-}
-
-test();
-console.log('code end')
+// index.mjs
+import { propA, propB, propC, propD } from "./a.mjs";
+// a.mjs
+const propA = "a";
+let propB = () => {
+    console.log("b");
+};
+var propC = "c";
+export { propA, propB, propC };
+export const propD = "d";
