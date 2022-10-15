@@ -1,3 +1,13 @@
+# MAC移动硬盘2022.10.04
+```js
+
+brew tap gromgit/homebrew-fuse
+
+
+brew install ntfs-3g-mac 
+
+sudo /usr/local/Cellar/ntfs-3g-mac/2022.5.17/bin/ntfs-3g /dev/disk2s1 /Volumes/TOSHIBA -olocal -oallow_other -o auto_xattr
+```
 # mac 移动硬盘
 
 1. 查看硬盘的 `Volume Name`
@@ -24,3 +34,4 @@ LABEL=movie none ntfs rw,auto,nobrowse
 5. 通过`Finder`进入`/Volumes/`，将移动硬盘拖动到桌面或者个人收藏
 
 6. 重新插入硬盘后生效。
+

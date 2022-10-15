@@ -174,6 +174,16 @@
     - `unhandledrejection` 只能捕获未显式处理的`Promise`异常
     - `addEventListener`能够多次订阅，`onerror`是`window`上的属性，多次订阅会覆盖
     ```js
+        window.addEventListener('unhandledrejection', function (event) {
+            // listen error ErrorEvent {isTrusted: true, message: 'Script error.', filename: '', lineno: 0, colno: 0, …}
+            console.log('listen error', event)
+        }, true)
+
+        window.onunhandledrejection = function(errMsg) {
+            // on error Script error.
+            console.log('on error', errMsg)
+        }
+
         // 能触发 unhandledrejection ，因为未显式处理
         new Promise((resolve, reject) => {
             reject(1)
@@ -328,7 +338,7 @@ process.on('uncaughtException', function (err) {
 });
 
 console.log('code start')
-const func = () => {
+const func = async () => {
     console.log('promise start')
     console.log(noValid)
     console.log('promise end')
