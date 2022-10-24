@@ -497,13 +497,13 @@ console.log(Shape.square(1));
 interface A {
     x: number;
     // y: string; // ts error
-    foo(bar: number): number; // 4
+    foo(bar: number): number; // 优先级-4
 }
 interface A {
     y: number;
-    foo(bar: string): string; // 2
-    foo(bar: number[]): number[]; // 3
-    foo(bar: "b"): number; // 1
+    foo(bar: string): string; // 优先级-2
+    foo(bar: number[]): number[]; // 优先级-3
+    foo(bar: "b"): number; // 优先级-1
 }
 
 // a必须具备x和y
