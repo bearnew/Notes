@@ -18,3 +18,4 @@
 ```
 
 3. peerDependencies 主要解决安装的`npm`包版本不一致问题
+4. `npm7.0+`版本的才会自动安装`peerDependencies`
