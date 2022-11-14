@@ -162,6 +162,35 @@
 5. `ES module`的特性
     1. `ES6 Module` 静态的，不能放在块级作用域内，代码发生在编译时。
         - ES6 模块提前加载并执行模块文件，ES6 模块在预处理阶段分析模块依赖，在执行阶段执行模块
+        ```js
+        // a.js
+        import b from './b.js';
+        console.log('a模块加载');
+        export default function say() {
+            console.log('hello , world');
+        }
+        ```
+        ```js
+        // b.js
+        console.log('b模块加载');
+        export default function sayhello() {
+            console.log('hello,world');
+        }
+        ```
+        ```js
+        // main.js
+        console.log('main.js开始执行');
+        import say from './a.js';
+        import say1 from './b.js';
+        console.log('main.js执行完毕');
+        ```
+        ```js
+        // node main.js
+        b模块加载
+        a模块加载
+        main.js开始执行
+        main.js执行完毕
+        ```
     2. `ES6 Module` 的值是动态绑定的，可以通过导出方法修改，可以直接访问修改结果。
         ```js
         import {  num , addNumber } from './a'
