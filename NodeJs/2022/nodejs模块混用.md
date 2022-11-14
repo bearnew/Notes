@@ -182,6 +182,7 @@
         console.log('main.js开始执行');
         import say from './a.js';
         import say1 from './b.js';
+        say();
         console.log('main.js执行完毕');
         ```
         ```js
@@ -189,6 +190,7 @@
         b模块加载
         a模块加载
         main.js开始执行
+        hello , world
         main.js执行完毕
         ```
     2. `ES6 Module` 的值是动态绑定的，可以通过导出方法修改，可以直接访问修改结果。
