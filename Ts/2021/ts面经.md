@@ -150,6 +150,68 @@
     - `void`, 没有显示的返回值的函数返回值为`void`类型。如果一个变量为`void`类型，只能赋予`undefined`或者`null`。
 17. `unknown`, `any` 的区别
     - `unknown`类型和`any`类型类似。与`any`类型不同的是。`unknown`类型可以接受任意类型赋值，但是`unknown`类型赋值给其他类型前，必须被断言
+    - `any`会放弃类型检查
+    - `unknown`类型的变量只能赋值给`any`或者`unknown`
+    - `unknow`配合类型收缩使用
+    ```js
+    let uncertain: any = 'Hello world'!;
+    uncertain = 5;
+    uncertain = { hello: () => 'Hello world!' };
+
+    // any不会做任何类型检测
+    const uncertain1: any = 'Hello world!';
+    uncertain1.hello();
+
+
+    let uncertain2: unknown = 'Hello'!;
+    uncertain2 = 12;
+    uncertain2 = { hello: () => 'Hello!' };
+
+    // 只能将unknown类型变量赋值给unknown和any
+    let notSure: unknown = uncertain2;
+    let notSure2: any = uncertain;
+
+
+    function getDog() {
+        return '22'
+    }
+
+    // unknown会进行类型推断
+    const dog: unknown = getDog();
+    dog.hello(); // Object is of type 'unknown'
+
+    const dog1: any = getDog();
+    dog1.hello();
+
+
+    const getDogName = () => {
+        let x: unknown;
+        return x;
+    };
+
+    // 类型收缩-typeof
+    const dogName = getDogName();
+    if (typeof dogName === 'string') {
+        console.log(dogName.toLowerCase());
+    }
+
+    // 类型收缩-instanceof
+    class Dog {
+        name: string
+    };
+
+    const getAnimal = () => {
+        return {
+            name: 'animal'
+        }
+    }
+
+    const dog2 = getAnimal();
+    
+    if (dog instanceof Dog) {
+        console.log(dog.name.toLowerCase());
+    }
+    ```
 18. 在`window`中扩展类型
     ```ts
     declare global {
@@ -184,3 +246,15 @@ class User implements IPerson {
 interface IRoles extends User {}
 class Roles extends User {}
 ```
+20. 使用ts严格模式，让ts更合理、安全、严谨
+```ts
+{
+    "compilerOptions": {
+        "strict": true
+    }
+}
+```
+21. `??`比`||`更加严格
+
+-   `||`左边是空字符串、`false`、`0`
+-   `??`必须左侧是`null`或者`undefined`
