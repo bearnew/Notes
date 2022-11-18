@@ -512,3 +512,104 @@ let a: A = {
     y: 1,
 };
 ```
+
+## 12.声明文件
+
+> https://juejin.cn/post/6844904034621456398
+
+1. 安装`@types/lodash`声明文件包
+2. 全局类库声明文件
+
+```ts
+declare function globalLib(options: globalLib.Options): void;
+
+declare namespace globalLib {
+    const version: string;
+    function doSomething(): void;
+    interface Options {
+        [key: string]: any;
+    }
+}
+```
+
+3. 模块声明文件
+
+```ts
+interface Options {
+    [key: string]: any;
+}
+
+declare function moduleLib(options: Options): void;
+
+declare namespace moduleLib {
+    const version: string;
+    function doSomething(): void;
+}
+
+export = moduleLib;
+```
+
+## 13.tsconfig 配置
+
+1. 文件相关选项
+
+```json
+{
+    "files": [
+        "src/a.ts" // 编译器需要编译的单个文件的列表
+    ],
+    "include": [
+        "src", // 编译器编译src目录下的所有文件
+        "src1/*", // 只会编译src1一级目录的文件
+        "src2/*/*" // 只会编译src2二级目录的文件
+    ],
+    "exclude": [
+        "src/lib" // 排除src/lib文件
+    ],
+    "extends": "./tsconfig.base", // 继承基础配置
+    "exclude": [], // 覆盖extends继承的文件
+    "compileOnSave": true // 保存文件时自动编译，VSCode不支持，Atom支持
+}
+```
+
+2. 编译相关的选项
+
+```json
+{
+    "compilerOptions": {
+        "incremental": true, // 增量编译，用于提速
+        "tsBuildInfoFile": "./buildFile", // 增量编译文件的存储位置
+        "diagnostics": true, // 打印编译诊断信息
+
+        "target": "es5", // 目标语言版本
+        "module": "commonjs", // 要生成的代码模块标准
+        "outFile": "./app.js", // 将多个相互依赖的文件生成一个文件，可以用在AMD模块中
+
+        "lib": [], // TS需要引用的库，及声明文件，es5默认 "dom" "es5" "scripthost"(activeX控件等)
+
+        "allowJs": true, // 允许编译JS文件（js jsx）
+        "checkJs": true, // 允许在JS文件中报错，通常和allowJs一起使用
+        "outDir": "./out", // 指定输出目录
+        "rootDir": "./", // 指定输入文件目录，默认为当前目录
+
+        "declaration": true, // 生成声明文件
+        "declarationDir": "./a", // 声明文件的路径
+        "emitDeclarationOnly": true, // 只生成声明文件，没有生成js文件
+        "sourceMap": true, // 生成目标文件的 sourceMap
+        "inlineSourceMap": true, // 生成目标文件的inline sourceMap的格式
+        "declarationMap": true, // 生成声明文件的sourceMap
+        "typeRoots": [], // 声明文件目录，默认node_modules/@types，会从这里取加载types
+        "types": [], // 声明文件包，需要加载的声明文件的包
+
+        "removeComments": true, // 清除注释
+
+        "noEmit": true, // 不输出文件
+        "noEmitOnError": true, // 发生错误时不输出文件
+
+        "noEmitHelpers": true, // 不生成helper函数，需额外安装ts-helpers
+        "importHelpers": true, // 通过tslib引入helper函数，文件必须是模块(文件必须有export导出, 文件会自动去引用tslib文件)
+
+        "downlevelIteration": true // 降级遍历器的实现(es3/5)
+    }
+}
+```
