@@ -609,7 +609,36 @@ export = moduleLib;
         "noEmitHelpers": true, // 不生成helper函数，需额外安装ts-helpers
         "importHelpers": true, // 通过tslib引入helper函数，文件必须是模块(文件必须有export导出, 文件会自动去引用tslib文件)
 
-        "downlevelIteration": true // 降级遍历器的实现(es3/5)
+        "downlevelIteration": true, // 降级遍历器的实现(es3/5)
+
+        "strict": true, // 开启所有严格的类型检查，以下类型都会为true
+        /**-----------------strict: true-----------------------*/
+        "alwaysStrict": true, // 在代码中注入"use strict";
+        "noImplicitAny": true, // 不允许隐式的any类型
+        "strictNullChecks": true, // 不允许把null undefined赋值给其他类型变量
+        "strictFunctionTypes": true, // 不允许函数参数双向协变
+        "strictPropertyInitialization": true, // 类的实例属性必须初始化
+        "strictBindCallApply": true, // 严格的bind/call/apply检查
+        "noImplicitThis": false, // 不允许this有隐式的any类型
+        /**-----------------strict: true-----------------------*/
+
+        "noUnusedLocals": true, // 检查只声明，未使用的局部变量
+        "noUnusedParameters": true, // 检查未使用的函数参数
+        "noFallthroughCasesInSwitch": true, // 防止switch语句贯穿（分支没有break语句的情况）
+        "noImplicitReturns": true, // 每个分支都要有返回值
+
+        "esModuleInterop": true, // 允许export = 导出，由import from 导入
+        "allowUmdGlobalAccess": true, // 允许在模块中访问UMD全局变量
+        // "moduleResolution": "classic", // 模块解析策略（AMD System ES2015）
+        "moduleResolution": "node", // 模块解析策略(默认, 能解析的文件更多)
+        "baseUrl": "./", // 解析非相对模块的地址
+        "paths": {
+            // 路径映射，相当于 baseUrl
+            "jquery": ["node_modules/jquery/dist/jquery.slim.min.js"]
+        },
+        "rootDirs": ["src", "out"], // 将多个目录放在一个虚拟目录下，用于运行时不报错
+        "listEmittedFiles": true, // 终端打印输出的文件
+        "listFiles": true // 终端打印编译的文件（包括引用的声明文件）
     }
 }
 ```
