@@ -642,3 +642,29 @@ export = moduleLib;
     }
 }
 ```
+
+3. 工程引用（将大项目拆成小项目）
+
+```json
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "strict": true,
+        "composite": true, // 允许项目被引用
+        "declaration": true
+    }
+}
+```
+
+```json
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "../../dist/server"
+    },
+    "references": [
+        { "path": "../common" } // 依赖common工程
+    ]
+}
+```
