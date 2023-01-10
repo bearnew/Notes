@@ -668,3 +668,35 @@ export = moduleLib;
     ]
 }
 ```
+
+## 13.从ts-loader到babel
+1. `ts-loader`
+```js
+{
+    loader: 'ts-loader',
+    options: {
+        transpileOnly: true // 只做代码编译，不做类型检查
+    }
+}
+```
+2. `fork-ts-checker-webpack-plugin`
+- 在独立的进程进行类型检查
+3. `awesome-typescript-loader`
+- 更适合`Babel`记成，使用`Babel`的转义和缓存
+- 不需要安装额外的插件，就可以把类型检查放在独立进程中进行
+- 但是`ts-loader`编译时间更短
+4. `babel`编译
+- 设置`tsconfig.json`为`noEmit: true`，不输出文件
+- 检测脚本
+```js
+{
+    "script": {
+        "type-check": "tsc --watch"
+    }
+}
+```
+- `babel`无法编译的语法
+    - `namespace`
+    - `as`
+    - `enum`
+    - `export = s`(默认导出)
