@@ -695,7 +695,7 @@ export = moduleLib;
     }
 }
 ```
-- `babel`无法编译的语法
+- `babel`无法编译的语法（添加`@babel/preset-typescript`可编译）
     - `namespace`
     - `as`
     - `enum`
