@@ -460,3 +460,182 @@ ReactDom.createRoot(document.getElementById('root')!).render(<h1>hello</h1>)
 ```js
 import { jsx as _jsx } from "react/jsx-runtime";
 ```
+
+## 13.表单组件
+
+1. 受控组件
+
+```js
+function MyForm() {
+    const [value, setValue] = useState("");
+    const handleChange = useCallback((evt) => {
+        setValue(evt.target.value);
+    }, []);
+
+    return <input value={value} onChange={handleChange} />;
+}
+```
+
+2. 非受控组件
+
+```js
+import { useRef } from "react";
+
+export default function MyForm() {
+    // 定义一个ref用于保存input节点的引用
+    const inputRef = useRef();
+    const handleSubmit = (evt) => {
+        evt.preventDefault();
+        // 使用的时候直接从input节点获取值
+        alert("Name:" + inputRef.current.value);
+    };
+    return (
+        <form onSubmit={handleSubmit}>
+            <label>
+                Name:
+                <input type="text" ref={inputRef} />
+            </label>
+            <input type="submit" value="Submit" />
+        </form>
+    );
+}
+```
+
+3. hooks 组件
+
+```js
+import { useCallback } from "react";
+import useForm from "./useForm";
+export default () => {
+    // 使用 useForm 得到表单的状态管理逻辑
+    const { values, setFieldValue } = useForm();
+    // 处理表单的提交事件
+    const handleSubmit = useCallback(
+        (evt) => {
+            // 使用 preventDefault() 防止页面被刷新
+            evt.preventDefault();
+            console.log(values);
+        },
+        [values]
+    );
+    return (
+        <form onSubmit={handleSubmit}>
+            <div>
+                <label>Name: </label>
+                <input
+                    value={values.name || null}
+                    onChange={(evt) => setFieldValue("name", evt.target.value)}
+                />
+            </div>
+            <div>
+                <label>Email:</label>
+                <input
+                    value={values.email || null}
+                    onChange={(evt) => setFieldValue("email", evt.target.value)}
+                />
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    );
+};
+```
+
+```js
+// 除了初始值之外，还提供了一个 validators 对象，
+// 用于提供针对某个字段的验证函数
+const useForm = (initialValues = {}, validators) => {
+    const [values, setValues] = useState(initialValues);
+    // 定义了 errors 状态
+    const [errors, setErrors] = useState({});
+    const setFieldValue = useCallback(
+        (name, value) => {
+            setValues((values) => ({
+                ...values,
+                [name]: value,
+            }));
+            // 如果存在验证函数，则调用验证用户输入
+            if (validators[name]) {
+                const errMsg = validators[name](value);
+                setErrors((errors) => ({
+                    ...errors,
+                    // 如果返回错误信息，则将其设置到 errors 状态，否则清空错误状态
+                    [name]: errMsg || null,
+                }));
+            }
+        },
+        [validators]
+    );
+    // 将 errors 状态也返回给调用者
+    return { values, errors, setFieldValue };
+};
+```
+
+```js
+function MyForm() {
+    // 用 useMemo 缓存 validators 对象
+    const validators = useMemo(() => {
+        return {
+            name: (value) => {
+                // 要求 name 的长度不得小于 2
+                if (value.length < 2)
+                    return "Name length should be no less than 2.";
+                return null;
+            },
+            email: (value) => {
+                // 简单的实现一个 email 验证逻辑：必须包含 @ 符号。
+                if (!value.includes("@")) return "Invalid email address";
+                return null;
+            },
+        };
+    }, []);
+    // 从 useForm 的返回值获取 errors 状态
+    const { values, errors, setFieldValue } = useForm({}, validators);
+    // UI 渲染逻辑...
+}
+```
+
+## 14. 路由
+
+```js
+const MyRouter = ({ children }) => {
+    const routes = _.keyBy(
+        children.map((c) => c.props),
+        "path"
+    );
+    const [hash] = useHash();
+    const Page = routes[hash.replace("#", "")]?.component;
+    // 如果路由不存在就返回 Not found.
+    return Page ? <Page /> : "Not found.";
+};
+const Route = () => null;
+```
+
+```js
+function SamplePages() {
+    return (
+        <div className="sample-pages">
+            {/* 定义了侧边导航栏 */}
+            <div className="sider">
+                <a href="#page1">Page 1</a>
+                <a href="#page2">Page 2</a>
+                <a href="#page3">Page 3</a>
+                <a href="#page4">Page 4</a>
+            </div>
+            <div className="exp-15-page-container">
+                {/* 定义路由配置 */}
+                <MyRouter>
+                    <Route path="page1" component={Page1} />
+                    <Route path="page2" component={Page2} />
+                    <Route path="page3" component={Page3} />
+                    <Route path="page4" component={Page4} />
+                </MyRouter>
+            </div>
+        </div>
+    );
+}
+```
+
+## 15.单元测试
+
+1. `jest`测试方法
+2. `@testing-library`测试`react`和`hooks`
