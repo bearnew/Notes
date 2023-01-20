@@ -7,7 +7,8 @@
 * `tree-shaking`是针对静态结构进行分析，`import`和`export`是静态的导入和导出，而`commonjs`有动态导入和导出的功能
 * 因此`babel`中需配置`modules: false`关闭默认的模块转换，让`webpack`对模块进行处理
 #### 3. `tree shaking`的删除工作由`terser-webpack-plugin`或者`uglifyjs-webpack-plugin`来完成
-#### 4. `tree shaking`默认只对函数有效，但`babel`7编译的`class`会带有`/*#__PURE__*/`，方便`terser-webpack-plugin`删除class
+#### 4. `tree shaking`默认只对函数有效，但`babel`7编译的`class`会带有`/*#__PURE__*/`，告诉`webpack`此函数无副作用，方便`terser-webpack-plugin`删除class
+#### 5. `mode: production`会默认开启`optimization.usedExports`，对没有使用到的导出成员进行了标记，比如 `/* unused harmony export echoHost */`,以便后续使用 `terser-webpack-plugin` 等插件完成代码优化，删除掉这些未使用的代码片段
 ```js
 export class Person {
     constructor(props) {
@@ -59,7 +60,7 @@ export var Person =
     return Person;
 }();
 ``` 
-#### 5. `package.json`的`sideEffects`属性用于告知`webpack`是否有副作用
+#### 6. `package.json`的`sideEffects`属性用于告知`webpack`是否有副作用
 ```js
 // 如果所有代码都不包含 side effect，我们就可以简单地将该属性标记为 false，来告知 webpack，它可以安全地删除未用到的 export。
 {
@@ -78,7 +79,7 @@ export var Person =
     ...,
 }
 ```
-#### 6. 存在副作用的行为，无法进行`tree shaking`
+#### 7. 存在副作用的行为，无法进行`tree shaking`
 1. 函数调用，`main.js`引入了b文件的方法f，`main.js`没有执行f，但是b文件执行了f
 2. 使用了原型链
 3. 操作window
