@@ -4,7 +4,9 @@
 brew tap gromgit/homebrew-fuse
 
 
-brew install ntfs-3g-mac 
+brew install ntfs-3g-mac
+
+sudo diskutil unmount /dev/disk2s1
 
 sudo /usr/local/Cellar/ntfs-3g-mac/2022.5.17/bin/ntfs-3g /dev/disk2s1 /Volumes/TOSHIBA -olocal -oallow_other -o auto_xattr
 ```
