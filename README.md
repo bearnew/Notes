@@ -1,4 +1,5 @@
 # blog
-bear-new的博客
 
-请安装chrome插件octoTree进行阅读
+bear-new 的笔记
+
+安装 chrome 插件 octoTree 阅读体验更佳
