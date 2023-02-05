@@ -150,3 +150,154 @@ function compose(...funcs) {
   };
 }
 ```
+## 5.偏函数、柯里化
+1. 设计模式的开放封闭原则，对扩展开放，对修改封闭
+2. 偏函数：通过固定函数的部分参数，生成参数数量更少的函数
+3. 偏函数是1个n元函数变成一个m(m<n)元函数
+  ```js
+  // 定义一个包装函数，专门用来处理偏函数逻辑
+  function wrapFunc(func, fixedValue) {
+    // 包装函数的目标输出是一个新的函数
+    function wrappedFunc(input){
+      // 这个函数会固定 fixedValue，然后把 input 作为动态参数读取
+      const newFunc = func(input, fixedValue)
+      return newFunc
+    }
+    return wrappedFunc
+  }
+  const multiply3 = wrapFunc(multiply, 3)
+
+  // 输出6
+  multiply3(2)
+  ```
+4. 柯里化
+  ```js
+  function add(a, b) {
+    return a + b
+  }
+
+  function multiply(a, b, c) {
+    return a*b*c
+  }
+
+  function addMore(a, b, c, d) {
+    return a+b+c+d
+  }
+
+  function divide(a, b) {
+    return a/b
+  }
+  ```
+  ```js
+  // curry 函数借助 Function.length 读取函数元数
+  function curry(func, arity=func.length) {
+    // 定义一个递归式 generateCurried
+    function generateCurried(prevArgs) {
+      // generateCurried 函数必定返回一层嵌套
+      return function curried(nextArg) {
+        // 统计目前“已记忆”+“未记忆”的参数
+        const args = [...prevArgs, nextArg]  
+        // 若 “已记忆”+“未记忆”的参数数量 >= 回调函数元数，则认为已经记忆了所有的参数
+        if(args.length >= arity) {
+          // 触碰递归边界，传入所有参数，调用回调函数
+          return func(...args)
+        } else {
+          // 未触碰递归边界，则递归调用 generateCurried 自身，创造新一层的嵌套
+          return generateCurried(args)
+        }
+      }
+    }
+    // 调用 generateCurried，起始传参为空数组，表示“目前还没有记住任何参数”
+    return generateCurried([])
+  }
+  ```
+  ```js
+  const curriedAdd = curry(add)
+  const curriedMultiply = curry(multiply)
+  const curriedAddMore = curry(addMore)
+  const curriedDivide = curry(divide)
+
+  const compute = pipe(
+    curriedAdd(1), 
+    curriedMultiply(2)(3), 
+    curriedAddMore(1)(2)(3), 
+    curriedDivide(300)
+  )
+
+  compute(3); // 10
+  ```
+  ## 6.盒子模型
+  ```js
+  function add4(num) {
+    return num + 4
+  }  
+
+  function multiply3(num) {
+    return num*3
+  }  
+
+  function divide2(num) {
+    return num/2
+  }
+  
+  const Box = x => ({
+    map: f => Box(f(x)),
+    valueOf: () => x
+  })
+
+  // 值为 21
+  const computeBox = Box(10)
+    .map(add4)
+    .map(multiply3)
+    .map(divide2)  
+    .valueOf()
+  ```
+  ```js
+    const isEmpty = x => x === undefined || x === null;
+    const Maybe = x => ({
+      map: f => isEmpty(x) ? Maybe(null) : Maybe(f(x)),  
+      valueOf: () => x,  
+      inspect: () => `Maybe {${x}}`
+    })
+
+    function add4(x) {
+      return x + 4
+    }  
+
+    function add8(x) {
+      x + 8
+    }
+
+    function toString(x) {
+      return x.toString()
+    }  
+
+    function addX(x) {
+      return x + 'X'
+    }  
+
+    function add10(x) {
+      return x + '10'
+    }
+
+    const res = Maybe(10)
+      .map(add4)
+      .map(add8)
+      .map(toString)
+      .map(addX)  
+      .inspect()
+
+    // 输出 Maybe {null}
+    console.log(res)
+  ```
+  ```js
+  const Monad = x => ({
+    map: f => Monad(f(x)),
+    // flatMap 直接返回 f(x) 的执行结果
+    flatMap: f => f(x),
+
+    valueOf: () => x,
+    inspect: () => `Monad {${x}}`,
+  })
+  ```
+  
