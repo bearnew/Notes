@@ -18,3 +18,50 @@
    - 处理方法：使用全局事件 window.addEventListener 捕获
 3. 异常边界组件自身内的异常；
    - 处理方法：将边界组件和业务组件分离，各司其职，不能在边界组件中处理逻辑代码，也不能在业务组件中使用 didcatch
+
+## ErroryBoundary 组件
+
+```js
+import React from "react";
+
+interface IProps {
+  FallbackElement?: React.ElementType<{ error: Error }>;
+  onError?: (error: Error, info: React.ErrorInfo) => void;
+  children: React.ReactNode;
+}
+
+interface IState {
+  error: Error | null;
+}
+
+class ErroryBoundary extends React.Component<IProps, IState> {
+  state: IState = {
+    error: null,
+  };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
+    console.error("语法错误：", error);
+    console.error("错误组件：", errorInfo);
+  }
+
+  render(): React.ReactNode {
+    const { FallbackElement } = this.props;
+    const { error } = this.state;
+
+    if (!!error) {
+      return React.isValidElement(FallbackElement) ? FallbackElement : null;
+    }
+
+    return this.props.children;
+  }
+}
+
+export default ErroryBoundary;
+```
