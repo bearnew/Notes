@@ -5,15 +5,17 @@
 1. `FPS`: 绿色竖线越高，FPS 越高，红色代表卡顿
 2. `CPU`: 面积越大，`CPU`在消耗越大，越耗性能
 3. `NETWORK`: 每个时间节点网络请求和帧画面
+4. 宽度代表执行时间，超过 50ms 就被认为是`long task`，需要优化
+5. 长度代表调用栈深度，特别长的都是有递归在
 
 ### 2.像素管道
 
 1. 重排: 宽度、高度、位置
-    - ![render](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/render.png?raw=true)
+   - ![render](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/render.png?raw=true)
 2. 重绘：背景图片、文字颜色或阴影
-    - ![paint](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/paint.png?raw=true)
+   - ![paint](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/paint.png?raw=true)
 3. 合成：`transform` 和 `opacity` 属性更改来实现动画
-    - ![composite](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/composite.png?raw=true)
+   - ![composite](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/composite.png?raw=true)
 
 ### 3.火焰图颜色
 
@@ -70,7 +72,7 @@
         <td>Composite Layers</td><td>Chrome的渲染引擎完成图片层合并时触发</td>
     </tr>
     <tr>
-        <td rowspan="1">灰色(other)</td><td rowspan="1">其它事件花费的时间</td><td>-</td><td>-</td>
+        <td rowspan="1">灰色(other)</td><td rowspan="1">宏任务task</td><td>-</td><td>-</td>
     </tr>
     <tr>
         <td rowspan="1">白色(Idle)</td><td rowspan="1">空闲时间</td><td>-</td><td>-</td>
@@ -79,5 +81,5 @@
 
 ### 4.图解
 
--   ![performance](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/chrome_performance.png?raw=true)
--   ![js_time](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/chrome_performance_js_time.png?raw=true)
+- ![performance](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/chrome_performance.png?raw=true)
+- ![js_time](https://github.com/bearnew/picture/blob/master/markdown_v2/2022/chrome%20devtools/chrome_performance_js_time.png?raw=true)
