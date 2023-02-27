@@ -186,3 +186,41 @@ const puppeteer = require("puppeteer");
   await browser.clone();
 })();
 ```
+
+### 三、开源
+
+1. 开源协议
+
+   - MIT，一般库都选择 MIT
+   - BSD
+   - Apache，涉及专利技术选择 Apache 协议
+
+2. 发布包
+   - 使用`.npmignore`来忽略文件
+   - 发布测试包
+   ```js
+   npm publish --tag=beta
+   ```
+   - 发布共有包
+   ```js
+   npm publish --access public
+   ```
+   - 在 package.json 中添加`publishConfig`字段
+   ```js
+   {
+        "publishConfig": {
+            "registry": "https://registry.npmjs.org",
+            "access": "public"
+        }
+   }
+   ```
+   - 发布后添加 tag
+   ```js
+   git tag 1.0.0 // 添加指定版本tag
+   git push --tags // 将tag推送到远端
+   ```
+3. github registry 数据
+   - https://github.com/bearnew/Notes/graphs/traffic
+   - https://github.com/bearnew/webpack-template/network/dependents
+4. npm 数据
+   - https://www.npmjs.com/package/next-webpack-cli
