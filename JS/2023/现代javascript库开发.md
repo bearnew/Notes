@@ -224,3 +224,92 @@ const puppeteer = require("puppeteer");
    - https://github.com/bearnew/webpack-template/network/dependents
 4. npm 数据
    - https://www.npmjs.com/package/next-webpack-cli
+
+### 四、维护
+
+1. 规范
+
+- `EditorConfig`
+- `prettier`
+- `husky`
+- `eslint`
+
+  ```js
+  // eslint初始化
+  npx eslint --init
+  ```
+
+  ```js
+  // 解决Eslint和Prettier的规则
+  npm i eslint-plugin-prettier -D // 让Eslint对prettier进行检查
+  npm i eslint-config-prettier -D // 把Eslint和prettier冲突的规则都关闭
+  ```
+
+- `Conventional commits`规范`commit`的提交
+- 持续集成（test、lint）
+
+### 五、设计更好的 JS 库
+
+1. 设计更好的函数
+
+- 命名准确简洁
+- 参数个数越少越好，2 个参数或者对象化参数
+- 返回值一致，字符串使用''兜底，而不是`undefined`
+- 参数校验
+  - 对于`object array function`要做强制校验
+  - 对于`number string boolean`做自动转换
+    - 数字用`Number`
+    - 整数用`Math.round`
+    - 字符串用`String`
+    - 布尔值使用`!!`
+- 副作用
+  - 不要修改环境信息如`Array.prototype`
+  - 不要修改函数参数，如参数是对象，在函数内修改了参数
+- 异常捕获
+
+  ```js
+  function safeParse(str, backupData) {
+    try {
+      return JSON.parse(str);
+    } catch (e) {
+      return backupData;
+    }
+  }
+
+  // 不报错，返回{}
+  safeParse("1", {});
+  ```
+
+-
+
+2. 兼容性问题
+
+- `String.prototype.trim`，ES2015 新增的函数
+- `String.prototype.trimStart`，ES2021 新增函数
+- `String.proptype.replaceAll`，ES2021
+- `Array.from` ES2015
+- `Array.prototype.findIndex`，ES2015
+- `Array.prototype.includes`，ES2016
+- `Array.prototype.flat` ES2019
+- `Array.prototype.fill` ES2015
+- `Object.values` ES2017
+- `Object.entries` ES2017
+  ```js
+  const obj = {
+    a: 1,
+    b: 2,
+  };
+  Object.entries(obj); // [['a', 1], ['b', 2]]
+  ```
+-
+
+### 六、安全防护
+
+1. 冻结对象
+
+- `Object.preventExtensions`
+- `Object.seal`
+- `Object.freeze`
+
+2. npm list 查看完整依赖库
+3. npm audit 安全审核
