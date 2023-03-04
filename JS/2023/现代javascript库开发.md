@@ -406,3 +406,15 @@ function find(arr, item) {
   return null;
 }
 ```
+
+## 八、命令行工具
+
+1. 使用`jslib`初始化一个项目
+
+```js
+jslibbook new mylib
+```
+
+2. 交互式界面可以使用`Inquirer.js`
+3. `chalk`打印颜色
+4. `ora`实现`loading`效果
