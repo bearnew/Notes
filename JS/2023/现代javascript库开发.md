@@ -313,3 +313,96 @@ const puppeteer = require("puppeteer");
 
 2. npm list 查看完整依赖库
 3. npm audit 安全审核
+
+### 七、抽象标准库
+
+1. Once
+
+```js
+export function once(fn) {
+  let count = 0;
+  return function (...args) {
+    if (count === 0) {
+      count += 1;
+      return fn(...args);
+    }
+  };
+}
+
+const log = () => {
+  console.log("1111");
+};
+const log1 = once(log);
+
+log1(); // 1111
+log1(); // 无输出
+```
+
+2. 递归循环引用，会导致栈溢出，不递归，改用循环
+
+```js
+function cloneForce(x) {
+  const uniqueList = []; // 用来去重
+  let root = {};
+
+  // 循环数组
+  const loopList = [
+    {
+      parent: root,
+      key: undefined,
+      data: x,
+    },
+  ];
+
+  while (loopList.length) {
+    // 深度优先
+    const node = loopList.pop();
+    const parent = node.parent;
+    const key = node.key;
+    const data = node.data;
+
+    // 初始化赋值目标，如果key为undefined，则拷贝到parent，否则拷贝到parent[key]
+    let res = parent;
+    if (typeof key !== "undefined") {
+      res = parent[key] = {};
+    }
+
+    let uniqueData = find(uniqueList, data);
+    if (uniqueData) {
+      parent[key] = uniqueData.target;
+      continue;
+    }
+
+    uniqueList.push({
+      source: data,
+      target: res,
+    });
+
+    for (let k in data) {
+      if (data.hasOwnProperty(k)) {
+        if (typeof data[k] === "object") {
+          // 下一次循环
+          loopList.push({
+            parent: res,
+            key: k,
+            data: data[k],
+          });
+        } else {
+          res[k] = data[k];
+        }
+      }
+    }
+  }
+  return root;
+}
+
+function find(arr, item) {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i].source === item) {
+      return arr[i];
+    }
+  }
+
+  return null;
+}
+```
