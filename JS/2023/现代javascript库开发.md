@@ -418,3 +418,8 @@ jslibbook new mylib
 2. 交互式界面可以使用`Inquirer.js`
 3. `chalk`打印颜色
 4. `ora`实现`loading`效果
+
+## 九、工具库
+
+1. 博客推荐使用`Gatsby`或`Hexo`
+2. 写文档推荐`Docusaurus`(`react`)或`VuePress`
