@@ -80,3 +80,36 @@ function useMemo(callback) {
     return s;
 }
 ```
+
+## 2.新架构
+
+- `Scheduler`(调度器): 调度任务的优先级，高优先级任务优先进入`Reconciler`
+- `Reconciler`(协调器): `VDOM`的实现，负责根据自变量变化计算出`UI`变化
+
+  - `Reconciler`的更新流程可中断，每次循环都会调用`shouldYield`判断当前`Time Slice`是否有剩余时间，没有剩余时间则暂缓更新流程，将主流程交给渲染流水线，等待下一个宏任务再继续执行，这就是`Time Slice`的实现原理 -核心流程
+
+  ```js
+  function workLoopConcurrent() {
+    // 一直执行任务，直到任务执行完或中断
+    while (workInProgress !== null && !shouldYield()) {
+      performUnitOfWork(workInProgress);
+    }
+  }
+
+  function shouldYield() {
+    // 当前时间是否大于过期时间
+    // 其中deadline = getCurrentTime() + yieldInterval
+    // yieldInterval为调度器预设的时间间隔，默认为5ms
+    return getCurrentTime() >= deadline;
+  }
+  ```
+
+  ```js
+
+  ```
+
+- `Renderer`(渲染器): 负责将`UI`变化渲染到宿主环境
+
+## 3.新架构好处
+
+1. `Reconciler`从同步变为异步，可中断，解决 CPU 瓶颈，多个更新流程并发执行，突破`I/O`瓶颈
