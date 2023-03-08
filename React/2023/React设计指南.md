@@ -113,3 +113,66 @@ function useMemo(callback) {
 ## 3.新架构好处
 
 1. `Reconciler`从同步变为异步，可中断，解决 CPU 瓶颈，多个更新流程并发执行，突破`I/O`瓶颈
+
+## 4.Fiber 架构
+
+1. `React`3 种节点类型
+
+- `React Element`(React 元素)
+- `React Component`(React 组件)
+- `FiberNode`(组成 Fiber 架构的节点类型)
+
+```js
+// App是React Component
+const App = () => {
+  return <h3>Hello</h3>;
+};
+
+// ele是React Element
+const ele = <App />;
+
+// 在React运行时内部，包含App对应FiberNode
+ReactDom.createRoot(rootNode).render(ele);
+```
+
+2. 作为静态的数据结构，每个`FiberNode`对应一个`React`元素，用于保存`React`元素的类型，对应的`DOM`元素等信息
+3. 作为动态的工作单元，每个`FiberNode`保存本次更新中`React`元素变化的数据、要执行的工作（增、删、改、更新 Ref、副作用等）
+4. `FiberNode`构造函数
+
+```js
+// FiberNode构造函数
+function FiberNode(tag, pendingProps, key, mode) {
+  this.tag = tag;
+  this.key = key;
+  this.elementType = null;
+}
+```
+
+5. `Fiber`节点的属性连接
+
+```js
+// 指向父FiberNode,子FiberNode及其兄弟FiberNode执行完completeWork后会返回父FiberNode
+this.return = null;
+// 指向第一个子FiberNode
+this.child = null;
+// 指向右边的兄弟FiberNode
+this.sibling = null;
+```
+
+6. 显卡的双缓存
+
+   - 显卡合成图像并写入后缓冲区，后缓冲区被写入图像，前后缓存区就会互换
+
+   - 刷新频率为 60Hz 的显示器，每秒从前缓存区读取 60 次图像，显示到显示器上。
+
+7. React 的双缓存
+   - 一颗真实 UI 对应的`Fiber Tree`
+   - 正在内存中构建的`Fiber Tree`
+   ```js
+   // 用于clone fiberNode的方法
+   function cloneChildFibers(current, workInProgress) {
+     // current是前缓冲区的FiberNode，对应真实UI
+     // workInProgress对应构建中的Fiber tree
+   }
+   ```
+8.
