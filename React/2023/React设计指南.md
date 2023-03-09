@@ -203,7 +203,7 @@ function workLoopConcurrent() {
 
 ## 6.更新流程
 
-1. beginWork
+1. beginWork，会根据当前`fiberNode`创建下一级`fiberNode`，在`update`时标记`Placement`(新增、移动)、`ChildDeletion`(删除)
 
 ```js
 function beginWork(current, workInProgress, renderLanes) {
@@ -236,3 +236,37 @@ function beginWork(current, workInProgress, renderLanes) {
   }
 }
 ```
+
+2. `completeWork`在`mount`时会构建`DOM Tree`，完成`completeWork`后，`Reconciler`工作流程结束
+
+## 7.commit 阶段(renderer 阶段)
+
+1. `BeforeMutation`阶段
+2. `Mutation`阶段
+3. `Layout`阶段
+
+## 8.错误处理
+
+1. API
+
+- `getDerivedStateFromError`静态方法，提供一个机会渲染`fallback UI`
+- `componentDidCatch`组件实例方法，错误发生后，提供一个机会记录错误信息
+
+2. 不会被捕获的错误
+
+   1. 事件回调中的错误
+
+   ```js
+   const B = () => {
+     const handleClick = () => {
+       throw new Error("错误发生");
+     };
+     return <div onClick={handleClick}>Hello</div>;
+   };
+   ```
+
+   2. 异步代码，如`setTimeout`、`requestAnimationFrame`回调
+   3. `SSR`, `SSR`不属于`React`流程
+   4. `ErrorBoundaries`本身`Component`的错误，`ErrorBoundaries`只会捕获子孙组件的错误
+
+3.
