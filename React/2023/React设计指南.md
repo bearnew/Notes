@@ -175,4 +175,64 @@ this.sibling = null;
      // workInProgress对应构建中的Fiber tree
    }
    ```
-8.
+
+## 5.render 阶段
+
+```js
+// 同步更新流程
+// performSyncWorkOnRoot会执行该方法
+function workLoopSync() {
+  // workInProgress为null，表示Fiber构建已结束
+  while (workInProgress !== null) {
+    performUnitOfWork(workInProgress);
+  }
+}
+```
+
+```js
+// 并发更新流程
+// performConcurrentWorkOnRoot会执行该方法
+function workLoopConcurrent() {
+  // workInProgress为null，表示Fiber构建已结束
+  // shouldYield是否可中断
+  while (workInProgress !== null && !shouldYield()) {
+    performUnitOfWork(workInProgress);
+  }
+}
+```
+
+## 6.更新流程
+
+1. beginWork
+
+```js
+function beginWork(current, workInProgress, renderLanes) {
+  if (current !== null) {
+    // 是update流程
+  } else {
+    // 是mount流程
+  }
+
+  // 判断tag不同，进入不同处理逻辑
+  switch (workInProgress.tag) {
+    case IndeterminateComponnet:
+    // mount进入的分支
+    // mount和update最终都会进入reconcileChildren的方法
+    // mount传参shouldTrackSideEffects为false,不追踪副作用
+    // update传true，标记flags，方便后续操作
+    // ...
+    case LazyComponent:
+    // ...
+    case FunctionComponent:
+    // ...
+    case ClassComponent:
+    // ...
+    case HostRoot:
+    // ...
+    case HostComponent:
+    // ...
+    case HostText:
+    // ...
+  }
+}
+```
