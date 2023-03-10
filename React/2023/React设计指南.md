@@ -269,4 +269,11 @@ function beginWork(current, workInProgress, renderLanes) {
    3. `SSR`, `SSR`不属于`React`流程
    4. `ErrorBoundaries`本身`Component`的错误，`ErrorBoundaries`只会捕获子孙组件的错误
 
-3.
+## 9.schedule
+
+1. 执行的动力-`Scheduler`
+2. 执行的底层算法-`lane`模型
+3. 执行的策略-调度策略
+4. 执行的边界情况-饥饿情况
+5. 低级特性-`Batched Updates`等
+6. 高级特性-各种`Concurrent Feature`
