@@ -277,3 +277,142 @@ function beginWork(current, workInProgress, renderLanes) {
 4. 执行的边界情况-饥饿情况
 5. 低级特性-`Batched Updates`等
 6. 高级特性-各种`Concurrent Feature`
+
+## 10.简易事件系统
+
+```js
+class SyntheticEvent {
+  constructor(e) {
+    this.nativeEvent = e;
+  }
+  stopPropagation() {
+    this._stopPropagation = true;
+    if (this.nativeEvent.stopPropagation) {
+      this.nativeEvent.stopPropagation();
+    }
+  }
+}
+
+const triggerEventFlow = (paths, type, se) => {
+  for (let i = paths.length; i--) {
+    const pathNode = paths[i];
+    const callback = pathNode[type];
+    if (callback) {
+      callback.call(null, se);
+    }
+    if (se._stopPropagation) {
+      break;
+    }
+  }
+}
+
+const dispatchEvent = (e, type) => {
+  const se = new SyntheticEvent(e);
+  const ele = e.target;
+  let fiber;
+  for (let prop in ele) {
+    if (prop.toLowerCase().includes('fiber')) {
+      fiber = ele[prop];
+    }
+  }
+  const paths = collectPaths(type, fiber);
+  triggerEventFlow(paths, type + "CAPTURE", se);
+  if (!se._stopPropagation) {
+    triggerEventFlow(paths.reverse(), type, se);
+  }
+}
+
+const collectPaths = (type, begin) => {
+  const paths = [];
+  while(begin,tag !== 3) {
+    const { memoizedProps, tag } = begin;
+    if (tag === 5) {
+      const eventName = ("on" + type).toUpperCase();
+      if (memoizedProps && Object.keys(memoizedProps).includes(eventName)) {
+        const pathNode = {};
+        pathNode[type.toUpperCase()] = memoizedProps[eventName];
+        paths.push(pathNode);
+      }
+    }
+    begin = begin.return;
+  }
+  return path;
+}
+
+export const addEvent = (container, type) => {
+  container.addEventListener(type, e => {
+    dispatchEvent(e, type.toUpperCase(), container);
+  })
+}
+```
+
+## 11.Reconcile 流程
+
+1. `React`的`diff`会预设 3 个限制
+
+   1. 只对同级元素进行`diff`,`DOM`元素在前后 2 次更新跨越了层级，`React`不会尝试复用他
+   2. 两个不同类型的元素会产生不同的树，如果元素从`DIV`变成`P`，`React`会销毁`DIV`及其子孙元素，并新建`P`及其子孙元素
+   3. 开发者可以通过`key`来暗示哪些子元素在不同渲染下能够保持稳定
+
+2. 同级多节点`diff`，属于以下 1 种或多种
+   1. 节点位置没有变化
+   2. 节点增删
+   3. 节点移动
+3. diff 算法
+   1. 第一轮遍历尝试逐个复用节点
+   2. 第二轮遍历处理剩下的节点
+4. 简易`diff`算法
+
+```typescript
+type NodeList = Node[];
+type Flag = "Placement" | "Deletion";
+
+interface Node {
+  key: string;
+  flag?: Flag;
+  index?: number;
+}
+
+// diff算法的实现
+function diff(before: NodeList, after: NodeList): NodeList {
+  let lastPlacedIndex = 0;
+  const result: NodeList = [];
+
+  const beforeMap = new Map<string, Node>();
+  before.forEach((node, i) => {
+    node.index = i;
+    beforeMap.set(node.key, node);
+  });
+
+  for (let i = 0; i < after.length; i++) {
+    const afterNode = after[i];
+    afterNode.index = i;
+    const beforeNode = beforeMap.get(afterNode.key);
+
+    if (beforeNode) {
+      // 复用旧节点
+      beforeMap.delete(beforeNode.key);
+
+      const oldIndex = beforeNode.index as number;
+      if (oldIndex < lastPlacedIndex) {
+        afterNode.flag = "Placement";
+        result.push(afterNode);
+        continue;
+      } else {
+        lastPlaceIndex = oldIndex;
+      }
+    } else {
+      // 创建新节点
+      afterNode.flag = "Placement";
+      result.push(afterNode);
+    }
+  }
+
+  beforeMap.forEach((node) => {
+    node.flag = "Deletion";
+    result.push(node);
+  });
+
+  return result;
+}
+```
