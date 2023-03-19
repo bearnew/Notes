@@ -92,3 +92,20 @@ console.log(obj.name); // Freddie Mercury
     import c4 from './test.js';
     c4(); // i am default
     ```
+    7. `import`的值可变
+    ```js
+    // test.js
+    export const testObj = { a: { b: 1 } };
+    export const a = testObj.a;
+    ```
+    ```js
+    // a.js
+    import { testObj } from './test.js';
+    testObj.a = { b: 2 };
+    ```
+    ```js
+    // b.js
+    import { testObj, a } from './test.js';
+    console.log(a); // { b: 1 }
+    console.log(testObj); { a: { b: 2 } }
+    ```
