@@ -902,6 +902,538 @@ export default () => {
 };
 ```
 
+## 7.多功能 ref
+
+1. 类组件`React.createRef`
+
+```js
+class Index extends React.Component {
+    constructor(props) {
+        super(props);
+        this.currentDom = React.createRef(null);
+    }
+    componentDidMount() {
+        console.log(this.currentDom);
+    }
+    render = () => <div ref={this.currentDom}>ref对象模式获取元素或组件</div>;
+}
+```
+
+```js
+// React.createRef底层逻辑
+// react/src/ReactCreateRef.js
+export function createRef() {
+    const refObject = {
+        current: null,
+    };
+    return refObject;
+}
+```
+
+2. 函数组件`useRef`
+
+-   函数组件不能使用`React.createRef`，每次组件更新`ref`的值都会被重置
+-   `useRef` 产生的 `ref` 对象挂到函数组件对应的 `fiber` 上，函数组件每次执行，只要组件不被销毁，函数组件对应的 `fiber` 对象一直存在，所以`ref` 等信息就会被保存下来。
+
+```js
+export default function Index() {
+    const currentDom = React.useRef(null);
+    React.useEffect(() => {
+        console.log(currentDom.current); // div
+    }, []);
+    return <div ref={currentDom}>ref对象模式获取元素或组件</div>;
+}
+```
+
+3. 类组件获取`ref`的 3 种方式
+    1. `ref`是一个字符串
+    ```js
+    /* 类组件 */
+    class Children extends Component {
+        render = () => <div>hello,world</div>;
+    }
+    /* TODO:  Ref属性是一个字符串 */
+    export default class Index extends React.Component {
+        componentDidMount() {
+            // {currentDom: div, currentComInstance: Children}
+            console.log(this.refs);
+        }
+        render = () => (
+            <div>
+                <div ref="currentDom">字符串模式获取元素或组件</div>
+                <Children ref="currentComInstance" />
+            </div>
+        );
+    }
+    ```
+    2. `ref`是一个函数
+    ```js
+    // 等到真实 DOM 创建阶段，执行 callback ，获取的 DOM 元素或组件实例，将以回调函数第一个参数形式传入，
+    class Children extends React.Component {
+        render = () => <div>hello,world</div>;
+    }
+    /* TODO: Ref属性是一个函数 */
+    export default class Index extends React.Component {
+        currentDom = null;
+        currentComponentInstance = null;
+        componentDidMount() {
+            console.log(this.currentDom); // <div>ref模式获取元素或组件</div>
+            console.log(this.currentComponentInstance); // Children {props: {}}
+        }
+        render = () => (
+            <div>
+                <div ref={(node) => (this.currentDom = node)}>
+                    Ref模式获取元素或组件
+                </div>
+                <Children
+                    ref={(node) => (this.currentComponentInstance = node)}
+                />
+            </div>
+        );
+    }
+    ```
+    3. ref 属性是一个 ref 对象
+    ```js
+    class Children extends React.Component {
+        render = () => <div>hello,world</div>;
+    }
+    export default class Index extends React.Component {
+        currentDom = React.createRef(null);
+        currentComponentInstance = React.createRef(null);
+        componentDidMount() {
+            // {current: div}
+            console.log(this.currentDom);
+            // {current: Children}
+            console.log(this.currentComponentInstance);
+        }
+        render = () => (
+            <div>
+                <div ref={this.currentDom}>Ref对象模式获取元素或组件</div>
+                <Children ref={this.currentComponentInstance} />
+            </div>
+        );
+    }
+    ```
+4. `forwardRef`转发`ref`
+    - `forwardRef` 的初衷就是解决 `ref` 不能跨层级捕获和传递的问题。
+5. `forwardRef`跨层级获取`ref`, `forwardRef` 把 `ref` 变成了可以通过 `props` 传递和转发。
+    ```js
+    // 孙组件
+    function Son(props) {
+        const { grandRef } = props;
+        return (
+            <div>
+                <div> i am alien </div>
+                <span ref={grandRef}>这个是想要获取元素</span>
+            </div>
+        );
+    }
+    // 父组件
+    class Father extends React.Component {
+        constructor(props) {
+            super(props);
+        }
+        render() {
+            return (
+                <div>
+                    <Son grandRef={this.props.grandRef} />
+                </div>
+            );
+        }
+    }
+    const NewFather = React.forwardRef((props, ref) => (
+        <Father grandRef={ref} {...props} />
+    ));
+    // 爷组件
+    class GrandFather extends React.Component {
+        constructor(props) {
+            super(props);
+        }
+        node = null;
+        componentDidMount() {
+            console.log(this.node); // span #text 这个是想要获取元素
+        }
+        render() {
+            return (
+                <div>
+                    <NewFather ref={(node) => (this.node = node)} />
+                </div>
+            );
+        }
+    }
+    ```
+6. `forwardRef`合并转发`ref`
+    ```js
+    // 表单组件
+    class Form extends React.Component{
+        render(){
+            return <div>{...}</div>
+        }
+    }
+    // index 组件
+    class Index extends React.Component{
+        componentDidMount(){
+            const { forwardRef } = this.props
+            forwardRef.current={
+                form:this.form,      // 给form组件实例 ，绑定给 ref form属性
+                index:this,          // 给index组件实例 ，绑定给 ref index属性
+                button:this.button,  // 给button dom 元素，绑定给 ref button属性
+            }
+        }
+        form = null
+        button = null
+        render(){
+            return <div>
+                <button ref={(button)=> this.button = button } >点击</button>
+                <Form  ref={(form) => this.form = form }  />
+            </div>
+        }
+    }
+    const ForwardRefIndex = React.forwardRef(( props,ref )=> <Index  {...props} forwardRef={ref}  />)
+    // home 组件
+    export default function Home(){
+        const ref = useRef(null)
+        useEffect(()=>{
+            // {button: button, form: Form, index: Index}
+            console.log(ref.current)
+        },[])
+        return <ForwardRefIndex ref={ref} />
+    }
+    ```
+7. `forwardRef`高阶组件转发`ref`
+    ```js
+    function HOC(Component) {
+        class Wrap extends React.Component {
+            render() {
+                const { forwardedRef, ...otherprops } = this.props;
+                return <Component ref={forwardedRef} {...otherprops} />;
+            }
+        }
+        return React.forwardRef((props, ref) => (
+            <Wrap forwardedRef={ref} {...props} />
+        ));
+    }
+    class Index extends React.Component {
+        render() {
+            return <div>hello,world</div>;
+        }
+    }
+    const HocIndex = HOC(Index);
+    export default () => {
+        const node = useRef(null);
+        useEffect(() => {
+            console.log(node.current); /* Index 组件实例  */
+        }, []);
+        return (
+            <div>
+                <HocIndex ref={node} />
+            </div>
+        );
+    };
+    ```
+8. 类组件`ref`获取组件实例，实现组件双向通信
+    - 子组件暴露方法 `fatherSay` 供父组件使用，父组件通过调用方法可以设置子组件展示内容。
+    - 父组件提供给子组件 `toFather`，子组件调用，改变父组件展示内容，实现父 <-> 子 双向通信。
+    ```js
+    /* 子组件 */
+    class Son extends React.PureComponent {
+        state = {
+            fatherMes: "",
+            sonMes: "",
+        };
+        fatherSay = (fatherMes) =>
+            this.setState({ fatherMes }); /* 提供给父组件的API */
+        render() {
+            const { fatherMes, sonMes } = this.state;
+            return (
+                <div className="sonbox">
+                    <div className="title">子组件</div>
+                    <p>父组件对我说：{fatherMes}</p>
+                    <div className="label">对父组件说</div>
+                    <input
+                        onChange={(e) =>
+                            this.setState({ sonMes: e.target.value })
+                        }
+                        className="input"
+                    />
+                    <button
+                        className="searchbtn"
+                        onClick={() => this.props.toFather(sonMes)}>
+                        to father
+                    </button>
+                </div>
+            );
+        }
+    }
+    /* 父组件 */
+    export default function Father() {
+        const [sonMes, setSonMes] = React.useState("");
+        const sonInstance = React.useRef(null); /* 用来获取子组件实例 */
+        const [fatherMes, setFatherMes] = React.useState("");
+        const toSon = () =>
+            sonInstance.current.fatherSay(
+                fatherMes,
+            ); /* 调用子组件实例方法，改变子组件state */
+        return (
+            <div className="box">
+                <div className="title">父组件</div>
+                <p>子组件对我说：{sonMes}</p>
+                <div className="label">对子组件说</div>
+                <input
+                    onChange={(e) => setFatherMes(e.target.value)}
+                    className="input"
+                />
+                <button className="searchbtn" onClick={toSon}>
+                    to son
+                </button>
+                <Son ref={sonInstance} toFather={setSonMes} />
+            </div>
+        );
+    }
+    ```
+9. 函数组件 `forwardRef` + `useImperativeHandle`
+
+    - 第一个参数 ref : 接受 forWardRef 传递过来的 ref 。
+    - 第二个参数 createHandle ：处理函数，返回值作为暴露给父组件的 ref 对象。
+    - 第三个参数 deps :依赖项 deps，依赖项更改形成新的 ref 对象。
+    - ![20230326224158-2023-03-26](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230326224158-2023-03-26.png)
+
+    ```js
+    // 父组件用 ref 标记子组件，由于子组件 Son 是函数组件没有实例，所以用 forwardRef 转发 ref。
+    // 子组件 Son 用 useImperativeHandle 接收父组件 ref，将让 input 聚焦的方法 onFocus 和 改变 input 输入框的值的方法 onChangeValue 传递给 ref 。
+    // 父组件可以通过调用 ref 下的 onFocus 和 onChangeValue 控制子组件中 input 赋值和聚焦。
+    // 子组件
+    function Son(props, ref) {
+        const inputRef = useRef(null);
+        const [inputValue, setInputValue] = useState("");
+        useImperativeHandle(
+            ref,
+            () => {
+                const handleRefs = {
+                    onFocus() {
+                        /* 声明方法用于聚焦input框 */
+                        inputRef.current.focus();
+                    },
+                    onChangeValue(value) {
+                        /* 声明方法用于改变input的值 */
+                        setInputValue(value);
+                    },
+                };
+                return handleRefs;
+            },
+            [],
+        );
+        return (
+            <div>
+                <input
+                    placeholder="请输入内容"
+                    ref={inputRef}
+                    value={inputValue}
+                />
+            </div>
+        );
+    }
+
+    const ForwarSon = forwardRef(Son);
+    // 父组件
+    class Index extends React.Component {
+        cur = null;
+        handerClick() {
+            const { onFocus, onChangeValue } = this.cur;
+            onFocus(); // 让子组件的输入框获取焦点
+            onChangeValue("let us learn React!"); // 让子组件input
+        }
+        render() {
+            return (
+                <div style={{ marginTop: "50px" }}>
+                    <ForwarSon ref={(cur) => (this.cur = cur)} />
+                    <button onClick={this.handerClick.bind(this)}>
+                        操控子组件
+                    </button>
+                </div>
+            );
+        }
+    }
+    ```
+
+10. `ref`用作函数组件缓存数据
+    - 第一个能够直接修改数据，不会造成函数组件冗余的更新作用。
+    - 第二个 useRef 保存数据，如果有 useEffect ，useMemo 引用 ref 对象中的数据，无须将 ref 对象添加成 dep 依赖项，因为 useRef 始终指向一个内存空间，所以这样一点好处是可以随时访问到变化后的值。
+    ```js
+    const toLearn = [ { type: 1 , mes:'let us learn React' } , { type:2,mes:'let us learn Vue3.0' }  ]
+    export default function Index({ id }){
+        const typeInfo = React.useRef(toLearn[0])
+        const changeType = (info)=>{
+            typeInfo.current = info /* typeInfo 的改变，不需要视图变化 */
+        }
+        useEffect(()=>{
+        if(typeInfo.current.type===1){
+            /* ... */
+        }
+        },[ id ]) /* 无须将 typeInfo 添加依赖项  */
+        return <div>
+            {
+                toLearn.map(item=> <button key={item.type}  onClick={ changeType.bind(null,item) } >{ item.mes }</button> )
+            }
+        </div>
+    ```
+11. ref 原理
+    ```js
+    export default class Index extends React.Component {
+        state = { num: 0 };
+        node = null;
+        render() {
+            return (
+                <div>
+                    <div
+                        ref={(node) => {
+                            this.node = node;
+                            // 第1次打印null
+                            // 第2次打印div
+                            console.log("此时的参数是什么：", this.node);
+                        }}>
+                        ref元素节点
+                    </div>
+                    <button
+                        onClick={() =>
+                            this.setState({ num: this.state.num + 1 })
+                        }>
+                        点击
+                    </button>
+                </div>
+            );
+        }
+    }
+    ```
+12. 第一阶段：一次更新中，在 commit 的 mutation 阶段, 执行 commitDetachRef，commitDetachRef 会清空之前 ref 值，使其重置为 null。 源码先来看一下。
+    ```js
+    // react-reconciler/src/ReactFiberCommitWork.js
+    function commitDetachRef(current: Fiber) {
+        const currentRef = current.ref;
+        if (currentRef !== null) {
+            if (typeof currentRef === "function") {
+                /* function 和 字符串获取方式。 */
+                currentRef(null);
+            } else {
+                /* Ref对象获取方式 */
+                currentRef.current = null;
+            }
+        }
+    }
+    ```
+13. 第二阶段：DOM 更新阶段，这个阶段会根据不同的 effect 标签，真实的操作 DOM 。
+14. 第三阶段：layout 阶段，在更新真实元素节点之后，此时需要更新 ref 。
+    ```js
+    // react-reconciler/src/ReactFiberCommitWork.js
+    function commitAttachRef(finishedWork: Fiber) {
+        const ref = finishedWork.ref;
+        if (ref !== null) {
+            const instance = finishedWork.stateNode;
+            let instanceToUse;
+            switch (finishedWork.tag) {
+                case HostComponent: //元素节点 获取元素
+                    instanceToUse = getPublicInstance(instance);
+                    break;
+                default: // 类组件直接使用实例
+                    instanceToUse = instance;
+            }
+            if (typeof ref === "function") {
+                ref(instanceToUse); //* function 和 字符串获取方式。 */
+            } else {
+                ref.current = instanceToUse; /* ref对象方式 */
+            }
+        }
+    }
+    ```
+15. 只有含有 Ref tag 的时候，才会执行更新 ref
+    1. 第一种就是类组件的更新过程中。
+    2. 第二种就是更新 HostComponent 的时候，什么是 HostComponent 就不必多说了，比如 <div /> 等元素。
+    ```js
+    function markRef(current: Fiber | null, workInProgress: Fiber) {
+        const ref = workInProgress.ref;
+        if (
+            (current === null && ref !== null) || // 初始化的时候
+            (current !== null && current.ref !== ref) // ref 指向发生改变
+        ) {
+            workInProgress.effectTag |= Ref;
+        }
+    }
+    ```
+16. 每次点击按钮都会更新
+    ```js
+    // 每一次更新的时候，都给 ref 赋值了新的函数，那么 markRef 中就会判断成 current.ref !== ref，所以就会重新打 Ref 标签，那么在 commit 阶段，就会更新 ref 执行 ref 回调函数了。
+    <div
+        ref={(node) => {
+            this.node = node;
+            console.log("此时的参数是什么：", this.node);
+        }}>
+        ref元素节点
+    </div>
+    ```
+    ```js
+    // ref只会更新1次
+    export default class Index extends React.Component {
+        state = { num: 0 };
+        node = null;
+        getDom = (node) => {
+            this.node = node;
+            console.log("此时的参数是什么：", this.node);
+        };
+        render() {
+            return (
+                <div>
+                    <div ref={this.getDom}>ref元素节点</div>
+                    <button
+                        onClick={() =>
+                            this.setState({ num: this.state.num + 1 })
+                        }>
+                        点击
+                    </button>
+                </div>
+            );
+        }
+    }
+    ```
+17. 更新 ref
+    ```js
+    // react-reconciler/src/ReactFiberWorkLoop.js
+    // commitDetachRef
+    function commitMutationEffects() {
+        if (effectTag & Ref) {
+            const current = nextEffect.alternate;
+            if (current !== null) {
+                commitDetachRef(current);
+            }
+        }
+    }
+    ```
+    ```js
+    // commitAttachRef
+    function commitLayoutEffects() {
+        if (effectTag & Ref) {
+            commitAttachRef(nextEffect);
+        }
+    }
+    ```
+18. 卸载`ref`
+    ```js
+    // react-reconciler/src/ReactFiberCommitWork.js
+    function safelyDetachRef(current) {
+        const ref = current.ref;
+        if (ref !== null) {
+            if (typeof ref === "function") {
+                // 函数式 ｜ 字符串
+                ref(null);
+            } else {
+                ref.current = null; // ref 对象
+            }
+        }
+    }
+    ```
+19. 流程图
+    - ![20230326230447-2023-03-26](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230326230447-2023-03-26.png)
+20.
+
 ## hooks 原理
 
 1. `hooks`出现的本质原因
