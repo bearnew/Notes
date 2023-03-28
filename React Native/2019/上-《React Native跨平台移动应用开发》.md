@@ -105,7 +105,9 @@
         * 值为0，表示不缩小，值越大，缩小的越大
         * 如：父元素宽度为200px, 子元素A, B的宽度分别为100px, 200px, A和B的`flex-shrink`都为0，则会有100px超出父元素
         * 如：如果A设置flex-shrink为2，B设置flex-shrink为3，则A减小宽度40px, B减小宽度60px 
-
+    * flex-flow
+        * `flex-flow: row wrap;`
+        * `flex-flow`是`flex-direction`和`flex-wrap`的缩写
 ## 5.调试
 * 真机，摇晃
 * ios模拟器`command+d`
