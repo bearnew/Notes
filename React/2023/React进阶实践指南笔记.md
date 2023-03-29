@@ -1746,7 +1746,86 @@ export default function Index() {
     }
     ```
 
-14.
+## 9.模块化 css
+
+1. 模块化方式
+    - `css module`
+    - `css in js`
+2. css module compose
+    ```css
+    .text {
+        /* 继承基础样式 ，增加额外的样式 backgroundColor */
+        composes: base from "./style1.css"; /* base 样式在 style1.css 文件中 */
+        background-color: pink;
+    }
+    ```
+3. `css in js`
+
+    ```js
+    import React from "react";
+    import Style from "./style";
+
+    export default function Index() {
+        return (
+            <div style={Style.boxStyle}>
+                <span style={Style.textStyle}>hi , i am CSS IN JS!</span>
+            </div>
+        );
+    }
+    ```
+
+    ```js
+    /* 容器的背景颜色 */
+    const boxStyle = {
+        backgroundColor: "blue",
+    };
+    /* 字体颜色 */
+    const textStyle = {
+        color: "orange",
+    };
+
+    export default {
+        boxStyle,
+        textStyle,
+    };
+    ```
+
+4. style-component
+    ```js
+    const Button = styled.button`
+        background: ${(props) => (props.theme ? props.theme : "#6a8bad")};
+        color: #fff;
+        min-width: 96px;
+        height: 36px;
+        border: none;
+        border-radius: 18px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        margin-left: 20px !important;
+    `;
+    export default function Index() {
+        return (
+            <div>
+                <Button theme={"#fc4838"}>props主题按钮</Button>
+            </div>
+        );
+    }
+    ```
+    ```js
+    const NewButton = styled(Button)`
+        background: orange;
+        color: pink;
+    `;
+    export default function Index() {
+        return (
+            <div>
+                <NewButton> 继承按钮</NewButton>
+            </div>
+        );
+    }
+    ```
+5.
 
 ## hooks 原理
 
