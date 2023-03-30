@@ -1825,7 +1825,159 @@ export default function Index() {
         );
     }
     ```
-5.
+
+## 11.React 渲染
+
+1. React 底层做的优化
+    - 设立任务优先级
+    - 异步调度
+    - diff 算法
+    - 时间分片
+2. 缓存`React.element`对象
+    - `useMemo` 会记录上一次执行 `create` 的返回值，并把它绑定在函数组件对应的 `fiber` 对象上，只要组件不销毁，缓存值就一直存在，但是 `deps` 中如果有一项改变，就会重新执行 `create` ，返回值作为新的值记录到 `fiber` 对象上。
+    - 每次执行` render` 本质上 `createElement` 会产生一个新的 `props`，这个 `props` 将作为对应 `fiber` 的 `pendingProps` ，在此 `fiber` 更新调和阶段，`React` 会对比 `fiber` 上老 `oldProps` 和新的 `newProp （ pendingProps ）`是否相等，如果相等函数组件就会放弃子组件的调和更新，从而子组件不会重新渲染；如果上述把 `element` 对象缓存起来，上面 `props` 也就和 `fiber` 上 `oldProps` 指向相同的内存空间，也就是相等，从而跳过了本次更新。
+    ```js
+    // numberA 改变，重新形成element对象，否则通过 useMemo 拿到上次的缓存值
+    export default function Index() {
+        const [numberA, setNumberA] = React.useState(0);
+        const [numberB, setNumberB] = React.useState(0);
+        return (
+            <div>
+                {useMemo(
+                    () => (
+                        <Children number={numberA} />
+                    ),
+                    [numberA],
+                )}
+                <button onClick={() => setNumberA(numberA + 1)}>
+                    改变numberA
+                </button>
+                <button onClick={() => setNumberB(numberB + 1)}>
+                    改变numberB
+                </button>
+            </div>
+        );
+    }
+    ```
+3. `PureComponent`
+
+    - 浅比较 state 和 props 是否相等
+    - `shouldComponentUpdate` 的权重，会大于 `PureComponent`
+
+    ```js
+    // react/react-reconciler/ReactFiberClassComponent.js
+    function checkShouldComponentUpdate() {
+        if (typeof instance.shouldComponentUpdate === "function") {
+            return instance.shouldComponentUpdate(
+                newProps,
+                newState,
+                nextContext,
+            ); /* shouldComponentUpdate 逻辑 */
+        }
+        if (ctor.prototype && ctor.prototype.isPureReactComponent) {
+            return (
+                !shallowEqual(oldProps, newProps) ||
+                !shallowEqual(oldState, newState)
+            );
+        }
+    }
+    ```
+
+    - 避免使用箭头函数。不要给是 PureComponent 子组件绑定箭头函数，因为父组件每一次 render ，如果是箭头函数绑定的话，都会重新生成一个新的箭头函数， PureComponent 对比新老 props 时候，因为是新的函数，所以会判断不想等，而让组件直接渲染，PureComponent 作用终会失效。
+
+    ```js
+    class Index extends React.PureComponent {}
+
+    export default class Father extends React.Component {
+        render = () => <Index callback={() => {}} />;
+    }
+    ```
+
+    - PureComponent 的父组件是函数组件的情况，绑定函数要用 useCallback 或者 useMemo 处理。这种情况还是很容易发生的，就是在用 class + function 组件开发项目的时候，如果父组件是函数，子组件是 PureComponent ，那么绑定函数要小心，因为函数组件每一次执行，如果不处理，还会声明一个新的函数，所以 PureComponent 对比同样会失效，如下情况：
+
+    ```js
+    class Index extends React.PureComponent {}
+    export default function () {
+        const callback =
+            function handerCallback() {}; /* 每一次函数组件执行重新声明一个新的callback，PureComponent浅比较会认为不想等，促使组件更新  */
+        return <Index callback={callback} />;
+    }
+    ```
+
+    ```js
+    // 解决 PureComponent 失效问题
+    export default function () {
+        const callback = React.useCallback(function handerCallback() {}, []);
+        return <Index callback={callback} />;
+    }
+    ```
+
+    -
+
+4. `shouldComponentUpdate`
+    - 如果子组件的 props 是引用数据类型，比如 object ，还是不能直观比较是否相等
+    - 对 Immutable 对象的任何修改或添加删除操作都会返回一个新的 Immutable 对象, 可以把需要对比的 props 或者 state 数据变成 Immutable 对象，通过对比 Immutable 是否相等，来证明状态是否改变，从而确定是否更新组件。
+    ```js
+     shouldComponentUpdate(newProp,newState,newContext){
+        if(newProp.propsNumA !== this.props.propsNumA || newState.stateNumA !== this.state.stateNumA ){
+            return true /* 只有当 props 中 propsNumA 和 state 中 stateNumA 变化时，更新组件  */
+        }
+        return false
+    }
+    ```
+5. `React.memo`
+    1. React.memo: 第二个参数 返回 true 组件不渲染 ， 返回 false 组件重新渲染
+    2. memo 当二个参数 compare 不存在时，会用浅比较原则处理 props ，相当于仅比较 props 版本的 pureComponent
+    3. memo 同样适合类组件和函数组件
+    4. `memo`的原理
+    ```js
+    // react-reconciler/src/ReactFiberBeginWork.js
+    function updateMemoComponent() {
+        if (updateExpirationTime < renderExpirationTime) {
+            let compare = Component.compare;
+            compare = compare !== null ? compare : shallowEqual; //如果 memo 有第二个参数，则用二个参数判定，没有则浅比较props是否相等。
+            if (
+                compare(prevProps, nextProps) &&
+                current.ref === workInProgress.ref
+            ) {
+                return bailoutOnAlreadyFinishedWork(
+                    current,
+                    workInProgress,
+                    renderExpirationTime,
+                ); //已经完成工作停止向下调和节点。
+            }
+        }
+        // 返回将要更新组件,memo包装的组件对应的fiber，继续向下调和更新。
+    }
+    ```
+    5. memo 使用
+    ```js
+    function TextMemo(props){ / /子组件
+        console.log('子组件渲染')
+        return <div>hello,world</div>
+    }
+    const controlIsRender = (pre,next)=>{
+        return ( pre.number === next.number ) ||  (pre.number !== next.number && next.number > 5) // number不改变或number 改变但值大于5->不渲染组件 | 否则渲染组件
+    }
+    const NewTexMemo = memo(TextMemo,controlIsRender)
+    ```
+    6.
+6. 打破渲染限制
+    1. 类组件更新如果调用的是 `forceUpdate` 而不是 `setState` ，会跳过 `PureComponent` 的浅比较和 `shouldComponentUpdate` 自定义比较。其原理是组件中调用 `forceUpdate` 时候，全局会开启一个 `hasForceUpdate` 的开关。当组件更新的时候，检查这个开关是否打开，如果打开，就直接跳过 `shouldUpdate` 。
+    2. `context`穿透，上述的几种方式，都不能本质上阻断 `context` 改变，而带来的渲染穿透，所以开发者在使用 `Context` 要格外小心，既然选择了消费` context` ，就要承担 `context` 改变，带来的更新作用。
+7. 控制渲染流程
+    - ![20230331023236-2023-03-31](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230331023236-2023-03-31.png)
+8. 无须过分在乎 React 没有必要的渲染
+    - render 阶段执行是在 js 当中，js 中运行代码远快于浏览器的 Rendering 和 Painting 的，更何况 React 还提供了 diff 算法等手段，去复用真实 DOM 。
+9. 需要注意渲染节流。
+    - 第一种情况数据可视化的模块组件（展示了大量的数据）
+    - 受控组件的模式去管理表单数据层,表单数据层完全托管于 props 或是 state ，而用户操作表单往往是频繁的，需要频繁改变数据层，所以很有可能让整个页面组件高频率 render 。
+    - 第三种情况就是越是靠近 app root 根组件越值得注意，根组件渲染会波及到整个组件树重新 render ，子组件 render ，一是浪费性能，二是可能执行 useEffect ，componentWillReceiveProps 等钩子，造成意想不到的情况发生。
+10. 开发细节
+    1. 开发过程中对于大量数据展示的模块，开发者有必要用 shouldComponentUpdate ，PureComponent 来优化性能。
+    2. 对于表单控件，最好办法单独抽离组件，独自管理自己的数据层，这样可以让 state 改变，波及的范围更小。
+    3. 如果需要更精致化渲染，可以配合 immutable.js 。
+    4. 组件颗粒化，配合 memo 等 api ，可以制定私有化的渲染空间。
 
 ## hooks 原理
 
