@@ -1979,6 +1979,178 @@ export default function Index() {
     3. 如果需要更精致化渲染，可以配合 immutable.js 。
     4. 组件颗粒化，配合 memo 等 api ，可以制定私有化的渲染空间。
 
+## 12.渲染调优
+
+1. `Suspense`，包裹异步组件
+    - 调用 Render => 发现异步请求 => 悬停，等待异步请求完毕 => 再次渲染展示数据。
+    ```js
+    // 子组件
+    function UserInfo() {
+        // 获取用户数据信息，然后再渲染组件。
+        const user = getUserInfo();
+        return <h1>{user.name}</h1>;
+    }
+    // 父组件
+    export default function Index() {
+        return (
+            <Suspense fallback={<h1>Loading...</h1>}>
+                <UserInfo />
+            </Suspense>
+        );
+    }
+    ```
+2. `React.lazy`
+    ```js
+    const LazyComponent = React.lazy(() => import("./text"));
+    export default function Index() {
+        return (
+            <Suspense fallback={<div>loading...</div>}>
+                <LazyComponent />
+            </Suspense>
+        );
+    }
+    ```
+3. `Suspense`原理
+    - ![20230331231543-2023-03-31](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230331231543-2023-03-31.png)
+4. `React.lazy`原理
+    - 第一次渲染首先会执行 `init` 方法，里面会执行 `lazy` 的第一个函数，得到一个 `Promise`，绑定 `Promise.then` 成功回调，回调里得到将要渲染组件 `defaultExport` ，这里要注意的是，如上面的函数当第二个 `if` 判断的时候，因为此时状态不是 `Resolved` ，所以会走 `else` ，抛出异常 `Promise`，抛出异常会让当前渲染终止。
+    - 这个异常 `Promise` 会被 `Suspense` 捕获到，`Suspense` 会处理 `Promise` ，`Promise` 执行成功回调得到 `defaultExport`（将想要渲染组件），然后 `Susponse` 发起第二次渲染，第二次 `init` 方法已经是 `Resolved` 成功状态，那么直接返回 `result` 也就是真正渲染的组件。这时候就可以正常渲染组件了。
+    ```js
+    // react/src/ReactLazy.js
+    function lazy(ctor) {
+        return {
+            $$typeof: REACT_LAZY_TYPE,
+            _payload: {
+                _status: -1, //初始化状态
+                _result: ctor,
+            },
+            _init: function (payload) {
+                if (payload._status === -1) {
+                    /* 第一次执行会走这里  */
+                    const ctor = payload._result;
+                    const thenable = ctor();
+                    payload._status = Pending;
+                    payload._result = thenable;
+                    thenable.then((moduleObject) => {
+                        const defaultExport = moduleObject.default;
+                        resolved._status = Resolved; // 1 成功状态
+                        resolved._result =
+                            defaultExport; /* defaultExport 为我们动态加载的组件本身  */
+                    });
+                }
+                if (payload._status === Resolved) {
+                    // 成功状态
+                    return payload._result;
+                } else {
+                    //第一次会抛出Promise异常给Suspense
+                    throw payload._result;
+                }
+            },
+        };
+    }
+    ```
+5. componentDidCatch
+    - `error` —— 抛出的错误。
+    - `info` —— 带有 `componentStack key` 的对象，其中包含有关组件引发错误的栈信息。 先来打印一下，生命周期 `componentDidCatch` 参数长什么样子？
+    ```js
+    class Index extends React.Component {
+        state = {
+            hasError: false,
+        };
+        componentDidCatch(...arg) {
+            uploadErrorLog(arg); /* 上传错误日志 */
+            this.setState({
+                /* 降级UI */ hasError: true,
+            });
+        }
+        render() {
+            const { hasError } = this.state;
+            return (
+                <div>
+                    {hasError ? <div>组件出现错误</div> : <ErrorTest />}
+                    <div> hello, my name is alien! </div>
+                    <Test />
+                </div>
+            );
+        }
+    }
+    ```
+6. `static getDerivedStateFromError`
+    - `React`更期望用 `getDerivedStateFromError` 代替 `componentDidCatch` 用于处理渲染异常的情况。
+    - `getDerivedStateFromError` 是静态方法，内部不能调用 `setState`。`getDerivedStateFromError` 返回的值可以合并到 `state`，作为渲染使用。
+    ```js
+    class Index extends React.Component {
+        state = {
+            hasError: false,
+        };
+        static getDerivedStateFromError() {
+            return { hasError: true };
+        }
+        render() {
+            /* 如上 */
+        }
+    }
+    ```
+
+## 12.diff children 的流程
+
+1. 遍历新`children`，复用`oldFiber`
+    - 第一步对于 React.createElement 产生新的 child 组成的数组，首先会遍历数组，因为 fiber 对于同一级兄弟节点是用 sibling 指针指向，所以在遍历 children 遍历，sibling 指针同时移动，找到与 child 对应的 oldFiber
+    - 然后通过调用 updateSlot ，updateSlot 内部会判断当前的 tag 和 key 是否匹配，如果匹配复用老 fiber 形成新的 fiber ，如果不匹配，返回 null ，此时 newFiber 等于 null 。
+    - 如果是处于更新流程，找到与新节点对应的老 fiber ，但是不能复用 alternate === null ，那么会删除老 fiber 。
+    ```js
+    // react-reconciler/src/ReactChildFiber.js
+    function reconcileChildrenArray(){
+        /* 第一步  */
+        for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
+            if (oldFiber.index > newIdx) {
+                nextOldFiber = oldFiber;
+                oldFiber = null;
+            } else {
+                nextOldFiber = oldFiber.sibling;
+            }
+            const newFiber = updateSlot(returnFiber,oldFiber,newChildren[newIdx],expirationTime,);
+            if (newFiber === null) { break }
+            // ..一些其他逻辑
+            }
+            if (shouldTrackSideEffects) {  // shouldTrackSideEffects 为更新流程。
+                if (oldFiber && newFiber.alternate === null) { /* 找到了与新节点对应的fiber，但是不能复用，那么直接删除老节点 */
+                    deleteChild(returnFiber, oldFiber);
+                }
+            }
+        }
+    }
+    ```
+2. 统一删除`oldfiber`
+    ```js
+    if (newIdx === newChildren.length) {
+        deleteRemainingChildren(returnFiber, oldFiber);
+        return resultingFirstChild;
+    }
+    ```
+3. 同意创建`newFiber`
+    ```js
+    if (oldFiber === null) {
+        for (; newIdx < newChildren.length; newIdx++) {
+            const newFiber = createChild(
+                returnFiber,
+                newChildren[newIdx],
+                expirationTime,
+            );
+            // ...
+        }
+    }
+    ```
+4. 第四步：针对发生移动和更复杂的情况
+    ```js
+    const existingChildren = mapRemainingChildren(returnFiber, oldFiber);
+    for (; newIdx < newChildren.length; newIdx++) {
+        const newFiber = updateFromMap(existingChildren, returnFiber);
+        /* 从mapRemainingChildren删掉已经复用oldFiber */
+    }
+    ```
+5.
+
 ## hooks 原理
 
 1. `hooks`出现的本质原因
