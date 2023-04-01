@@ -2149,7 +2149,184 @@ export default function Index() {
         /* 从mapRemainingChildren删掉已经复用oldFiber */
     }
     ```
-5.
+
+## 13.处理海量数据
+
+1. 时间分片
+
+    - 使用`requestIdleCallback`代替`setTimeout`浏览器空闲执行下一帧渲染
+    - 通过`renderList`把已经渲染的`element`缓存起来
+
+    ```js
+    // TODO: 改造方案
+    class Index extends React.Component {
+        state = {
+            dataList: [], //数据源列表
+            renderList: [], //渲染列表
+            position: { width: 0, height: 0 }, // 位置信息
+            eachRenderNum: 500, // 每次渲染数量
+        };
+        box = React.createRef();
+        componentDidMount() {
+            const { offsetHeight, offsetWidth } = this.box.current;
+            const originList = new Array(20000).fill(1);
+            const times = Math.ceil(
+                originList.length / this.state.eachRenderNum,
+            ); /* 计算需要渲染此次数*/
+            let index = 1;
+            this.setState(
+                {
+                    dataList: originList,
+                    position: { height: offsetHeight, width: offsetWidth },
+                },
+                () => {
+                    this.toRenderList(index, times);
+                },
+            );
+        }
+        toRenderList = (index, times) => {
+            if (index > times) return; /* 如果渲染完成，那么退出 */
+            const { renderList } = this.state;
+            renderList.push(
+                this.renderNewList(index),
+            ); /* 通过缓存element把所有渲染完成的list缓存下来，下一次更新，直接跳过渲染 */
+            this.setState({
+                renderList,
+            });
+            requestIdleCallback(() => {
+                /* 用 requestIdleCallback 代替 setTimeout 浏览器空闲执行下一批渲染 */
+                this.toRenderList(++index, times);
+            });
+        };
+        renderNewList(index) {
+            /* 得到最新的渲染列表 */
+            const { dataList, position, eachRenderNum } = this.state;
+            const list = dataList.slice(
+                (index - 1) * eachRenderNum,
+                index * eachRenderNum,
+            );
+            return (
+                <React.Fragment key={index}>
+                    {list.map((item, index) => (
+                        <Circle key={index} position={position} />
+                    ))}
+                </React.Fragment>
+            );
+        }
+        render() {
+            return (
+                <div className="bigData_index" ref={this.box}>
+                    {this.state.renderList}
+                </div>
+            );
+        }
+    }
+    ```
+
+2. 虚拟列表
+    1. 原理
+        - ![20230401114623-2023-04-01](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230401114623-2023-04-01.png)
+    2. `example`
+    ```js
+    function VirtualList() {
+        const [dataList, setDataList] = React.useState([]); /* 保存数据源 */
+        const [position, setPosition] = React.useState([
+            0, 0,
+        ]); /* 截取缓冲区 + 视图区索引 */
+        const scroll = React.useRef(null); /* 获取scroll元素 */
+        const box = React.useRef(null); /* 获取元素用于容器高度 */
+        const context =
+            React.useRef(null); /* 用于移动视图区域，形成滑动效果。 */
+        const scrollInfo = React.useRef({
+            height: 500 /* 容器高度 */,
+            bufferCount: 8 /* 缓冲区个数 */,
+            itemHeight: 60 /* 每一个item高度 */,
+            renderCount: 0 /* 渲染区个数 */,
+        });
+        React.useEffect(() => {
+            const height = box.current.offsetHeight;
+            const { itemHeight, bufferCount } = scrollInfo.current;
+            const renderCount = Math.ceil(height / itemHeight) + bufferCount;
+            scrollInfo.current = {
+                renderCount,
+                height,
+                bufferCount,
+                itemHeight,
+            };
+            const dataList = new Array(10000)
+                .fill(1)
+                .map((item, index) => index + 1);
+            setDataList(dataList);
+            setPosition([0, renderCount]);
+        }, []);
+        const handleScroll = () => {
+            const { scrollTop } = scroll.current;
+            const { itemHeight, renderCount } = scrollInfo.current;
+            const currentOffset = scrollTop - (scrollTop % itemHeight);
+            const start = Math.floor(scrollTop / itemHeight);
+            context.current.style.transform = `translate3d(0, ${currentOffset}px, 0)`; /* 偏移，造成下滑效果 */
+            const end = Math.floor(scrollTop / itemHeight + renderCount + 1);
+            if (end !== position[1] || start !== position[0]) {
+                /* 如果render内容发生改变，那么截取  */
+                setPosition([start, end]);
+            }
+        };
+        const { itemHeight, height } = scrollInfo.current;
+        const [start, end] = position;
+        const renderList = dataList.slice(start, end); /* 渲染区间 */
+        console.log("渲染区间", position);
+        return (
+            <div className="list_box" ref={box}>
+                <div
+                    className="scroll_box"
+                    style={{ height: height + "px" }}
+                    onScroll={handleScroll}
+                    ref={scroll}>
+                    <div
+                        className="scroll_hold"
+                        style={{ height: `${dataList.length * itemHeight}px` }}
+                    />
+                    <div className="context" ref={context}>
+                        {renderList.map((item, index) => (
+                            <div className="list" key={index}>
+                                {" "}
+                                {item + ""} Item{" "}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    ```
+    ```css
+    .list_box {
+        width: 400px;
+        height: 500px;
+    }
+    .list_box .scroll_box {
+        width: 400px;
+        position: relative;
+        overflow-y: scroll;
+    }
+    .list {
+        height: 40px;
+        width: calc(100% - 50px);
+        padding-left: 23px;
+        margin: 5px;
+        text-align: left;
+        line-height: 40px;
+        background-color: salmon;
+        border-radius: 40px;
+        color: white;
+        font-weight: bolder;
+    }
+    .context {
+        position: absolute;
+        top: 0;
+        width: 400px;
+    }
+    ```
 
 ## hooks 原理
 
