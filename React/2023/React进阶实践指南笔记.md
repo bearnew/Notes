@@ -2327,6 +2327,37 @@ export default function Index() {
         width: 400px;
     }
     ```
+3. 建议不要在 hooks 的参数中执行函数或者 new 实例
+    - 每次`rerender`都会执行`fn`或者`new`一个实例
+    - 如果创建的是`dom`元素，没有进行垃圾回收，会造成内存泄漏
+    - 在更新阶段，`fn`和`new Fn()`不会被`useRef`接受
+    ```js
+    const hook1 = useRef(fn());
+    const hook2 = useRef(new Fn());
+    ```
+    ```js
+    // 初始化
+    function mountRef(initialValue) {
+        const hook = mountWorkInProgressHook();
+        const ref = { current: initialValue };
+        hook.memoizedState = ref;
+        return ref;
+    }
+    ```
+    ```js
+    // 更新阶段，只会去获取之前创建的hook的memoizedState
+    function updateRef(initialValue) {
+        const hook = updateWorkInProgressHook();
+        return hook.memoizedState;
+    }
+    ```
+    ```js
+    // 优化后代码
+    const hook = useRef(null);
+    if (!hook.current) {
+        hook.current = new Fn();
+    }
+    ```
 
 ## hooks 原理
 
@@ -2401,3 +2432,246 @@ export default function Index() {
 7. `hooks`更新
     - 更新过程中，如果通过 if 条件语句，增加或者删除 `hooks`，在复用 `hooks` 过程中，会产生复用 `hooks` 状态和当前 `hooks` 不一致的问题
 8.
+
+## 15.事件原理
+
+1. `React`实现了一个兼容全浏览器的框架，抹平不同浏览器对事件处理的差异
+2. 冒泡阶段和捕获阶段
+
+```js
+export default function Index() {
+    const handleClick = () => {
+        console.log("模拟冒泡阶段执行");
+    };
+    const handleClickCapture = () => {
+        console.log("模拟捕获阶段执行");
+    };
+    return (
+        <div>
+            <button onClick={handleClick} onClickCapture={handleClickCapture}>
+                点击
+            </button>
+        </div>
+    );
+}
+```
+
+3. `React`阻止冒泡
+
+```js
+export default function Index() {
+    const handleClick = (e) => {
+        e.stopPropagation(); /* 阻止事件冒泡，handleFatherClick 事件讲不在触发 */
+    };
+    const handleFatherClick = () => console.log("冒泡到父级");
+    return (
+        <div onClick={handleFatherClick}>
+            <div onClick={handleClick}>点击</div>
+        </div>
+    );
+}
+```
+
+4. 阻止默认行为
+    1. 原生事件： e.preventDefault() 和 return false 可以用来阻止事件默认行为
+    2. React 事件 在 React 应用中， return false 方法在 React 应用中完全失去了作用。可以用 e.preventDefault() 阻止事件默认行为，这个方法并非是原生事件的 preventDefault ，由于 React 事件源 e 也是独立组建的，所以 preventDefault 也是单独处理的。
+5. `React` 的事件不是绑定在元素上的，而是统一绑定在顶部容器上，在 `v17` 之前是绑定在 `document` 上的，在 `v17` 改成了 `app` 容器上。这样更利于一个 `html` 下存在多个应用（微前端）。
+6. 绑定事件并不是一次性绑定所有事件，比如发现了 onClick 事件，就会绑定 click 事件，比如发现 onChange 事件，会绑定 [blur，change ，focus ，keydown，keyup] 多个事件。
+7. React 事件合成的概念：React 应用中，元素绑定的事件并不是原生事件，而是 React 合成的事件，比如 onClick 是由 click 合成，onChange 是由 blur ，change ，focus 等多个事件合成。
+8. `registrationNameModules` 记录了 `React` 事件（比如 `onBlur` ）和与之对应的处理插件的映射
+
+```js
+const registrationNameModules = {
+    onBlur: SimpleEventPlugin,
+    onClick: SimpleEventPlugin,
+    onClickCapture: SimpleEventPlugin,
+    onChange: ChangeEventPlugin,
+    onChangeCapture: ChangeEventPlugin,
+    onMouseEnter: EnterLeaveEventPlugin,
+    onMouseLeave: EnterLeaveEventPlugin,
+    ...
+}
+```
+
+9. `registrationNameDependencies`保存`react`事件与原生事件的对应关系
+
+```js
+{
+    onBlur: ['blur'],
+    onClick: ['click'],
+    onClickCapture: ['click'],
+    onChange: ['blur', 'change', 'click', 'focus', 'input', 'keydown', 'keyup', 'selectionchange'],
+    onMouseEnter: ['mouseout', 'mouseover'],
+    onMouseLeave: ['mouseout', 'mouseover'],
+    ...
+}
+```
+
+10. 事件绑定
+    1. onChange 和 onClick 会保存在对应 DOM 元素类型 fiber 对象（ hostComponent ）的 memoizedProps 属性上
+    2. ![20230401232653-2023-04-01](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230401232653-2023-04-01.png)
+    3. example
+    ```js
+    export default function Index(){
+        const handleClick = () => console.log('点击事件')
+        const handleChange =() => console.log('change事件)
+        return <div >
+            <input onChange={ handleChange }  />
+            <button onClick={ handleClick } >点击</button>
+        </div>
+    }
+    ```
+    4. 注册事件监听器
+    ```js
+    // react-dom/src/client/ReactDOMComponent.js
+    function diffProperties(){
+        /* 判断当前的 propKey 是不是 React合成事件 */
+        if(registrationNameModules.hasOwnProperty(propKey)){
+            /* 这里多个函数简化了，如果是合成事件， 传入成事件名称 onClick ，向document注册事件  */
+            legacyListenToEvent(registrationName, document）;
+        }
+    }
+    ```
+    5. legacyListenToEvent 注册事件
+    ```js
+    // react-dom/src/events/DOMLegacyEventPluginSystem.js
+    function legacyListenToEvent(registrationName，mountAt){
+        const dependencies = registrationNameDependencies[registrationName]; // 根据 onClick 获取  onClick 依赖的事件数组 [ 'click' ]。
+            for (let i = 0; i < dependencies.length; i++) {
+            const dependency = dependencies[i];
+            //  addEventListener 绑定事件监听器
+            ...
+        }
+    }
+    ```
+    6. 将参数绑定给`dispatchEvent`
+    ```js
+    const listener = dispatchEvent.bind(
+        null,
+        "click",
+        eventSystemFlags,
+        document,
+    );
+    /* TODO: 重要, 这里进行真正的事件绑定。*/
+    document.addEventListener("click", listener, false);
+    ```
+    7.
+11. 一次点击事件
+    ```js
+    export default function Index() {
+        const handleClick1 = () => console.log(1);
+        const handleClick2 = () => console.log(2);
+        const handleClick3 = () => console.log(3);
+        const handleClick4 = () => console.log(4);
+        return (
+            <div onClick={handleClick3} onClickCapture={handleClick4}>
+                <button onClick={handleClick1} onClickCapture={handleClick2}>
+                    点击
+                </button>
+            </div>
+        );
+    }
+    ```
+    1. 批量更新
+    ```js
+    // react-dom/src/events/ReactDOMUpdateBatching.js
+    export function batchedEventUpdates(fn, a) {
+        isBatchingEventUpdates = true; //打开批量更新开关
+        try {
+            fn(a); // 事件在这里执行
+        } finally {
+            isBatchingEventUpdates = false; //关闭批量更新开关
+        }
+    }
+    ```
+    2. 合成事件源
+        - 通过 `onClick` 找到对应的处理插件 `SimpleEventPlugin` ，合成新的事件源 `e` ，里面包含了 `preventDefault` 和 `stopPropagation` 等方法。
+    3. 事件队列
+        - 如果遇到捕获阶段事件 `onClickCapture` ，就会 `unshift` 放在数组前面。以此模拟事件捕获阶段。
+        - 如果遇到冒泡阶段事件 `onClick` ，就会 `push` 到数组后面，模拟事件冒泡阶段。
+        - 一直收集到最顶端 app ，形成执行队列，在接下来阶段，依次执行队列里面的函数。
+        ```js
+        while (instance !== null) {
+            const { stateNode, tag } = instance;
+            if (tag === HostComponent && stateNode !== null) {
+                /* DOM 元素 */
+                const currentTarget = stateNode;
+                if (captured !== null) {
+                    /* 事件捕获 */
+                    /* 在事件捕获阶段,真正的事件处理函数 */
+                    const captureListener = getListener(instance, captured); // onClickCapture
+                    if (captureListener != null) {
+                        /* 对应发生在事件捕获阶段的处理函数，逻辑是将执行函数unshift添加到队列的最前面 */
+                        dispatchListeners.unshift(captureListener);
+                    }
+                }
+                if (bubbled !== null) {
+                    /* 事件冒泡 */
+                    /* 事件冒泡阶段，真正的事件处理函数，逻辑是将执行函数push到执行队列的最后面 */
+                    const bubbleListener = getListener(instance, bubbled); //
+                    if (bubbleListener != null) {
+                        dispatchListeners.push(bubbleListener); // onClick
+                    }
+                }
+            }
+            instance = instance.return;
+        }
+        ```
+    4. 4 个事件执行顺序是这样的
+        1. 首先第一次收集是在 button 上，handleClick1 冒泡事件 push 处理，handleClick2 捕获事件 unshift 处理。形成结构 [ handleClick2 , handleClick1 ]
+        2. 然后接着向上收集，遇到父级，收集父级 div 上的事件，handleClick3 冒泡事件 push 处理，handleClick4 捕获事件 unshift 处理。[handleClick4, handleClick2 , handleClick1,handleClick3 ]
+        3. 依次执行数组里面的事件，所以打印 4 2 1 3。
+    5.
+12. `react`阻止事件冒泡
+    -   假设在上述队列中，handleClick2 中调用 e.stopPropagation()，那么事件源里将有状态证明此次事件已经停止冒泡，那么下次遍历的时候， event.isPropagationStopped() 就会返回 true ，所以跳出循环，handleClick1, handleClick3 将不再执行，模拟了阻止事件冒泡的过程。
+    ```js
+    // legacy-events/EventBatching.js
+    function runEventsInBatch() {
+        const dispatchListeners = event._dispatchListeners;
+        if (Array.isArray(dispatchListeners)) {
+            for (let i = 0; i < dispatchListeners.length; i++) {
+                if (event.isPropagationStopped()) {
+                    /* 判断是否已经阻止事件冒泡 */
+                    break;
+                }
+                dispatchListeners[i](
+                    event,
+                ); /* 执行真正的处理函数 及handleClick1... */
+            }
+        }
+    }
+    ```
+13. v18 之前事件处理
+    ```js
+    // 老版本事件系统：事件监听 -> 捕获阶段执行 -> 冒泡阶段执行
+    // 新版本事件系统：捕获阶段执行 -> 事件监听 -> 冒泡阶段执行
+    function Index() {
+        const refObj = React.useRef(null);
+        useEffect(() => {
+            const handler = () => {
+                console.log("事件监听");
+            };
+            refObj.current.addEventListener("click", handler);
+            return () => {
+                refObj.current.removeEventListener("click", handler);
+            };
+        }, []);
+        const handleClick = () => {
+            console.log("冒泡阶段执行");
+        };
+        const handleCaptureClick = () => {
+            console.log("捕获阶段执行");
+        };
+        return (
+            <button
+                ref={refObj}
+                onClick={handleClick}
+                onClickCapture={handleCaptureClick}>
+                点击
+            </button>
+        );
+    }
+    ```
+14. 新老版本事件处理流程
+    -   ![20230402000114-2023-04-02](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230402000114-2023-04-02.png)
+15.
