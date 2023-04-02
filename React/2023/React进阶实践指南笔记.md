@@ -2674,4 +2674,500 @@ const registrationNameModules = {
     ```
 14. 新老版本事件处理流程
     -   ![20230402000114-2023-04-02](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230402000114-2023-04-02.png)
-15.
+
+## 17.调度与时间碎片
+
+1. 为什么采用异步调度
+    - 一次更新 `React` 无法知道此次更新的波及范围，所以 `React` 选择从根节点开始 `diff` ，查找不同，更新这些不同
+    - 浏览器有绘制任务那么执行绘制任务，在空闲时间执行更新任务，就能解决卡顿问题了
+2. 浏览器每次事件循环（一帧）
+    1. 处理事件
+    2. 执行 js
+    3. 调用`requestAnimation`
+    4. 布局`layout`
+    5. 绘制`Paint`
+    6. 一帧执行后，如果没有其他事件，浏览器会进入休息时间
+3. requestIdleCallback
+    - callback 回调，浏览器空余时间执行回调函数。
+    - timeout 超时时间。如果浏览器长时间没有空闲，那么回调就不会执行，为了解决这个问题，可以通过 requestIdleCallback 的第二个参数指定一个超时时间。
+    ```js
+    requestIdleCallback(callback, { timeout });
+    ```
+4. `React`中使用`requestIdleCallback`有 5 个优先级
+    - `Immediate`，-1 需要立刻执行
+    - `UserBlocking`, 250ms 超时时间 250ms，一般指的是用户交互
+    - `Normal`，5000ms 超时时间 5s，不需要直观立即变化的任务，比如网络请求。
+    - `Low `, 10000ms 超时时间 10s，肯定要执行的任务，但是可以放在最后处理。
+    - `Idle `, 一些没有必要的任务，可能不会执行。
+5. 模拟 `requestIdleCallback`
+    - 实现的这个 `requestIdleCallback` ，可以主动让出主线程，让浏览器去渲染视图。
+    - 一次事件循环只执行一次，因为执行一个以后，还会请求下一次的时间片。
+6. 递归执行 `setTimeout(fn, 0)` 时，最后间隔时间会变成 4 毫秒左右
+    - 每秒 60 帧的频率划分时间片，这样每个时间片就是 16ms
+    - 16 毫秒要完成如上 js 执行，浏览器绘制等操作
+    - `setTimeout`带来的 4ms 延迟有点浪费了
+7. `MessageChannel`
+
+    - 在一次更新中，`React` 会调用 `requestHostCallback` ，把更新任务赋值给 `scheduledHostCallback` ，然后 `port2` 向 `port1` 发起 `postMessage` 消息通知。
+    - `port1` 会通过 `onmessage` ，接受来自 `port2` 消息，然后执行更新任务 `scheduledHostCallback` ，然后置空 `scheduledHostCallback` ，借此达到异步执行目的。
+
+    ```js
+    let scheduledHostCallback = null;
+    /* 建立一个消息通道 */
+    var channel = new MessageChannel();
+    /* 建立一个port发送消息 */
+    var port = channel.port2;
+
+    channel.port1.onmessage = function () {
+        /* 执行任务 */
+        scheduledHostCallback();
+        /* 执行完毕，清空任务 */
+        scheduledHostCallback = null;
+    };
+    /* 向浏览器请求执行更新任务 */
+    requestHostCallback = function (callback) {
+        scheduledHostCallback = callback;
+        if (!isMessageLoopRunning) {
+            isMessageLoopRunning = true;
+            port.postMessage(null);
+        }
+    };
+    ```
+
+8. workLoopSync
+
+    ```js
+    // react-reconciler/src/ReactFiberWorkLoop.js
+    // 正常更新，会更新执行每一个待更新的fiber
+    function workLoopSync() {
+        while (workInProgress !== null) {
+            workInProgress = performUnitOfWork(workInProgress);
+        }
+    }
+
+    // 低优先级异步更新
+    // 浏览器没有空余时间，shouldYield为true，会终止循环
+    // 避免浏览器一次性遍历大量的fiber，没有时间执行渲染任务，导致页面卡顿
+    function workLoopConcurrent() {
+        while (workInProgress !== null && !shouldYield()) {
+            workInProgress = performUnitOfWork(workInProgress);
+        }
+    }
+    ```
+
+9. `scheduleCallback`
+    - `workLoopSync` 和 `workLoopConcurrent`，都是由`scheduleCallback`统一调度的
+    ```js
+    // 正常更新的任务
+    scheduleCallback(Immediate, workLoopSync);
+    ```
+    ```js
+    /* 计算超时等级，就是如上那五个等级 */
+    var priorityLevel = inferPriorityFromExpirationTime(
+        currentTime,
+        expirationTime,
+    );
+    scheduleCallback(priorityLevel, workLoopConcurrent);
+    ```
+10. `scheduleCallback `源码
+
+    - 创建一个新的任务 newTask。
+    - 过任务的开始时间( startTime ) 和 当前时间( currentTime ) 比较:当 startTime > currentTime, 说明未过期, 存到 timerQueue，当 startTime <= currentTime, 说明已过期, 存到 taskQueue。
+    - 如果任务过期，并且没有调度中的任务，那么调度 requestHostCallback。本质上调度的是 flushWork。
+    - 如果任务没有过期，用 requestHostTimeout 延时执行 handleTimeout。
+
+    ```js
+    // scheduler/src/Scheduler.js
+    function scheduleCallback(){
+        /* 计算过期时间：超时时间  = 开始时间（现在时间） + 任务超时的时间（上述设置那五个等级）     */
+        const expirationTime = startTime + timeout;
+        /* 创建一个新任务 */
+        const newTask = { ... }
+        if (startTime > currentTime) {
+            /* 通过开始时间排序 */
+            newTask.sortIndex = startTime;
+            /* 把任务放在timerQueue中 */
+            push(timerQueue, newTask);
+            /*  执行setTimeout ， */
+            requestHostTimeout(handleTimeout, startTime - currentTime);
+        }else{
+            /* 通过 expirationTime 排序  */
+            newTask.sortIndex = expirationTime;
+            /* 把任务放入taskQueue */
+            push(taskQueue, newTask);
+            /*没有处于调度中的任务， 然后向浏览器请求一帧，浏览器空闲执行 flushWork */
+            if (!isHostCallbackScheduled && !isPerformingWork) {
+                isHostCallbackScheduled = true;
+                requestHostCallback(flushWork)
+            }
+        }
+    }
+    ```
+
+11. `requestHostTimeout`
+
+    - `requestHostTimeout` 延时执行 `handleTimeout`，`cancelHostTimeout` 用于清除当前的延时器。
+
+    ```js
+    // scheduler/src/Scheduler.js
+    requestHostTimeout = function (cb, ms) {
+        _timeoutID = setTimeout(cb, ms);
+    };
+
+    cancelHostTimeout = function () {
+        clearTimeout(_timeoutID);
+    };
+    ```
+
+12. `handleTimeout`
+    - 延时指定时间后，调用的 `handleTimeout` 函数， `handleTimeout` 会把任务重新放在 `requestHostCallback` 调度。
+    - 通过 `advanceTimers` 将 `timeQueue` 中过期的任务转移到 `taskQueue` 中。
+    - 然后调用 `requestHostCallback` 调度过期的任务。
+    ```js
+    // scheduler/src/Scheduler.js
+    function handleTimeout() {
+        isHostTimeoutScheduled = false;
+        /* 将 timeQueue 中过期的任务，放在 taskQueue 中 。 */
+        advanceTimers(currentTime);
+        /* 如果没有处于调度中 */
+        if (!isHostCallbackScheduled) {
+            /* 判断有没有过期的任务， */
+            if (peek(taskQueue) !== null) {
+                isHostCallbackScheduled = true;
+                /* 开启调度任务 */
+                requestHostCallback(flushWork);
+            }
+        }
+    }
+    ```
+13. advanceTimers
+    - 如果任务已经过期，那么将 `timerQueue` 中的过期任务，放入 `taskQueue`。
+    ```js
+    // scheduler/src/Scheduler.js advanceTimers
+    function advanceTimers() {
+        var timer = peek(timerQueue);
+        while (timer !== null) {
+            if (timer.callback === null) {
+                pop(timerQueue);
+            } else if (timer.startTime <= currentTime) {
+                /* 如果任务已经过期，那么将 timerQueue 中的过期任务，放入taskQueue */
+                pop(timerQueue);
+                timer.sortIndex = timer.expirationTime;
+                push(taskQueue, timer);
+            }
+        }
+    }
+    ```
+14. `flushWork`和`workloop`
+    - 第一件是 `React` 的更新任务最后都是放在 `taskQueue` 中的。
+    - 第二件是 `requestHostCallback` ，放入 `MessageChannel` 中的回调函数是`flushWork`。
+    - flushWork 如果有延时任务执行的话，那么会先暂停延时任务，然后调用 workLoop ，去真正执行超时的更新任务。
+    ```js
+    // scheduler/src/Scheduler.js flushWork
+    function flushWork(){
+        if (isHostTimeoutScheduled) { /* 如果有延时任务，那么先暂定延时任务*/
+            isHostTimeoutScheduled = false;
+            cancelHostTimeout();
+        }
+        try{
+            /* 执行 workLoop 里面会真正调度我们的事件  */
+            workLoop(hasTimeRemaining, initialTime)
+        }
+    }
+    ```
+15. workLoop
+    ```js
+    function workLoop() {
+        var currentTime = initialTime;
+        advanceTimers(currentTime);
+        /* 获取任务列表中的第一个 */
+        currentTask = peek();
+        while (currentTask !== null) {
+            /* 真正的更新函数 callback */
+            var callback = currentTask.callback;
+            if (callback !== null) {
+                /* 执行更新 */
+                callback();
+                /* 先看一下 timeQueue 中有没有 过期任务。 */
+                advanceTimers(currentTime);
+            }
+            /* 再一次获取任务，循环执行 */
+            currentTask = peek(taskQueue);
+        }
+    }
+    ```
+16. `shouldYield` 中止 `workloop`
+    - 在 fiber 的异步更新任务 workLoopConcurrent 中，每一个 fiber 的 workloop 都会调用 shouldYield 判断是否有超时更新的任务，如果有，那么停止 workLoop。
+    - 如果存在第一个任务，并且已经超时了，那么 shouldYield 会返回 true，那么会中止 fiber 的 workloop。
+    ```js
+    // scheduler/src/Scheduler.js unstable_shouldYield
+    function unstable_shouldYield() {
+        var currentTime = exports.unstable_now();
+        advanceTimers(currentTime);
+        /* 获取第一个任务 */
+        var firstTask = peek(taskQueue);
+        return (
+            (firstTask !== currentTask &&
+                currentTask !== null &&
+                firstTask !== null &&
+                firstTask.callback !== null &&
+                firstTask.startTime <= currentTime &&
+                firstTask.expirationTime < currentTask.expirationTime) ||
+            shouldYieldToHost()
+        );
+    }
+    ```
+17. 调和+调度
+    - ![20230403000339-2023-04-03](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230403000339-2023-04-03.png)
+    - ![20230403000350-2023-04-03](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230403000350-2023-04-03.png)
+18.
+
+## 18.调和和 fiber
+
+1. `Element`,`fiber`,`dom`三种什么关系
+    - `element` 是 `React` 视图层在代码层级上的表象，也就是开发者写的 `jsx` 语法，写的元素结构，都会被创建成 `element` 对象的形式。上面保存了 `props` ， `children` 等信息。
+    - `DOM` 是元素在浏览器上给用户直观的表象。
+    - `fiber` 可以说是是 `element` 和真实 `DOM` 之间的交流枢纽站，一方面每一个类型 `element` 都会有一个与之对应的 `fiber` 类型，`element` 变化引起更新流程都是通过 `fiber` 层面做一次调和改变，然后对于元素，形成新的 `DOM` 做视图渲染。
+2. 转换流程
+    - ![20230403012828-2023-04-03](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230403012828-2023-04-03.png)
+3. `Element`与`fiber`之间的关系
+    ```js
+    export const FunctionComponent = 0; // 对应函数组件
+    export const ClassComponent = 1; // 对应的类组件
+    export const IndeterminateComponent = 2; // 初始化的时候不知道是函数组件还是类组件
+    export const HostRoot = 3; // Root Fiber 可以理解为跟元素 ， 通过reactDom.render()产生的根元素
+    export const HostPortal = 4; // 对应  ReactDOM.createPortal 产生的 Portal
+    export const HostComponent = 5; // dom 元素 比如 <div>
+    export const HostText = 6; // 文本节点
+    export const Fragment = 7; // 对应 <React.Fragment>
+    export const Mode = 8; // 对应 <React.StrictMode>
+    export const ContextConsumer = 9; // 对应 <Context.Consumer>
+    export const ContextProvider = 10; // 对应 <Context.Provider>
+    export const ForwardRef = 11; // 对应 React.ForwardRef
+    export const Profiler = 12; // 对应 <Profiler/ >
+    export const SuspenseComponent = 13; // 对应 <Suspense>
+    export const MemoComponent = 14; // 对应 React.memo 返回的组件
+    ```
+4. `Fiber`上保存的信息
+
+    ```js
+    // react-reconciler/src/ReactFiber.js
+    function FiberNode() {
+        this.tag = tag; // fiber 标签 证明是什么类型fiber。
+        this.key = key; // key调和子节点时候用到。
+        this.type = null; // dom元素是对应的元素类型，比如div，组件指向组件对应的类或者函数。
+        this.stateNode = null; // 指向对应的真实dom元素，类组件指向组件实例，可以被ref获取。
+
+        this.return = null; // 指向父级fiber
+        this.child = null; // 指向子级fiber
+        this.sibling = null; // 指向兄弟fiber
+        this.index = 0; // 索引
+
+        this.ref = null; // ref指向，ref函数，或者ref对象。
+
+        this.pendingProps = pendingProps; // 在一次更新中，代表element创建
+        this.memoizedProps = null; // 记录上一次更新完毕后的props
+        this.updateQueue = null; // 类组件存放setState更新队列，函数组件存放
+        this.memoizedState = null; // 类组件保存state信息，函数组件保存hooks信息，dom元素为null
+        this.dependencies = null; // context或是时间的依赖项
+
+        this.mode = mode; //描述fiber树的模式，比如 ConcurrentMode 模式
+
+        this.effectTag = NoEffect; // effect标签，用于收集effectList
+        this.nextEffect = null; // 指向下一个effect
+
+        this.firstEffect = null; // 第一个effect
+        this.lastEffect = null; // 最后一个effect
+
+        this.expirationTime = NoWork; // 通过不同过期时间，判断任务是否过期， 在v17版本用lane表示。
+
+        this.alternate = null; //双缓存树，指向缓存的fiber。更新阶段，两颗树互相交替。
+    }
+    ```
+
+5. 创建`fiberRoot`和`rootFiber`
+    - fiberRoot：首次构建应用， 创建一个 fiberRoot ，作为整个 React 应用的根基。
+    - rootFiber： 如下通过 ReactDOM.render 渲染出来的，如上 Index 可以作为一个 rootFiber。一个 React 应用可以有多 ReactDOM.render 创建的 rootFiber ，但是只能有一个 fiberRoot（应用根节点）。
+    ```js
+    ReactDOM.render(<Index />, document.getElementById("app"));
+    ```
+    ```js
+    // react-reconciler/src/ReactFiberRoot.js
+    function createFiberRoot(containerInfo, tag) {
+        /* 创建一个root */
+        const root = new FiberRootNode(containerInfo, tag);
+        const rootFiber = createHostRootFiber(tag);
+        root.current = rootFiber;
+        return root;
+    }
+    ```
+6. `workInProgress`
+    - `workInProgress`是：正在内存中构建的 `Fiber` 树称为 `workInProgress Fiber` 树。在一次更新中，所有的更新都是发生在 `workInProgress` 树上。在一次更新之后，`workInProgress` 树上的状态是最新的状态，那么它将变成 `current` 树用于渲染视图。
+7. `current`
+    - current：正在视图层渲染的树叫做 current 树。
+    ```js
+    currentFiber.alternate = workInProgressFiber;
+    workInProgressFiber.alternate = currentFiber;
+    ```
+8. 更新
+    - 将 `current` 的 `alternate` 作为基础（如图右树），复制一份作为 `workInProgresss` ，然后进行更新。
+9. 双缓冲树
+    - `canvas` 绘制动画的时候，如果上一帧计算量比较大，导致清除上一帧画面到绘制当前帧画面之间有较长间隙，就会出现白屏。为了解决这个问题，`canvas` 在内存中绘制当前动画，绘制完毕后直接用当前帧替换上一帧画面，由于省去了两帧替换间的计算时间，不会出现从白屏到出现画面的闪烁情况。这种在内存中构建并直接替换的技术叫做双缓存。
+    - React 用 workInProgress 树(内存中构建的树) 和 current (渲染树) 来实现更新逻辑。双缓存一个在内存中构建，一个渲染视图，两颗树用 alternate 指针相互指向，在下一次渲染的时候，直接复用缓存树做为下一次渲染树，上一次的渲染树又作为缓存树，这样可以防止只用一颗树更新状态的丢失的情况，又加快了 DOM 节点的替换与更新。
+    - ![20230403014823-2023-04-03](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230403014823-2023-04-03.png)
+10. `render`
+
+    - `beginWork`：是向下调和的过程。就是由 fiberRoot 按照 child 指针逐层向下调和，期间会执行函数组件，实例类组件，diff 调和子节点，打不同 effectTag。
+    - `completeUnitOfWork`：是向上归并的过程，如果有兄弟节点，会返回 `sibling`兄弟，没有返回 `return `父级，一直返回到 fiebrRoot ，期间可以形成`effectList`，对于初始化流程会创建 `DOM` ，对于 DOM 元素进行事件收集，处理 style，className 等。
+
+    ```js
+    // react-reconciler/src/ReactFiberWorkLoop.js
+    function performUnitOfWork() {
+        next = beginWork(current, unitOfWork, renderExpirationTime);
+        if (next === null) {
+            next = completeUnitOfWork(unitOfWork);
+        }
+    }
+    ```
+
+    ```js
+    // react-reconciler/src/ReactFiberBeginWork.js
+    function beginWork(current,workInProgress){
+
+        switch(workInProgress.tag){
+            case IndeterminateComponent:{// 初始化的时候不知道是函数组件还是类组件
+                //....
+            }
+            case FunctionComponent: {//对应函数组件
+                //....
+            }
+            case ClassComponent:{  //类组件
+                //...
+            }
+            case HostComponent:{
+                //...
+            }
+            ...
+        }
+    }
+    ```
+
+11. `beginWork`的工作
+    - 对于组件，执行部分生命周期，执行 render ，得到最新的 children 。
+    - 向下遍历调和 children ，复用 oldFiber ( diff 算法)
+    - 打不同的副作用标签 effectTag ，比如类组件的生命周期，或者元素的增加，删除，更新。
+12. `reconcileChildren`
+    ```js
+    // react-reconciler/src/ReactFiberBeginWork.js
+    function reconcileChildren(current, workInProgress) {
+        if (current === null) {
+            /* 初始化子代fiber  */
+            workInProgress.child = mountChildFibers(
+                workInProgress,
+                null,
+                nextChildren,
+                renderExpirationTime,
+            );
+        } else {
+            /* 更新流程，diff children将在这里进行。 */
+            workInProgress.child = reconcileChildFibers(
+                workInProgress,
+                current.child,
+                nextChildren,
+                renderExpirationTime,
+            );
+        }
+    }
+    ```
+13. 向上归并 completeUnitOfWork
+    - 首先 completeUnitOfWork 会将 effectTag 的 Fiber 节点会被保存在一条被称为 effectList 的单向链表中。在 commit 阶段，将不再需要遍历每一个 fiber ，只需要执行更新 effectList 就可以了。
+    - completeWork 阶段对于组件处理 context ；对于元素标签初始化，会创建真实 DOM ，将子孙 DOM 节点插入刚生成的 DOM 节点中；会触发 diffProperties 处理 props ，比如事件收集，style，className 处理，在 15 章讲到过。
+14. 调和顺序
+    beginWork -> rootFiber
+    beginWork -> Index fiber
+    beginWork -> div fiber
+    beginWork -> hello,world fiber
+    completeWork -> hello,world fiber (completeWork 返回 sibling)
+    beginWork -> p fiber
+    completeWork -> p fiber
+    beginWork -> button fiber
+    completeWork -> button fiber (此时没有 sibling，返回 return)
+    completeWork -> div fiber
+    completeWork -> Index fiber
+    completeWork -> rootFiber (完成整个 workLoop)
+15. `commit`阶段
+    - 一方面是对一些生命周期和副作用钩子的处理，比如 componentDidMount ，函数组件的 useEffect ，useLayoutEffect ；
+    - 另一方面就是在一次更新中，添加节点（ Placement ），更新节点（ Update ），删除节点（ Deletion ），还有就是一些细节的处理，比如 ref 的处理。
+16. commit 细分可以分为：
+    - Before mutation 阶段（执行 DOM 操作前）；
+    - mutation 阶段（执行 DOM 操作）；
+    - layout 阶段（执行 DOM 操作后）
+17. Before mutation
+    - 因为 Before mutation 还没修改真实的 DOM ，是获取 DOM 快照的最佳时期，如果是类组件有 getSnapshotBeforeUpdate ，那么会执行这个生命周期。
+    - 会异步调用 useEffect ，在生命周期章节讲到 useEffect 是采用异步调用的模式，其目的就是防止同步执行时阻塞浏览器做视图渲染。
+    ```js
+    // react-reconciler/src/ReactFiberWorkLoop.js
+    function commitBeforeMutationEffects() {
+        while (nextEffect !== null) {
+            const effectTag = nextEffect.effectTag;
+            if ((effectTag & Snapshot) !== NoEffect) {
+                const current = nextEffect.alternate;
+                // 调用getSnapshotBeforeUpdates
+                commitBeforeMutationEffectOnFiber(current, nextEffect);
+            }
+            if ((effectTag & Passive) !== NoEffect) {
+                scheduleCallback(NormalPriority, () => {
+                    flushPassiveEffects();
+                    return null;
+                });
+            }
+            nextEffect = nextEffect.nextEffect;
+        }
+    }
+    ```
+18. Mutation
+    - 置空 ref ，在 ref 章节讲到对于 ref 的处理。
+    - 对新增元素，更新元素，删除元素。进行真实的 DOM 操作。
+    ```js
+    function commitMutationEffects() {
+        while (nextEffect !== null) {
+            if (effectTag & Ref) {
+                /* 置空Ref */
+                const current = nextEffect.alternate;
+                if (current !== null) {
+                    commitDetachRef(current);
+                }
+            }
+            switch (primaryEffectTag) {
+                case Placement: {
+                } //  新增元素
+                case Update: {
+                } //  更新元素
+                case Deletion: {
+                } //  删除元素
+            }
+        }
+    }
+    ```
+19. `Layout`
+    - commitLayoutEffectOnFiber 对于类组件，会执行生命周期，setState 的 callback，对于函数组件会执行 useLayoutEffect 钩子。
+    - 如果有 ref ，会重新赋值 ref 。
+    ```js
+    function commitLayoutEffects(root) {
+        while (nextEffect !== null) {
+            const effectTag = nextEffect.effectTag;
+            commitLayoutEffectOnFiber(
+                root,
+                current,
+                nextEffect,
+                committedExpirationTime,
+            );
+            if (effectTag & Ref) {
+                commitAttachRef(nextEffect);
+            }
+        }
+    }
+    ```
+20. 流程
+    - ![20230403015825-2023-04-03](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230403015825-2023-04-03.png)
+21.
