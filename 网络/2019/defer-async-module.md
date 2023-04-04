@@ -6,3 +6,10 @@
     * 模块在模块作用域中运行，模块内部的顶层变量，外部不可见
     * 同一个模块加载多次，只会执行一次
 * ![加载方式](https://github.com/bearnew/picture/blob/master/mardown/2019-07-11/script-load.png?raw=true)
+* 不同类型 script 的执行顺序及其是否阻塞解析 HTML
+
+|script 标签|	JS 执行顺序|	是否阻塞解析 HTML|
+|:----:|:----:|:----:|
+| <script> |	在 HTML 中的顺序 |	阻塞 |
+| <script async> |	网络请求返回顺序 |	可能阻塞，也可能不阻塞 |
+| <script defer> |	在 HTML 中的顺序 |	不阻塞 |
