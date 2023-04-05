@@ -2359,80 +2359,6 @@ export default function Index() {
     }
     ```
 
-## hooks 原理
-
-1. `hooks`出现的本质原因
-    - 函数组件也能做类组件的事，有状态、能处理副作用、能获取`ref`
-    - 解决逻辑复用难的问题
-    - 拥抱函数式编程
-2. `hooks`与`fiber`
-    - `function`组件(更新)->`hooks`(更新)->组件对应的`fiber`
-    - `function`组件(取值)<-`hooks`(取值)<-组件对应的`fiber`
-3. `hooks`的 3 种处理策略
-    - `ContextOnlyDispatcher`: 开发者在函数组件外部调用`hooks`会抛出异常
-    - `HooksDispatcherOnMount`: 函数组件初始化`mount`,奖励`hooks`和`fiber`之间的桥梁
-    - `HooksDispatcherOnUpdate`: 函数组件更新，需要`Hooks`去获取或者更新维护状态
-    ```js
-    const HooksDispatcherOnMount = { /* 函数组件初始化用的 hooks */
-        useState: mountState,
-        useEffect: mountEffect,
-        ...
-    }
-    const  HooksDispatcherOnUpdate ={/* 函数组件更新用的 hooks */
-        useState:updateState,
-        useEffect: updateEffect,
-        ...
-    }
-    const ContextOnlyDispatcher = {  /* 当hooks不是函数内部调用的时候，调用这个hooks对象下的hooks，所以报错。 */
-        useEffect: throwInvalidHookError,
-        useState: throwInvalidHookError,
-        ...
-    }
-    ```
-4. 函数组件触发
-    - 用`updateFunctionComponent`更新`fiber`,`updateFunctionComponent`内部就会调用`renderWithHooks`
-    ```js
-    let currentlyRenderingFiber;
-    function renderWithHooks(current, workInProgress, Component, props) {
-        currentlyRenderingFiber = workInProgress;
-        workInProgress.memoizedState =
-            null; /* 每一次执行函数组件之前，先清空状态 （用于存放hooks列表）*/
-        workInProgress.updateQueue = null; /* 清空状态（用于存放effect list） */
-        ReactCurrentDispatcher.current =
-            current === null || current.memoizedState === null
-                ? HooksDispatcherOnMount
-                : HooksDispatcherOnUpdate; /* 判断是初始化组件还是更新组件 */
-        let children = Component(
-            props,
-            secondArg,
-        ); /* 执行我们真正函数组件，所有的hooks将依次执行。 */
-        ReactCurrentDispatcher.current =
-            ContextOnlyDispatcher; /* 将hooks变成第一种，防止hooks在函数组件外部调用，调用直接报错。 */
-    }
-    ```
-5. 每个` hooks` 内部执行`mountWorkInProgressHook` ，然后每一个` hook` 通过 `next` 和下一个` hook` 建立起关联
-    ```js
-    export default function Index() {
-        const [number, setNumber] = React.useState(0); // 第一个hooks
-        const [num, setNum] = React.useState(1); // 第二个hooks
-        const dom = React.useRef(null); // 第三个hooks
-        React.useEffect(() => {
-            // 第四个hooks
-            console.log(dom.current);
-        }, []);
-        return (
-            <div ref={dom}>
-                <div onClick={() => setNumber(number + 1)}> {number} </div>
-                <div onClick={() => setNum(num + 1)}> {num}</div>
-            </div>
-        );
-    }
-    ```
-6. 函数组件对应 `fiber` 用 `memoizedState` 保存 `hooks` 信息
-7. `hooks`更新
-    - 更新过程中，如果通过 if 条件语句，增加或者删除 `hooks`，在复用 `hooks` 过程中，会产生复用 `hooks` 状态和当前 `hooks` 不一致的问题
-8.
-
 ## 15.事件原理
 
 1. `React`实现了一个兼容全浏览器的框架，抹平不同浏览器对事件处理的差异
@@ -3170,4 +3096,618 @@ const registrationNameModules = {
     ```
 20. 流程
     - ![20230403015825-2023-04-03](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230403015825-2023-04-03.png)
-21.
+
+## 19.hooks 原理
+
+1. `hooks`出现的本质原因
+    - 函数组件也能做类组件的事，有状态、能处理副作用、能获取`ref`
+    - 解决逻辑复用难的问题
+    - 拥抱函数式编程
+    - hooks 可以作为函数组件本身和函数组件对应的 fiber 之间的沟通桥梁。
+    - ![20230403192709-2023-04-03](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230403192709-2023-04-03.png)
+2. `hooks`与`fiber`
+    - `function`组件(更新)->`hooks`(更新)->组件对应的`fiber`
+    - `function`组件(取值)<-`hooks`(取值)<-组件对应的`fiber`
+3. `hooks`的 3 种处理策略
+    - `ContextOnlyDispatcher`: 开发者在函数组件外部调用`hooks`会抛出异常
+    - `HooksDispatcherOnMount`: 函数组件初始化`mount`,奖励`hooks`和`fiber`之间的桥梁
+    - `HooksDispatcherOnUpdate`: 函数组件更新，需要`Hooks`去获取或者更新维护状态
+    ```js
+    const HooksDispatcherOnMount = { /* 函数组件初始化用的 hooks */
+        useState: mountState,
+        useEffect: mountEffect,
+        ...
+    }
+    const  HooksDispatcherOnUpdate ={/* 函数组件更新用的 hooks */
+        useState:updateState,
+        useEffect: updateEffect,
+        ...
+    }
+    const ContextOnlyDispatcher = {  /* 当hooks不是函数内部调用的时候，调用这个hooks对象下的hooks，所以报错。 */
+        useEffect: throwInvalidHookError,
+        useState: throwInvalidHookError,
+        ...
+    }
+    ```
+4. 函数组件触发
+    - 用`updateFunctionComponent`更新`fiber`,`updateFunctionComponent`内部就会调用`renderWithHooks`
+    ```js
+    let currentlyRenderingFiber;
+    function renderWithHooks(current, workInProgress, Component, props) {
+        currentlyRenderingFiber = workInProgress;
+        workInProgress.memoizedState =
+            null; /* 每一次执行函数组件之前，先清空状态 （用于存放hooks列表）*/
+        workInProgress.updateQueue = null; /* 清空状态（用于存放effect list） */
+        ReactCurrentDispatcher.current =
+            current === null || current.memoizedState === null
+                ? HooksDispatcherOnMount
+                : HooksDispatcherOnUpdate; /* 判断是初始化组件还是更新组件 */
+        let children = Component(
+            props,
+            secondArg,
+        ); /* 执行我们真正函数组件，所有的hooks将依次执行。 */
+        ReactCurrentDispatcher.current =
+            ContextOnlyDispatcher; /* 将hooks变成第一种，防止hooks在函数组件外部调用，调用直接报错。 */
+    }
+    ```
+5. 每个` hooks` 内部执行`mountWorkInProgressHook` ，然后每一个` hook` 通过 `next` 和下一个` hook` 建立起关联
+    ```js
+    export default function Index() {
+        const [number, setNumber] = React.useState(0); // 第一个hooks
+        const [num, setNum] = React.useState(1); // 第二个hooks
+        const dom = React.useRef(null); // 第三个hooks
+        React.useEffect(() => {
+            // 第四个hooks
+            console.log(dom.current);
+        }, []);
+        return (
+            <div ref={dom}>
+                <div onClick={() => setNumber(number + 1)}> {number} </div>
+                <div onClick={() => setNum(num + 1)}> {num}</div>
+            </div>
+        );
+    }
+    ```
+6. 函数组件对应 `fiber` 用 `memoizedState` 保存 `hooks` 信息
+7. 对于函数组件 `fiber` ，`updateQueue` 存放每个 `useEffect/useLayoutEffect` 产生的副作用组成的链表。在 `commit` 阶段更新这些副作用。
+8. `ReactCurrentDispatcher.current` 中的， `React` 就是通过赋予 `current` 不同的 `hooks` 对象达到监控 `hooks` 是否在函数组件内部调用。
+9. hooks 初始化- hooks 如何和 fiber 建立起关系
+    ```js
+    // react-reconciler/src/ReactFiberHooks.js
+    function mountWorkInProgressHook() {
+        const hook = {
+            memoizedState: null,
+            baseState: null,
+            baseQueue: null,
+            queue: null,
+            next: null,
+        };
+        if (workInProgressHook === null) {
+            // 只有一个 hooks
+            currentlyRenderingFiber.memoizedState = workInProgressHook = hook;
+        } else {
+            // 有多个 hooks
+            workInProgressHook = workInProgressHook.next = hook;
+        }
+        return workInProgressHook;
+    }
+    ```
+    - 初始化，每个 hooks 内部执行 mountWorkInProgressHook ，然后每一个 hook 通过 next 和下一个 hook 建立起关联，最后在 fiber 上的结构会变成这样。
+    - ![20230403193132-2023-04-03](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230403193132-2023-04-03.png)
+    ```js
+    export default function Index() {
+        const [number, setNumber] = React.useState(0); // 第一个hooks
+        const [num, setNum] = React.useState(1); // 第二个hooks
+        const dom = React.useRef(null); // 第三个hooks
+        React.useEffect(() => {
+            // 第四个hooks
+            console.log(dom.current);
+        }, []);
+        return (
+            <div ref={dom}>
+                <div onClick={() => setNumber(number + 1)}> {number} </div>
+                <div onClick={() => setNum(num + 1)}> {num}</div>
+            </div>
+        );
+    }
+    ```
+10. `hooks`更新
+    - 更新过程中，如果通过 if 条件语句，增加或者删除 `hooks`，在复用 `hooks` 过程中，会产生复用 `hooks` 状态和当前 `hooks` 不一致的问题
+    - ![20230405121345-2023-04-05](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230405121345-2023-04-05.png)
+    ```js
+    export default function Index({ showNumber }) {
+        let number, setNumber;
+        showNumber && ([number, setNumber] = React.useState(0)); // 第一个hooks
+        const [num, setNum] = React.useState(1); // 第二个hooks
+        const dom = React.useRef(null); // 第三个hooks
+        React.useEffect(() => {
+            // 第四个hooks
+            console.log(dom.current);
+        }, []);
+        return (
+            <div ref={dom}>
+                <div onClick={() => setNumber(number + 1)}> {number} </div>
+                <div onClick={() => setNum(num + 1)}> {num}</div>
+            </div>
+        );
+    }
+    ```
+11. useState
+    ```js
+    // react-reconciler/src/ReactFiberHooks.js
+    // 上面的 state 会被当前 hooks 的 memoizedState 保存下来，每一个 useState 都会创建一个 queue 里面保存了更新的信息。
+    // 每一个 useState 都会创建一个更新函数，比如如上的 setNumber 本质上就是 dispatchAction，那么值得注意一点是，当前的 fiber 被 bind 绑定了固定的参数传入 dispatchAction 和 queue ，所以当用户触发 setNumber 的时候，能够直观反映出来自哪个 fiber 的更新。
+    // 最后把 memoizedState dispatch 返回给开发者使用。
+    function mountState(initialState){
+        const hook = mountWorkInProgressHook();
+        if (typeof initialState === 'function') {initialState = initialState() } // 如果 useState 第一个参数为函数，执行函数得到初始化state
+        hook.memoizedState = hook.baseState = initialState;
+        const queue = (hook.queue = { ... }); // 负责记录更新的各种状态。
+        const dispatch = (queue.dispatch = (dispatchAction.bind(  null,currentlyRenderingFiber,queue, ))) // dispatchAction 为更新调度的主要函数
+        return [hook.memoizedState, dispatch];
+    }
+    ```
+12. `dispatchAction`
+    - 首先用户每一次调用 dispatchAction（比如如上触发 setNumber ）都会先创建一个 update ，然后把它放入待更新 pending 队列中。
+    - 然后判断如果当前的 fiber 正在更新，那么也就不需要再更新了。
+    - 反之，说明当前 fiber 没有更新任务，那么会拿出上一次 state 和 这一次 state 进行对比，如果相同，那么直接退出更新。如果不相同，那么发起更新调度任务。这就解释了，为什么函数组件 useState 改变相同的值，组件不更新了。
+    - 触发了三次 setNumber，等于触发了三次 dispatchAction ，那么这三次 update 会在当前 hooks 的 pending 队列中，然后事件批量更新的概念，会统一合成一次更新。接下来就是组件渲染，那么就到了再一次执行 useState，此时走的是更新流程。那么试想一下点击 handleClick 最后 state 被更新成 6 ，那么在更新逻辑中 useState 内部要做的事，就是得到最新的 state 。
+    ```js
+    export default function Index() {
+        const [number, setNumber] = useState(0);
+        const handleClick = () => {
+            setNumber((num) => num + 1); // num = 1
+            setNumber((num) => num + 2); // num = 3
+            setNumber((num) => num + 3); // num = 6
+        };
+        return (
+            <div>
+                <button onClick={() => handleClick()}>点击 {number} </button>
+            </div>
+        );
+    }
+    ```
+    - 三次 `update` 会在当前 `hooks` 的 `pending` 队列中，然后事件批量更新的概念，会统一合成一次更新
+    ```js
+    function updateReducer() {
+        // 第一步把待更新的pending队列取出来。合并到 baseQueue
+        const first = baseQueue.next;
+        let update = first;
+        do {
+            /* 得到新的 state */
+            newState = reducer(newState, action);
+        } while (update !== null && update !== first);
+        hook.memoizedState = newState;
+        return [hook.memoizedState, dispatch];
+    }
+    ```
+13. `mountEffect`
+    ```js
+    // pushEffect 除了创建一个 effect ， 还有一个重要作用，就是如果存在多个 effect 或者 layoutEffect 会形成一个副作用链表，绑定在函数组件 fiber 的 updateQueue 上。
+    function mountEffect(create, deps) {
+        const hook = mountWorkInProgressHook();
+        const nextDeps = deps === undefined ? null : deps;
+        currentlyRenderingFiber.effectTag |= UpdateEffect | PassiveEffect;
+        hook.memoizedState = pushEffect(
+            HookHasEffect | hookEffectTag,
+            create, // useEffect 第一次参数，就是副作用函数
+            undefined,
+            nextDeps, // useEffect 第二次参数，deps
+        );
+    }
+    ```
+    ```js
+    function updateEffect(create, deps) {
+        const hook = updateWorkInProgressHook();
+        if (areHookInputsEqual(nextDeps, prevDeps)) {
+            /* 如果deps项没有发生变化，那么更新effect list就可以了，无须设置 HookHasEffect */
+            pushEffect(hookEffectTag, create, destroy, nextDeps);
+            return;
+        }
+        /* 如果deps依赖项发生改变，赋予 effectTag ，在commit节点，就会再次执行我们的effect  */
+        currentlyRenderingFiber.effectTag |= fiberEffectTag;
+        hook.memoizedState = pushEffect(
+            HookHasEffect | hookEffectTag,
+            create,
+            destroy,
+            nextDeps,
+        );
+    }
+    ```
+14. React 就是在 commit 阶段，通过标识符，证明是 useEffect 还是 useLayoutEffect ，接下来 React 会同步处理 useLayoutEffect ，异步处理 useEffect 。
+15. useRef
+    ```js
+    // 创建
+    function mountRef(initialValue) {
+        const hook = mountWorkInProgressHook();
+        const ref = { current: initialValue };
+        hook.memoizedState = ref; // 创建ref对象。
+        return ref;
+    }
+    ```
+    ```js
+    // 更新
+    function updateRef(initialValue) {
+        const hook = updateWorkInProgressHook();
+        return hook.memoizedState; // 取出复用ref对象。
+    }
+    ```
+16. `useMemo`
+    ```js
+    function mountMemo(nextCreate, deps) {
+        const hook = mountWorkInProgressHook();
+        const nextDeps = deps === undefined ? null : deps;
+        const nextValue = nextCreate();
+        hook.memoizedState = [nextValue, nextDeps];
+        return nextValue;
+    }
+    ```
+    ```js
+    function updateMemo(nextCreate, nextDeps) {
+        const hook = updateWorkInProgressHook();
+        const prevState = hook.memoizedState;
+        const prevDeps = prevState[1]; // 之前保存的 deps 值
+        if (areHookInputsEqual(nextDeps, prevDeps)) {
+            //判断两次 deps 值
+            return prevState[0];
+        }
+        const nextValue = nextCreate(); // 如果deps，发生改变，重新执行
+        hook.memoizedState = [nextValue, nextDeps];
+        return nextValue;
+    }
+    ```
+
+## 22.React-router
+
+1. history ,React-router , React-router-dom 三者关系
+    - `history`： history 是整个 React-router 的核心，里面包括两种路由模式下改变路由的方法，和监听路由变化方法等。
+    - `react-router`：既然有了 history 路由监听/改变的核心，那么需要调度组件负责派发这些路由的更新，也需要容器组件通过路由更新，来渲染视图。所以说 React-router 在 history 核心基础上，增加了 Router ，Switch ，Route 等组件来处理视图渲染。
+    - `react-router-dom`： 在 react-router 基础上，增加了一些 UI 层面的拓展比如 Link ，NavLink 。以及两种模式的根部路由 BrowserRouter ，HashRouter 。
+    - ![20230405170934-2023-04-05](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230405170934-2023-04-05.png)
+2. 2 种路由方式
+    - `history` 模式下：`http://www.xxx.com/home`
+    ```js
+    import { BrowserRouter as Router } from "react-router-dom";
+    function Index() {
+        return <Router>{/* ...开启history模式 */}</Router>;
+    }
+    ```
+    - `hash`模式下：`http://www.xxx.com/#/home`
+    ```js
+    import { HashRouter as Router } from "react-router-dom";
+    // 和history一样
+    ```
+3. `BrowserHistory`模式
+    1. `window.history.pushState`
+        - `state`：一个与指定网址相关的状态对象， `popstate` 事件触发时，该对象会传入回调函数。如果不需要可填 `null`。
+        - `title`：新页面的标题，但是所有浏览器目前都忽略这个值，可填 `null` 。
+        - `path`：新的网址，必须与当前页面处在同一个域。浏览器的地址栏将显示这个地址。
+        ```js
+        // state可以存任何数据
+        const state = {
+            currentPage: "home",
+            isLoggedIn: true,
+            user: {
+                name: "John Doe",
+                email: "johndoe@example.com",
+            },
+        };
+        history.pushState(state, title, path);
+        console.log(history.state);
+        ```
+    2. `history.replaceState`
+        - 参数和 `pushState` 一样，这个方法会修改当前的 `history` 对象记录， 但是 `history.length` 的长度不会改变。
+        ```js
+        history.replaceState(state, title, path);
+        ```
+    3. 监听路由 `popstate`
+        - `popstate` 事件只会在浏览器某些行为下触发, 比如点击后退、前进按钮或者调用 `history.back()`、`history.forward()`、`history.go()`方法。
+        ```js
+        window.addEventListener("popstate", function (e) {
+            /* 监听改变 */
+        });
+        ```
+4. `HashHistory`模式下
+    1. 改变路由 `window.location.hash`
+    2. 监听路由`onhashchange`
+    ```js
+    window.addEventListener("hashchange", function (e) {
+        /* 监听改变 */
+    });
+    ```
+    3.
+
+## 25.实现 mini-Router
+
+1. 提供路由更新派发——`Router`
+
+```js
+import React, {
+    useCallback,
+    useState,
+    useEffect,
+    createContext,
+    useMemo,
+} from "react";
+import { createBrowserHistory as createHistory } from "history";
+
+export const RouterContext = createContext();
+export let rootHistory = null;
+
+export default function Router(props) {
+    /* 缓存history属性 */
+    const history = useMemo(() => {
+        rootHistory = createHistory();
+        return rootHistory;
+    }, []);
+    const [location, setLocation] = useState(history.location);
+    useEffect(() => {
+        /* 监听location变化，通知更新 */
+        const unlisten = history.listen((location) => {
+            setLocation(location);
+        });
+        return function () {
+            unlisten && unlisten();
+        };
+    }, []);
+    return (
+        <RouterContext.Provider
+            value={{
+                location,
+                history,
+                match: {
+                    path: "/",
+                    url: "/",
+                    params: {},
+                    isExact: location.pathname === "/",
+                },
+            }}>
+            {props.children}
+        </RouterContext.Provider>
+    );
+}
+```
+
+2. 控制更新——`Route`
+
+```js
+import React, { useContext } from "react";
+import { matchPath } from "react-router";
+import { RouterContext } from "./Router";
+
+function Route(props) {
+    const context = useContext(RouterContext);
+    /* 获取location对象 */
+    const location = props.location || context.location;
+    /* 是否匹配当前路由，如果父级有switch，就会传入computedMatch来精确匹配渲染此路由 */
+    const match = props.computedMatch
+        ? props.computedMatch
+        : props.path
+        ? matchPath(location.pathname, props)
+        : context.match;
+    /* 这个props用于传递给路由组件 */
+    const newRouterProps = { ...context, location, match };
+    let { children, component, render } = props;
+    if (Array.isArray(children) && children.length === 0) children = null;
+    let renderChildren = null;
+    if (newRouterProps.match) {
+        if (children) {
+            /* 当Router 是 props children 或者 render props 形式。*/
+            renderChildren =
+                typeof children === "function"
+                    ? children(newRouterProps)
+                    : children;
+        } else if (component) {
+            /*  Route有component属性 */
+            renderChildren = React.createElement(component, newRouterProps);
+        } else if (render) {
+            /*  Route有render属性 */
+            renderChildren = render(newRouterProps);
+        }
+    }
+    /* 逐层传递上下文 */
+    return (
+        <RouterContext.Provider value={newRouterProps}>
+            {renderChildren}
+        </RouterContext.Provider>
+    );
+}
+export default Route;
+```
+
+3. 匹配正确路由—— `Switch`
+
+```js
+import React, { useContext } from "react";
+import { matchPath } from "react-router";
+
+import { RouterContext } from "../component/Router";
+
+export default function Switch(props) {
+    const context = useContext(RouterContext);
+    const location = props.location || context.location;
+    let children, match;
+    /* 遍历children Route 找到匹配的那一个 */
+    React.Children.forEach(props.children, (child) => {
+        if (!match && React.isValidElement(child)) {
+            /* 路由匹配并为React.element元素的时候 */
+            const path = child.props.path; //获取Route上的path
+            children = child; /* 匹配的children */
+            match = path
+                ? matchPath(location.pathname, { ...child.props })
+                : context.match; /* 计算是否匹配 */
+        }
+    });
+    /* 克隆一份Children，混入 computedMatch 并渲染。 */
+    return match
+        ? React.cloneElement(children, { location, computedMatch: match })
+        : null;
+}
+```
+
+4. 获取`history`对象
+
+```js
+import { useContext } from "react";
+import { RouterContext } from "../component/Router";
+/* 用useContext获取上下文中的history对象 */
+export default function useHistory() {
+    return useContext(RouterContext).history;
+}
+```
+
+5. 获取 `location` 对象
+
+```js
+import { useContext } from "react";
+import { RouterContext } from "../component/Router";
+/* 用useContext获取上下文中的location对象 */
+export default function useLocation() {
+    return useContext(RouterContext).location;
+}
+```
+
+6. 监听路由改变
+
+```js
+import { useEffect } from "react";
+import { rootHistory } from "../component/Router";
+
+/* 监听路由改变 */
+function useListen(cb) {
+    useEffect(() => {
+        if (!rootHistory) return () => {};
+        /* 绑定路由事件监听器 */
+        const unlisten = rootHistory.listen((location) => {
+            cb && cb(location);
+        });
+        return function () {
+            unlisten && unlisten();
+        };
+    }, []);
+}
+export default useListen;
+```
+
+7. 获取路由状态——`withRouter`
+
+```js
+import React, { useContext } from "react";
+import hoistStatics from "hoist-non-react-statics";
+
+import { RouterContext } from "../component/Router";
+
+export default function withRouter(Component) {
+    const WrapComponent = (props) => {
+        const { wrappedComponentRef, ...remainingProps } = props;
+        const context = useContext(RouterContext);
+        return (
+            <Component
+                {...remainingProps}
+                ref={wrappedComponentRef}
+                {...context}
+            />
+        );
+    };
+    return hoistStatics(WrapComponent, Component);
+}
+```
+
+8. 入口文件
+
+```js
+//component
+import Router, { RouterContext } from "./component/Router";
+import Route from "./component/Route";
+import Switch from "./component/Switch";
+//hooks
+import useHistory from "./hooks/useHistory";
+import useListen from "./hooks/useListen";
+import useLocation from "./hooks/useLocation";
+//hoc
+import withRouter from "./hoc/withRouter";
+
+export {
+    Router,
+    Switch,
+    Route,
+    RouterContext,
+    useHistory,
+    useListen,
+    useLocation,
+    withRouter,
+};
+```
+
+9. 示例
+
+```js
+import React from "react";
+import { Router, Route, useHistory, useListen, Switch } from "./router";
+
+/* 引用业务组件 */
+import Detail from "./testPage/detail"; /* 详情页 */
+import Home from "./testPage/home"; /* 首页 */
+import List from "./testPage/list"; /* 列表页 */
+import "./index.scss";
+
+const menusList = [
+    {
+        name: "首页",
+        path: "/home",
+    },
+    {
+        name: "列表",
+        path: "/list",
+    },
+    {
+        name: "详情",
+        path: "/detail",
+    },
+];
+/**/
+function Nav() {
+    const history = useHistory();
+    /* 路由跳转 */
+    const RouterGo = (url) => history.push(url);
+    const path = history.location.pathname;
+    return (
+        <div>
+            {menusList.map((item) => (
+                <span
+                    className={`nav ${item.path === path ? "active" : ""}`}
+                    key={item.path}
+                    onClick={() => RouterGo(item.path)}>
+                    {item.name}
+                </span>
+            ))}
+        </div>
+    );
+}
+
+function Top() {
+    /* 路由监听 */
+    useListen((location) => {
+        console.log("当前路由是：", location.pathname);
+    });
+    console.log(111);
+    return <div>--------top------</div>;
+}
+function Index() {
+    console.log("根组件渲染");
+    return (
+        <Router>
+            <Top />
+            <Nav />
+            <Switch>
+                <Route component={Home} path="/home"></Route>
+                <Route component={Detail} path="/detail" />
+                <Route path="/list" render={(props) => <List {...props} />} />
+            </Switch>
+            <div>--------bottom------</div>
+        </Router>
+    );
+}
+
+export default Index;
+```
