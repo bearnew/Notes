@@ -3711,3 +3711,503 @@ function Index() {
 
 export default Index;
 ```
+
+## 29.自定义 hooks 设计
+
+1. 驱动条件
+    - ![20230406010113-2023-04-06](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230406010113-2023-04-06.png)
+2. 顺序原则
+    - 自定义 `hooks` 内部至少有一个 `React Hooks` ，那么自定义 `hooks` 也要遵循 `hooks` 的规则，不能放在条件语句中，而且要保持执行顺序的一致性
+3. 条件限定
+    - 加限定条件，避免重复执行
+    ```js
+    function useXXX() {
+        const newValue = React.useRef(null); /* 创建一个 value 保存状态。  */
+        const value = React.useContext(defaultContext);
+        if (!newValue.current) {
+            /* 如果 newValue 不存在 */
+            newValue.current = initValueFunction(value);
+        }
+        return newValue.current;
+    }
+    ```
+4. 考虑可变性
+    ```js
+    function useXXX() {
+        const value = React.useContext(defaultContext);
+        const newValue = React.useMemo(() => initValueFunction(value), [value]);
+        return newValue;
+    }
+    ```
+5. 接受状态
+    - 如果使用了内部含有 useContext 的自定义 hooks ，那么当 context 上下文改变，会让使用自定义 hooks 的组件自动渲染。
+    ```js
+    export default function useHistory() {
+        return useContext(RouterContext).history;
+    }
+    ```
+6. 存储｜管理状态
+    ```js
+    function useForm() {
+        const formCurrent = React.useRef(null);
+        if (!formCurrent.current) {
+            formCurrent.current = new FormStore();
+        }
+        return formCurrent.current;
+    }
+    ```
+    ```js
+    function useRenderCount() {
+        const isFirstRender = React.useRef(true); /* 记录是否是第一次渲染 */
+        const renderCount = React.useRef(1); /* 记录渲染次数 */
+        useEffect(() => {
+            isFirstRender.current = false; /* 第一次渲染完成，改变状态 */
+        }, []);
+        useEffect(() => {
+            if (!isFirstRender.current)
+                renderCount.current++; /* 如果不是第一次渲染，那么添加渲染次数  */
+        });
+        return [renderCount.current, isFirstRender.current];
+    }
+    ```
+7. 同步`State`
+    ```js
+    function useSyncState(defaultValue) {
+        const value = React.useRef(defaultValue); /* useRef 用于保存状态 */
+        const [, forceUpdate] =
+            React.useState(null); /* useState 用于更新组件 */
+        const dispatch = (fn) => {
+            /* 模拟一个更新函数 */
+            let newValue;
+            if (typeof fn === "function") {
+                newValue = fn(value.current); /* 当参数为函数的情况 */
+            } else {
+                newValue = fn; /* 当参数为其他的情况 */
+            }
+            value.current = newValue;
+            forceUpdate({}); /* 强制更新 */
+        };
+        return [value, dispatch]; /* 返回和 useState 一样的格式 */
+    }
+    ```
+    ```js
+    export default function Index() {
+        const [data, setData] = useSyncState(0);
+        return (
+            <div style={{ marginTop: "50px" }}>
+                《React 进阶实践指南》 点赞 👍 {data.current}
+                <button
+                    onClick={() => {
+                        setData((num) => num + 1);
+                        console.log(data.current); //打印到最新的值
+                    }}>
+                    点击
+                </button>
+            </div>
+        );
+    }
+    ```
+8. 操作`dom`实例
+    ```js
+    /* TODO: 操纵原生dom  */
+    function useGetDOM() {
+        const dom = React.useRef();
+        React.useEffect(() => {
+            /* 做一些基于 dom 的操作 */
+            console.log(dom.current);
+        }, []);
+        return dom;
+    }
+    ```
+    ```js
+    export default function Index() {
+        const dom = useGetDOM();
+        return (
+            <div ref={dom}>
+                《React进阶实践指南》
+                <button>点赞</button>
+            </div>
+        );
+    }
+    ```
+9. 埋点`hooks`
+
+    ```js
+    export const LogContext = React.createContext({});
+
+    export default function useLog() {
+        /* 一些公共参数 */
+        const message = React.useContext(LogContext);
+        const listenDOM = React.useRef(null);
+
+        /* 分清依赖关系 -> message 改变，   */
+        const reportMessage = React.useCallback(
+            function (data, type) {
+                if (type === "pv") {
+                    // pv 上报
+                    console.log("组件 pv 上报", message);
+                } else if (type === "click") {
+                    // 点击上报
+                    console.log("组件 click 上报", message, data);
+                }
+            },
+            [message],
+        );
+
+        React.useEffect(() => {
+            const handleClick = function (e) {
+                reportMessage(e.target, "click");
+            };
+            if (listenDOM.current) {
+                listenDOM.current.addEventListener("click", handleClick);
+            }
+
+            return function () {
+                listenDOM.current &&
+                    listenDOM.current.removeEventListener("click", handleClick);
+            };
+        }, [reportMessage]);
+
+        return [listenDOM, reportMessage];
+    }
+    ```
+
+    ```js
+    function Home() {
+        const [dom, reportMessage] = useLog();
+        return (
+            <div>
+                {/* 监听内部点击 */}
+                <div ref={dom}>
+                    <p> 《React进阶实践指南》</p>
+                    <button> 按钮 one (内部点击) </button>
+                    <button> 按钮 two (内部点击) </button>
+                    <button> 按钮 three (内部点击) </button>
+                </div>
+                {/* 外部点击 */}
+                <button
+                    onClick={() => {
+                        console.log(reportMessage);
+                    }}>
+                    {" "}
+                    外部点击{" "}
+                </button>
+            </div>
+        );
+    }
+    const Index = React.memo(Home); /*  阻断 useState 的更新效应  */
+    export default function Root() {
+        const [value, setValue] = useState({});
+        return (
+            <LogContext.Provider value={value}>
+                <Index />
+                <button
+                    onClick={() =>
+                        setValue({
+                            name: "《React进阶实践指南》",
+                            author: "我不是外星人",
+                        })
+                    }>
+                    点击
+                </button>
+            </LogContext.Provider>
+        );
+    }
+    ```
+
+10. 分页长列表
+
+    ```js
+    /**
+     *
+     * @param {*} defaultQuery  表单查询默认参数
+     * @param {*} api           biaog
+     */
+    function useQueryTable(defaultQuery = {}, api) {
+        /* 保存查询表格表单信息 */
+        const formData = React.useRef({});
+        /* 保存查询表格分页信息 */
+        const pagination = React.useRef({
+            page: defaultQuery.page || 1,
+            pageSize: defaultQuery.pageSize || 10,
+        });
+
+        /* 强制更新 */
+        const [, forceUpdate] = React.useState(null);
+
+        /* 请求表格数据 */
+        const [tableData, setTableData] = React.useState({
+            data: [],
+            total: 0,
+            current: 1,
+        });
+
+        /* 请求列表数据 */
+        const getList = React.useCallback(
+            async function (payload = {}) {
+                if (!api) return;
+                const data =
+                    (await api({
+                        ...defaultQuery,
+                        ...payload,
+                        ...pagination.current,
+                        ...formData.current,
+                    })) || {};
+                if (data.code == 200) {
+                    setTableData({
+                        list: data.list,
+                        current: data.current,
+                        total: data.total,
+                    });
+                } else {
+                }
+            },
+            [api],
+        ); /* 以api作为依赖项，当api改变，重新声明getList */
+
+        /* 改变表单单元项 */
+        const setFormItem = React.useCallback(function (key, value) {
+            const form = formData.current;
+            form[key] = value;
+            forceUpdate(
+                {},
+            ); /* forceUpdate 每一次都能更新，不会造成 state 相等的情况 */
+        }, []);
+
+        /* 重置表单 */
+        const reset = React.useCallback(
+            function () {
+                const current = formData.current;
+                for (let name in current) {
+                    current[name] = "";
+                }
+                pagination.current.page = defaultQuery.page || 1;
+                pagination.current.pageSize = defaultQuery.pageSize || 10;
+                /* 请求数据  */
+                getList();
+            },
+            [getList],
+        ); /* getList 作为 reset 的依赖项  */
+
+        /* 处理分页逻辑 */
+        const handerChange = React.useCallback(
+            async function (page, pageSize) {
+                pagination.current = {
+                    page,
+                    pageSize,
+                };
+                getList();
+            },
+            [getList],
+        ); /* getList 作为 handerChange 的依赖项  */
+
+        /* 初始化请求数据 */
+        React.useEffect(() => {
+            getList();
+        }, []);
+
+        /* 组合暴露参数 */
+        return [
+            {
+                /* 组合表格状态 */ tableData,
+                handerChange,
+                getList,
+                pagination: pagination.current,
+            },
+            {
+                /* 组合搜索表单状态 */ formData: formData.current,
+                setFormItem,
+                reset,
+            },
+        ];
+    }
+    ```
+
+    ```js
+    /* 模拟数据请求 */
+    function getTableData(payload) {
+        return new Promise((resolve) => {
+            Promise.resolve().then(() => {
+                const { list } = listData;
+                const arr = threeNumberRandom(); // 生成三个随机数 模拟数据交互
+                console.log("请求参数：", payload);
+                resolve({
+                    ...listData,
+                    list: [list[arr[0]], list[arr[1]], list[arr[2]]],
+                    total: list.length,
+                    current: payload.page || 1,
+                });
+            });
+        });
+    }
+    function Index() {
+        const [table, form] = useQueryTable({ pageSize: 3 }, getTableData);
+        const { formData, setFormItem, reset } = form;
+        const { pagination, tableData, getList, handerChange } = table;
+        return (
+            <div style={{ margin: "30px" }}>
+                <div style={{ marginBottom: "24px" }}>
+                    <Input
+                        onChange={(e) => setFormItem("name", e.target.value)}
+                        placeholder="请输入名称"
+                        style={inputStyle}
+                        value={formData.name || ""}
+                    />
+                    <Input
+                        onChange={(e) => setFormItem("price", e.target.value)}
+                        placeholder="请输入价格"
+                        style={inputStyle}
+                        value={formData.price || ""}
+                    />
+                    <Select
+                        onChange={(value) => setFormItem("type", value)}
+                        placeholder="请选择"
+                        style={inputStyle}
+                        value={formData.type}>
+                        <Option value="1">家电</Option>
+                        <Option value="2">生活用品</Option>
+                    </Select>
+                    <button className="searchbtn" onClick={() => getList()}>
+                        提交
+                    </button>
+                    <button className="concellbtn" onClick={reset}>
+                        重置
+                    </button>
+                </div>
+                {useCallback(
+                    <Table
+                        columns={columns}
+                        dataSource={tableData.list}
+                        height="300px"
+                        onChange={(res) => {
+                            handerChange(res.current, res.pageSize);
+                        }}
+                        pagination={{
+                            ...pagination,
+                            total: tableData.total,
+                            current: tableData.current,
+                        }}
+                        rowKey="id"
+                    />,
+                    [tableData],
+                )}
+            </div>
+        );
+    }
+    ```
+
+11. `useCreateStore`
+    ```js
+    export const ReduxContext = React.createContext(null);
+    /* 用于产生 reduxHooks 的 store */
+    export function useCreateStore(reducer, initState) {
+        const store = React.useRef(null);
+        /* 如果存在——不需要重新实例化 Store */
+        if (!store.current) {
+            store.current = new ReduxHooksStore(
+                reducer,
+                initState,
+            ).exportStore();
+        }
+        return store.current;
+    }
+    ```
+    ```js
+    import { unstable_batchedUpdates } from "react-dom";
+    class ReduxHooksStore {
+        constructor(reducer, initState) {
+            this.name = "__ReduxHooksStore__";
+            this.id = 0;
+            this.reducer = reducer;
+            this.state = initState;
+            this.mapConnects = {};
+        }
+        /* 需要对外传递的接口 */
+        exportStore = () => {
+            return {
+                dispatch: this.dispatch.bind(this),
+                subscribe: this.subscribe.bind(this),
+                unSubscribe: this.unSubscribe.bind(this),
+                getInitState: this.getInitState.bind(this),
+            };
+        };
+        /* 获取初始化 state */
+        getInitState = (mapStoreToState) => {
+            return mapStoreToState(this.state);
+        };
+        /* 更新需要更新的组件 */
+        publicRender = () => {
+            unstable_batchedUpdates(() => {
+                /* 批量更新 */
+                Object.keys(this.mapConnects).forEach((name) => {
+                    const { update } = this.mapConnects[name];
+                    update(this.state);
+                });
+            });
+        };
+        /* 更新 state  */
+        dispatch = (action) => {
+            this.state = this.reducer(this.state, action);
+            // 批量更新
+            this.publicRender();
+        };
+        /* 注册每个 connect  */
+        subscribe = (connectCurrent) => {
+            const connectName = this.name + ++this.id;
+            this.mapConnects[connectName] = connectCurrent;
+            return connectName;
+        };
+        /* 解除绑定 */
+        unSubscribe = (connectName) => {
+            delete this.mapConnects[connectName];
+        };
+    }
+    ```
+12. `useConnect`
+
+    ```js
+    export function useConnect(mapStoreToState = () => {}) {
+        /* 获取 Store 内部的重要函数 */
+        const contextValue = React.useContext(ReduxContext);
+        const { getInitState, subscribe, unSubscribe, dispatch } = contextValue;
+        /* 用于传递给业务组件的 state  */
+        const stateValue = React.useRef(getInitState(mapStoreToState));
+
+        /* 渲染函数 */
+        const [, forceUpdate] = React.useState();
+        /* 产生 */
+        const connectValue = React.useMemo(() => {
+            const state = {
+                /* 用于比较一次 dispatch 中，新的 state 和 之前的state 是否发生变化  */
+                cacheState: stateValue.current,
+                /* 更新函数 */
+                update: function (newState) {
+                    /* 获取订阅的 state */
+                    const selectState = mapStoreToState(newState);
+                    /* 浅比较 state 是否发生变化，如果发生变化， */
+                    const isEqual = shallowEqual(state.cacheState, selectState);
+                    state.cacheState = selectState;
+                    stateValue.current = selectState;
+                    if (!isEqual) {
+                        /* 更新 */
+                        forceUpdate({});
+                    }
+                },
+            };
+            return state;
+        }, [contextValue]); // 将 contextValue 作为依赖项。
+
+        React.useEffect(() => {
+            /* 组件挂载——注册 connect */
+            const name = subscribe(connectValue);
+            return function () {
+                /* 组件卸载 —— 解绑 connect */
+                unSubscribe(name);
+            };
+        }, [connectValue]); /* 将 connectValue 作为 useEffect 的依赖项 */
+
+        return [stateValue.current, dispatch];
+    }
+    ```
+
+13.
