@@ -10,6 +10,6 @@
 
 |script 标签|	JS 执行顺序|	是否阻塞解析 HTML|
 |:----:|:----:|:----:|
-| <script> |	在 HTML 中的顺序 |	阻塞 |
-| <script async> |	网络请求返回顺序 |	可能阻塞，也可能不阻塞 |
-| <script defer> |	在 HTML 中的顺序 |	不阻塞 |
+| \<script> |	在 HTML 中的顺序 |	阻塞 |
+| \<script async> |	网络请求返回顺序 |	可能阻塞，也可能不阻塞 |
+| \<script defer> |	在 HTML 中的顺序 |	不阻塞 |
