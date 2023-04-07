@@ -83,32 +83,32 @@ function useMemo(callback) {
 
 ## 2.新架构
 
-- `Scheduler`(调度器): 调度任务的优先级，高优先级任务优先进入`Reconciler`
-- `Reconciler`(协调器): `VDOM`的实现，负责根据自变量变化计算出`UI`变化
+-   `Scheduler`(调度器): 调度任务的优先级，高优先级任务优先进入`Reconciler`
+-   `Reconciler`(协调器): `VDOM`的实现，负责根据自变量变化计算出`UI`变化
 
-  - `Reconciler`的更新流程可中断，每次循环都会调用`shouldYield`判断当前`Time Slice`是否有剩余时间，没有剩余时间则暂缓更新流程，将主流程交给渲染流水线，等待下一个宏任务再继续执行，这就是`Time Slice`的实现原理 -核心流程
+    -   `Reconciler`的更新流程可中断，每次循环都会调用`shouldYield`判断当前`Time Slice`是否有剩余时间，没有剩余时间则暂缓更新流程，将主流程交给渲染流水线，等待下一个宏任务再继续执行，这就是`Time Slice`的实现原理 -核心流程
 
-  ```js
-  function workLoopConcurrent() {
-    // 一直执行任务，直到任务执行完或中断
-    while (workInProgress !== null && !shouldYield()) {
-      performUnitOfWork(workInProgress);
+    ```js
+    function workLoopConcurrent() {
+        // 一直执行任务，直到任务执行完或中断
+        while (workInProgress !== null && !shouldYield()) {
+            performUnitOfWork(workInProgress);
+        }
     }
-  }
 
-  function shouldYield() {
-    // 当前时间是否大于过期时间
-    // 其中deadline = getCurrentTime() + yieldInterval
-    // yieldInterval为调度器预设的时间间隔，默认为5ms
-    return getCurrentTime() >= deadline;
-  }
-  ```
+    function shouldYield() {
+        // 当前时间是否大于过期时间
+        // 其中deadline = getCurrentTime() + yieldInterval
+        // yieldInterval为调度器预设的时间间隔，默认为5ms
+        return getCurrentTime() >= deadline;
+    }
+    ```
 
-  ```js
+    ```js
 
-  ```
+    ```
 
-- `Renderer`(渲染器): 负责将`UI`变化渲染到宿主环境
+-   `Renderer`(渲染器): 负责将`UI`变化渲染到宿主环境
 
 ## 3.新架构好处
 
@@ -118,14 +118,14 @@ function useMemo(callback) {
 
 1. `React`3 种节点类型
 
-- `React Element`(React 元素)
-- `React Component`(React 组件)
-- `FiberNode`(组成 Fiber 架构的节点类型)
+-   `React Element`(React 元素)
+-   `React Component`(React 组件)
+-   `FiberNode`(组成 Fiber 架构的节点类型)
 
 ```js
 // App是React Component
 const App = () => {
-  return <h3>Hello</h3>;
+    return <h3>Hello</h3>;
 };
 
 // ele是React Element
@@ -142,9 +142,9 @@ ReactDom.createRoot(rootNode).render(ele);
 ```js
 // FiberNode构造函数
 function FiberNode(tag, pendingProps, key, mode) {
-  this.tag = tag;
-  this.key = key;
-  this.elementType = null;
+    this.tag = tag;
+    this.key = key;
+    this.elementType = null;
 }
 ```
 
@@ -161,20 +161,20 @@ this.sibling = null;
 
 6. 显卡的双缓存
 
-   - 显卡合成图像并写入后缓冲区，后缓冲区被写入图像，前后缓存区就会互换
+    - 显卡合成图像并写入后缓冲区，后缓冲区被写入图像，前后缓存区就会互换
 
-   - 刷新频率为 60Hz 的显示器，每秒从前缓存区读取 60 次图像，显示到显示器上。
+    - 刷新频率为 60Hz 的显示器，每秒从前缓存区读取 60 次图像，显示到显示器上。
 
 7. React 的双缓存
-   - 一颗真实 UI 对应的`Fiber Tree`
-   - 正在内存中构建的`Fiber Tree`
-   ```js
-   // 用于clone fiberNode的方法
-   function cloneChildFibers(current, workInProgress) {
-     // current是前缓冲区的FiberNode，对应真实UI
-     // workInProgress对应构建中的Fiber tree
-   }
-   ```
+    - 一颗真实 UI 对应的`Fiber Tree`
+    - 正在内存中构建的`Fiber Tree`
+    ```js
+    // 用于clone fiberNode的方法
+    function cloneChildFibers(current, workInProgress) {
+        // current是前缓冲区的FiberNode，对应真实UI
+        // workInProgress对应构建中的Fiber tree
+    }
+    ```
 
 ## 5.render 阶段
 
@@ -182,10 +182,10 @@ this.sibling = null;
 // 同步更新流程
 // performSyncWorkOnRoot会执行该方法
 function workLoopSync() {
-  // workInProgress为null，表示Fiber构建已结束
-  while (workInProgress !== null) {
-    performUnitOfWork(workInProgress);
-  }
+    // workInProgress为null，表示Fiber构建已结束
+    while (workInProgress !== null) {
+        performUnitOfWork(workInProgress);
+    }
 }
 ```
 
@@ -193,11 +193,11 @@ function workLoopSync() {
 // 并发更新流程
 // performConcurrentWorkOnRoot会执行该方法
 function workLoopConcurrent() {
-  // workInProgress为null，表示Fiber构建已结束
-  // shouldYield是否可中断
-  while (workInProgress !== null && !shouldYield()) {
-    performUnitOfWork(workInProgress);
-  }
+    // workInProgress为null，表示Fiber构建已结束
+    // shouldYield是否可中断
+    while (workInProgress !== null && !shouldYield()) {
+        performUnitOfWork(workInProgress);
+    }
 }
 ```
 
@@ -207,33 +207,33 @@ function workLoopConcurrent() {
 
 ```js
 function beginWork(current, workInProgress, renderLanes) {
-  if (current !== null) {
-    // 是update流程
-  } else {
-    // 是mount流程
-  }
+    if (current !== null) {
+        // 是update流程
+    } else {
+        // 是mount流程
+    }
 
-  // 判断tag不同，进入不同处理逻辑
-  switch (workInProgress.tag) {
-    case IndeterminateComponnet:
-    // mount进入的分支
-    // mount和update最终都会进入reconcileChildren的方法
-    // mount传参shouldTrackSideEffects为false,不追踪副作用
-    // update传true，标记flags，方便后续操作
-    // ...
-    case LazyComponent:
-    // ...
-    case FunctionComponent:
-    // ...
-    case ClassComponent:
-    // ...
-    case HostRoot:
-    // ...
-    case HostComponent:
-    // ...
-    case HostText:
-    // ...
-  }
+    // 判断tag不同，进入不同处理逻辑
+    switch (workInProgress.tag) {
+        case IndeterminateComponnet:
+        // mount进入的分支
+        // mount和update最终都会进入reconcileChildren的方法
+        // mount传参shouldTrackSideEffects为false,不追踪副作用
+        // update传true，标记flags，方便后续操作
+        // ...
+        case LazyComponent:
+        // ...
+        case FunctionComponent:
+        // ...
+        case ClassComponent:
+        // ...
+        case HostRoot:
+        // ...
+        case HostComponent:
+        // ...
+        case HostText:
+        // ...
+    }
 }
 ```
 
@@ -249,25 +249,25 @@ function beginWork(current, workInProgress, renderLanes) {
 
 1. API
 
-- `getDerivedStateFromError`静态方法，提供一个机会渲染`fallback UI`
-- `componentDidCatch`组件实例方法，错误发生后，提供一个机会记录错误信息
+-   `getDerivedStateFromError`静态方法，提供一个机会渲染`fallback UI`
+-   `componentDidCatch`组件实例方法，错误发生后，提供一个机会记录错误信息
 
 2. 不会被捕获的错误
 
-   1. 事件回调中的错误
+    1. 事件回调中的错误
 
-   ```js
-   const B = () => {
-     const handleClick = () => {
-       throw new Error("错误发生");
-     };
-     return <div onClick={handleClick}>Hello</div>;
-   };
-   ```
+    ```js
+    const B = () => {
+        const handleClick = () => {
+            throw new Error("错误发生");
+        };
+        return <div onClick={handleClick}>Hello</div>;
+    };
+    ```
 
-   2. 异步代码，如`setTimeout`、`requestAnimationFrame`回调
-   3. `SSR`, `SSR`不属于`React`流程
-   4. `ErrorBoundaries`本身`Component`的错误，`ErrorBoundaries`只会捕获子孙组件的错误
+    2. 异步代码，如`setTimeout`、`requestAnimationFrame`回调
+    3. `SSR`, `SSR`不属于`React`流程
+    4. `ErrorBoundaries`本身`Component`的错误，`ErrorBoundaries`只会捕获子孙组件的错误
 
 ## 9.schedule
 
@@ -350,17 +350,17 @@ export const addEvent = (container, type) => {
 
 1. `React`的`diff`会预设 3 个限制
 
-   1. 只对同级元素进行`diff`,`DOM`元素在前后 2 次更新跨越了层级，`React`不会尝试复用他
-   2. 两个不同类型的元素会产生不同的树，如果元素从`DIV`变成`P`，`React`会销毁`DIV`及其子孙元素，并新建`P`及其子孙元素
-   3. 开发者可以通过`key`来暗示哪些子元素在不同渲染下能够保持稳定
+    1. 只对同级元素进行`diff`,`DOM`元素在前后 2 次更新跨越了层级，`React`不会尝试复用他
+    2. 两个不同类型的元素会产生不同的树，如果元素从`DIV`变成`P`，`React`会销毁`DIV`及其子孙元素，并新建`P`及其子孙元素
+    3. 开发者可以通过`key`来暗示哪些子元素在不同渲染下能够保持稳定
 
 2. 同级多节点`diff`，属于以下 1 种或多种
-   1. 节点位置没有变化
-   2. 节点增删
-   3. 节点移动
+    1. 节点位置没有变化
+    2. 节点增删
+    3. 节点移动
 3. diff 算法
-   1. 第一轮遍历尝试逐个复用节点
-   2. 第二轮遍历处理剩下的节点
+    1. 第一轮遍历尝试逐个复用节点
+    2. 第二轮遍历处理剩下的节点
 4. 简易`diff`算法
 
 ```typescript
@@ -368,52 +368,52 @@ type NodeList = Node[];
 type Flag = "Placement" | "Deletion";
 
 interface Node {
-  key: string;
-  flag?: Flag;
-  index?: number;
+    key: string;
+    flag?: Flag;
+    index?: number;
 }
 
 // diff算法的实现
 function diff(before: NodeList, after: NodeList): NodeList {
-  let lastPlacedIndex = 0;
-  const result: NodeList = [];
+    let lastPlacedIndex = 0;
+    const result: NodeList = [];
 
-  const beforeMap = new Map<string, Node>();
-  before.forEach((node, i) => {
-    node.index = i;
-    beforeMap.set(node.key, node);
-  });
+    const beforeMap = new Map<string, Node>();
+    before.forEach((node, i) => {
+        node.index = i;
+        beforeMap.set(node.key, node);
+    });
 
-  for (let i = 0; i < after.length; i++) {
-    const afterNode = after[i];
-    afterNode.index = i;
-    const beforeNode = beforeMap.get(afterNode.key);
+    for (let i = 0; i < after.length; i++) {
+        const afterNode = after[i];
+        afterNode.index = i;
+        const beforeNode = beforeMap.get(afterNode.key);
 
-    if (beforeNode) {
-      // 复用旧节点
-      beforeMap.delete(beforeNode.key);
+        if (beforeNode) {
+            // 复用旧节点
+            beforeMap.delete(beforeNode.key);
 
-      const oldIndex = beforeNode.index as number;
-      if (oldIndex < lastPlacedIndex) {
-        afterNode.flag = "Placement";
-        result.push(afterNode);
-        continue;
-      } else {
-        lastPlaceIndex = oldIndex;
-      }
-    } else {
-      // 创建新节点
-      afterNode.flag = "Placement";
-      result.push(afterNode);
+            const oldIndex = beforeNode.index as number;
+            if (oldIndex < lastPlacedIndex) {
+                afterNode.flag = "Placement";
+                result.push(afterNode);
+                continue;
+            } else {
+                lastPlaceIndex = oldIndex;
+            }
+        } else {
+            // 创建新节点
+            afterNode.flag = "Placement";
+            result.push(afterNode);
+        }
     }
-  }
 
-  beforeMap.forEach((node) => {
-    node.flag = "Deletion";
-    result.push(node);
-  });
+    beforeMap.forEach((node) => {
+        node.flag = "Deletion";
+        result.push(node);
+    });
 
-  return result;
+    return result;
 }
 ```
 
@@ -549,3 +549,7 @@ schedule();
 export {};
 
 ```
+
+## 13.组件卸载之前清理 window 注册的事件和定时器
+
+## 14.babel-plugin-lodash 对应用种的 lodash 进行精简

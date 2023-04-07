@@ -157,7 +157,7 @@ window.JSON.parse = function (json) {
             json
                 .replace(rx_two, "@")
                 .replace(rx_three, "]")
-                .replace(rx_four, "")
+                .replace(rx_four, ""),
         )
     ) {
         return eval(`(${json})`);
@@ -290,7 +290,7 @@ if (!Function.prototype.myBind)
 
             return function () {
                 var args = bindArgs.concat(
-                    Array.prototype.slice.call(arguments)
+                    Array.prototype.slice.call(arguments),
                 );
                 return thatFunc.apply(bindObj, args);
             };
@@ -467,7 +467,7 @@ $jsonp(
     { count: 10, start: 15 },
     function (data) {
         document.getElementById("result").innerHTML = JSON.stringify(data);
-    }
+    },
 );
 ```
 
@@ -1115,7 +1115,7 @@ window.addEventListener(
             // ...
         }
     },
-    false
+    false,
 );
 ```
 
@@ -1558,7 +1558,7 @@ function lazyMan(name) {
     const { log } = console;
     const sleep = (s) =>
         new Promise((res) =>
-            setTimeout(() => log(`Wake up after ${s}`) || res(), s * 1000)
+            setTimeout(() => log(`Wake up after ${s}`) || res(), s * 1000),
         );
     const queue = [() => log(`Hi! This is ${name}!`)];
     // 这个里用了 push(x) && ctx
@@ -1610,7 +1610,7 @@ lazyMan("Hank").eat("supper").sleepFirst(5);
 function runPromiseInSequence(arr, input) {
     return arr.reduce(
         (promiseChain, currentFunction) => promiseChain.then(currentFunction),
-        Promise.resolve(input)
+        Promise.resolve(input),
     );
 }
 ```
@@ -1649,4 +1649,40 @@ function _const(key, value) {
 }
 _const("a", 1);
 a = 2;
+```
+
+#### 55.useReducer
+
+```js
+function useReducer(reducer, initialState) {
+    const [state, setState] = useState(initialState);
+    function dispatch(action) {
+        const newState = reducer(state, action);
+        setState(newState);
+    }
+
+    return [state, dispatch];
+}
+
+function App() {
+    const reducer = (state, action) => {
+        switch (action.type) {
+            case "increment":
+                return state + 1;
+            case "decrement":
+                return state - 1;
+            default:
+                return state;
+        }
+    };
+
+    const [count, dispatch] = useReducer(reducer, 0);
+    return (
+        <div>
+            {count}
+            <button onClick={() => dispatch({ type: "increment" })}>+1</button>
+            <button onClick={() => dispatch({ type: "decrement" })}>+1</button>
+        </div>
+    );
+}
 ```
