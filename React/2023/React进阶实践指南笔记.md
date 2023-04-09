@@ -4313,3 +4313,195 @@ export default Index;
 12. `beginWork`流程图
     - ![20230409003747-2023-04-09](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230409003747-2023-04-09.png)
 13.
+
+## 33.useMutationSource
+
+1. 使用
+
+```js
+// 通过 createMutableSource 创建一个外部数据源。
+// 数据源对象为 window。
+// 用 location.href 作为数据源的版本号，href 发生变化，那么说明数据源发生变化。
+const locationSource = createMutableSource(window, () => window.location.href);
+
+// 获取快照信息，这里获取的是 location.pathname 字段，这个是可以复用的，当路由发生变化的时候，那么会调用快照函数，来形成新的快照信息。
+const getSnapshot = (window) => window.location.pathname;
+
+// 订阅函数。
+const subscribe = (window, callback) => {
+    //通过 popstate 监听 history 模式下的路由变化，路由变化的时候，执行快照函数，得到新的快照信息。
+    window.addEventListener("popstate", callback);
+    //取消监听
+    return () => window.removeEventListener("popstate", callback);
+};
+
+function Example() {
+    // 通过 useMutableSource，把数据源对象，快照函数，订阅函数传入，形成 pathName。
+    const pathName = useMutableSource(locationSource, getSnapshot, subscribe);
+
+    // ...
+}
+```
+
+2. 原理
+
+```js
+// react-reconciler/src/ReactFiberHooks.new.js -> useMutableSource
+function useMutableSource(hook, source, getSnapshot) {
+    /* 获取版本号 */
+    const getVersion = source._getVersion;
+    const version = getVersion(source._source);
+    /* 用 useState 保存当前 Snapshot，触发更新。 */
+    let [currentSnapshot, setSnapshot] = dispatcher.useState(() =>
+        readFromUnsubscribedMutableSource(root, source, getSnapshot),
+    );
+    dispatcher.useEffect(() => {
+        /* 包装函数  */
+        const handleChange = () => {
+            /* 触发更新 */
+            setSnapshot();
+        };
+        /* 订阅更新 */
+        const unsubscribe = subscribe(source._source, handleChange);
+        /* 取消订阅 */
+        return unsubscribe;
+    }, [source, subscribe]);
+}
+```
+
+## 34.transition
+
+1. `startTransition` 依赖于 `concurrent Mode` 渲染并发模式
+
+```js
+import ReactDOM from "react-dom";
+/* 通过 createRoot 创建 root */
+const root = ReactDOM.createRoot(document.getElementById("app"));
+/* 调用 root 的 render 方法 */
+root.render(<App />);
+```
+
+2. `startTransition` 把不是特别迫切的更新任务 `setSearchQuery` 隔离出来
+
+```js
+const handleChange = () => {
+    /* 高优先级任务 —— 改变搜索条件 */
+    setInputValue(e.target.value);
+    /* 低优先级任务 —— 改变搜索过滤后列表状态  */
+    startTransition(() => {
+        setSearchQuery(e.target.value);
+    });
+};
+```
+
+3. 为什么不用`setTimeout`
+    - 超时后，还会执行 `setTimeout` 的任务，它们与用户交互同样属于宏任务，所以仍然会阻止页面的交互
+    - `transition` 就不同了，在 `conCurrent mode` 下，`startTransition` 是可以中断渲染的 ，所以它不会让页面卡顿，`React` 让这些任务，在浏览器空闲时间执行，所以上述输入 `input` 内容时，`startTransition` 会优先处理 `input` 值的更新，而之后才是列表的渲染。
+4. 为什么不用节流和防抖
+    - 节流和防抖需要有效掌握 Delay Time 延时时间，如果时间过长，那么给人一种渲染滞后的感觉，
+    - 如果时间过短，那么就类似于 setTimeout(fn,0) 还会造成前面的问题。
+5. 过渡任务
+    - 第一类紧急更新任务。比如一些用户交互行为，按键，点击，输入等。
+    - 第二类就是过渡更新任务。比如 UI 从一个视图过渡到另外一个视图。
+6. `useTranstion`，处于过渡状态的标志——isPending。
+    ```js
+    export default function App() {
+        const [value, setInputValue] = React.useState("");
+        const [query, setSearchQuery] = React.useState("");
+        // 没有搜索出来，处于过渡任务，isPending为true
+        const [isPending, startTransition] = React.useTransition();
+        const handleChange = (e) => {
+            setInputValue(e.target.value);
+            startTransition(() => {
+                setSearchQuery(e.target.value);
+            });
+        };
+        return (
+            <div>
+                {isPending && <span>isTransiton</span>}
+                <input
+                    onChange={handleChange}
+                    placeholder="输入搜索内容"
+                    value={value}
+                />
+                <NewList query={query} />
+            </div>
+        );
+    }
+    ```
+7. `useDeferredValue`
+    - `useTransition` 是把 `startTransition` 内部的更新任务变成了过渡任务`transtion`,而 `useDeferredValue` 是把原值通过过渡任务得到新的值，这个值作为延时状态。 一个是处理一段逻辑，另一个是生产一个新的状态。
+    - `useDeferredValue` 还有一个不同点就是这个任务，本质上在 `useEffect` 内部执行，而 `useEffect` 内部逻辑是异步执行的 ，所以它一定程度上更滞后于` useTransition`。 `useDeferredValue` = `useEffect` + `transtion`
+    ```js
+    export default function App() {
+        const [value, setInputValue] = React.useState("");
+        const query = React.useDeferredValue(value);
+        const handleChange = (e) => {
+            setInputValue(e.target.value);
+        };
+        return (
+            <div>
+                <button>useDeferredValue</button>
+                <input
+                    onChange={handleChange}
+                    placeholder="输入搜索内容"
+                    value={value}
+                />
+                <NewList query={query} />
+            </div>
+        );
+    }
+    ```
+8. `startTransition`
+    ```js
+    // react/src/ReactStartTransition.js -> startTransition
+    export function startTransition(scope) {
+        const prevTransition = ReactCurrentBatchConfig.transition;
+        /* 通过设置状态 */
+        ReactCurrentBatchConfig.transition = 1;
+        try {
+            /* 执行更新 */
+            scope();
+        } finally {
+            /* 恢复状态 */
+            ReactCurrentBatchConfig.transition = prevTransition;
+        }
+    }
+    ```
+9. `useTranstion`
+    ```js
+    // react-reconciler/src/ReactFiberHooks.new.js -> useTranstion
+    function mountTransition() {
+        const [isPending, setPending] = mountState(false);
+        const start = (callback) => {
+            setPending(true);
+            const prevTransition = ReactCurrentBatchConfig.transition;
+            ReactCurrentBatchConfig.transition = 1;
+            try {
+                setPending(false);
+                callback();
+            } finally {
+                ReactCurrentBatchConfig.transition = prevTransition;
+            }
+        };
+        return [isPending, start];
+    }
+    ```
+10. `useDeferredValue`
+    ```js
+    // react-reconciler/src/ReactFiberHooks.new.js -> useTranstion
+    function updateDeferredValue(value) {
+        const [prevValue, setValue] = updateState(value);
+        updateEffect(() => {
+            const prevTransition = ReactCurrentBatchConfig.transition;
+            ReactCurrentBatchConfig.transition = 1;
+            try {
+                setValue(value);
+            } finally {
+                ReactCurrentBatchConfig.transition = prevTransition;
+            }
+        }, [value]);
+        return prevValue;
+    }
+    ```
+11.
