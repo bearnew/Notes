@@ -4210,4 +4210,106 @@ export default Index;
     }
     ```
 
+## 31.Context 原理
+
+1. `Provider` 传递流程：`Provider` 的更新，会深度遍历子代 `fiber`，消费 `context` 的 `fiber` 和父级链都会提升更新优先级。 对于类组件的 `fiber` ，会 `forceUpdate` 处理。接下来所有消费的 `fiber`，都会 `beginWork` 。
+2. `context` 订阅流程： `contextType` ， `useContext`，`Consumer` 会内部调用 `readContext` ，`readContext` 会把 `fiber` 上的 `dependencies` 属性和 `context` 对象建立起关联。
+
+## 32.beginWork 和 render
+
+1. 组件更新需要
+    - 组件本身改变 `state` 。函数 `useState` | `useReducer` ，类组件 `setState` | `forceUpdate`。
+    - `props` 改变，由组件更新带来的子组件的更新。
+    - `context`更新，并且该组件消费了当前 `context` 。
+2. 更新过程
+    - 更新类组件用的是 `updateClassComponent`，它做的事情是初始化时候实例化类组件，更新的话那么直接调用 `render` 得到新的 `children` ；
+    - 更新函数组件用的是 `updateFunctionComponent`，里面调用 `renderWithHooks` 执行函数组件并依次调用 `hooks`。这里细节问题不需要拘泥。
+    - `fiber`是调和过程中的最小单元，每一个需要调和的 `fiber` 都会进入 `workLoop` 中。
+    - 而组件是最小的更新单元，`React` 的更新源于数据层 `state` 的变化。
+3. 任务的优先级
+    - 在 `v16` 版本，任务的优先级用 `expirationTime` 表示
+    - 在 `v17` 版本被 `lane` 取缔。
+4. 从 `state` 改变到 `scheduleUpdateOnFiber`
+    - 创建一个任务优先级 `lane`。
+    - 然后进行 `scheduleUpdateOnFiber`。 那么这个 `scheduleUpdateOnFiber` 应该就是整个 `React` 更新任务的开始。那么这个函数到底做了些什么呢 ？
+    - 类组件 `setState` 更新
+    ```js
+    // react-reconciler/src/ReactFiberClassComponent.new.js -> classComponentUpdater
+    enqueueSetState(inst, payload, callback){
+        const fiber = getInstance(inst);
+        const lane = requestUpdateLane(fiber);
+        scheduleUpdateOnFiber(fiber, lane, eventTime);
+    }
+    ```
+    - 函数组件 `useState` 更新
+    ```js
+    // react-reconciler/src/ReactFiberHooks.new.js -> dispatchReducerAction
+    function dispatchReducerAction(fiber, queue, action) {
+        const lane = requestUpdateLane(fiber);
+        scheduleUpdateOnFiber(fiber, lane, eventTime);
+    }
+    ```
+5. `scheduleUpdateOnFiber `
+    - 第一个就是通过当前的更新优先级 lane ，把当前 fiber 到 rootFiber 的父级链表上的所有优先级都给更新了。
+    - 如果当前 fiber 确定更新，那么会调用 ensureRootIsScheduled ，
+    ```js
+    // react-reconciler/src/ReactFiberWorkLoop.new.js -> scheduleUpdateOnFiber
+    function scheduleUpdateOnFiber(fiber, lane) {
+        /* 递归向上标记更新优先级 */
+        const root = markUpdateLaneFromFiberToRoot(fiber, lane);
+        if (root === null) return null;
+        /* 如果当前 root 确定更新，那么会执行 ensureRootIsScheduled */
+        ensureRootIsScheduled(root, eventTime);
+    }
+    ```
+6. `markUpdateLaneFromFiberToRoot` 如何标记的优先级
+    - 首先会更新当前 `fiber` 上的更新优先级。在 `fiber` 章节我们讲过，`fiber` 架构采用 ‘连体婴’形式的双缓冲树，所有还要更新当前 `fiber` 的缓冲树 `alternate` 上的优先级。
+    - 然后会递归向上把父级连上的 `childLanes` 都更新，更新成当前的任务优先级。
+    ```js
+    // react-reconciler/src/ReactFiberWorkLoop.new.js -> markUpdateLaneFromFiberToRoot
+    /**
+     * @param {*} sourceFiber 发生 state 变化的fiber ，比如组件 A 触发了 useState ，那么组件 A 对应的 fiber 就是 sourceFiber
+     * @param {*} lane        产生的更新优先级
+     */
+    function markUpdateLaneFromFiberToRoot(sourceFiber, lane) {
+        /* 更新当前 fiber 上 */
+        sourceFiber.lanes = mergeLanes(sourceFiber.lanes, lane);
+        /* 更新缓存树上的 lanes */
+        let alternate = sourceFiber.alternate;
+        if (alternate !== null)
+            alternate.lanes = mergeLanes(alternate.lanes, lane);
+        /* 当前更新的 fiber */
+        let node = sourceFiber;
+        /* 找到返回父级 */
+        let parent = sourceFiber.return;
+        while (parent !== null) {
+            /* TODO: 更新 childLanes 字段 */
+            parent.childLanes = mergeLanes(parent.childLanes, lane);
+            if (alternate !== null) {
+                alternate.childLanes = mergeLanes(alternate.childLanes, lane);
+            }
+            /* 递归遍历更新 */
+            node = parent;
+            parent = parent.return;
+        }
+    }
+    ```
+7. 具体更新流程
+    - 首先通过 `fiber` 章节我们知道，所有的 `fiber` 是通过一颗 `fiber` 树关联到一起的，如果组件 `A` 发生一次更新，`React` 是从 `root` 开始深度遍历更新 `fiber` 树。
+    - 那么更新过程中需要深度遍历整个 `fiber` 树吗？，当然也不是，那么只有一个组件更新，所有的 `fiber` 节点都调和无疑是性能上的浪费。
+    - 既然要从头更新，又不想调和整个 `fiber` 树，那么如何找到更新的组件 `A `呢？这个时候 `childLanes` 就派上用场了，如果 `A` 发生了更新，那么先向上递归更新父级链的 `childLanes`，接下来从 `Root Fiber` 向下调和的时候，发现 `childLanes` 等于当前更新优先级，那么说明它的 `child` 链上有新的更新任务，则会继续向下调和，反之退出调和流程。
+8. 当 `Concurrent` 模式下会通过 `shouldYield` ，来判断有没有过期的任务，有过期任务，会中断` workLoop` ，那么也就是说明了`render`阶段是可以被打断的。
+    ```js
+    while (workInProgress !== null && !shouldYield()) {
+        performUnitOfWork(workInProgress);
+    }
+    ```
+9. 场景一：更新 `A` 组件 `state`，那么 `A` 触发更新，那么如果 `B`,`C` 没有做渲染控制处理（比如 `memo` `PureComponent`），那么更新会波动到 `B` ， `C`，那么 `A`，`B`，`C` 都会 `rerender`。
+    - ![20230409002954-2023-04-09](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230409002954-2023-04-09.png)
+10. 场景二：当更新 `B` 组件，那么组件 `A fiber` 会被标记，然后 `A` 会调和，但是不会 `rerender`；组件 `B` 是当事人，既会进入调和，也会 `rerender`；组件 `C` 受到父组件 `B` 的影响，会 `rerender`。
+    - ![20230409003143-2023-04-09](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230409003143-2023-04-09.png)
+11. 当更新 `C`组件，那么 `A，B` 会进入调和流程，但是不会 `rerender，C` 是当事人，会调和并 `rerender`
+    - ![20230409003230-2023-04-09](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230409003230-2023-04-09.png)
+12. `beginWork`流程图
+    - ![20230409003747-2023-04-09](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230409003747-2023-04-09.png)
 13.
