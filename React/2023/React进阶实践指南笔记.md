@@ -4504,4 +4504,79 @@ const handleChange = () => {
         return prevValue;
     }
     ```
-11.
+
+## 36.V18 特性-concurrent 下的 state 更新流程
+
+1. 模拟批量处理任务
+
+```html
+<body>
+    <button onclick="handleClick()">点击</button>
+</body>
+<script>
+    let batchEventUpdate = false;
+    let callbackQueue = [];
+
+    function flushSyncCallbackQueue() {
+        console.log("-----执行批量更新-------");
+        while (callbackQueue.length > 0) {
+            const cur = callbackQueue.shift();
+            cur();
+        }
+        console.log("-----批量更新结束-------");
+    }
+
+    function wrapEvent(fn) {
+        return function () {
+            /* 开启批量更新状态 */
+            batchEventUpdate = true;
+            fn();
+            /* 立即执行更新任务 */
+            flushSyncCallbackQueue();
+            /* 关闭批量更新状态 */
+            batchEventUpdate = false;
+        };
+    }
+
+    function setState(fn) {
+        /* 如果在批量更新状态下，那么批量更新 */
+        if (batchEventUpdate) {
+            callbackQueue.push(fn);
+        } else {
+            /* 如果没有在批量更新条件下，那么直接更新。 */
+            fn();
+        }
+    }
+
+    function handleClick() {
+        setState(() => {
+            console.log("---更新1---");
+        });
+        console.log("上下文执行");
+        setState(() => {
+            console.log("---更新2---");
+        });
+    }
+    /* 让 handleClick 变成可控的  */
+    handleClick = wrapEvent(handleClick);
+</script>
+```
+
+2. 更新流程
+    - v17 legacy 下更新，同步环境渲染 1 次，异步环境渲染 2 次
+    - v18 concurrent 下，同步环境和异步环境都只渲染 1 次
+3. `concurrent`调度流程
+    ```js
+    // react-reconciler/src/ReactFiberHostConfig.js -> scheduleMicrotask
+    var scheduleMicrotask =
+        typeof queueMicrotask === "function"
+            ? queueMicrotask
+            : typeof Promise !== "undefined"
+            ? function (callback) {
+                  return Promise.resolve(null)
+                      .then(callback)
+                      .catch(handleErrorInNextTick);
+              }
+            : scheduleTimeout;
+    ```
+4.
