@@ -18,7 +18,7 @@ console.log(...fruits) // apple banana pear
 function breakfast(dessert, drink, ...foods) {
     console.log(dessert, drink, foods)
 }
-breakfase('apple', 'banana','pear','peach');
+breakfast('apple', 'banana','pear','peach');
 ```
 
 #### Object.is判断两个值是否相等
