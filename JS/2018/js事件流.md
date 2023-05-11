@@ -11,6 +11,23 @@
         passive
     }, useCapture)
     ```
+    ```js
+    // 是否支持passive
+    let passiveSupported = false;
+    if (process.env.BROWSER) {
+        try {
+            const options = Object.defineProperty({}, 'passive', {
+                // eslint-disable-next-line getter-return
+                get: function get() {
+                    passiveSupported = true;
+                }
+            });
+            // @ts-ignore
+            window.addEventListener('passivesupport', null, options);
+            // eslint-disable-next-line no-empty
+        } catch (err) {}
+    }
+    ```
 2. 先进行事件捕获，再进行事件冒泡
 3. 同一目标，既有捕获事件，又有冒泡事件，按事件注册顺序执行
 ```html
