@@ -6,8 +6,27 @@
     EventTarget.addEventListener(type, {
         capture, // 是否在捕获阶段触发事件
         once, // 是否只调用1次
-        passive // 是否不调用preventDefault
+        // 浏览器滚动时，会有一个短暂的停留来延迟检测是否要preventDefault,导致滑动卡顿
+        // passive设置为ture，告诉浏览器是不调用preventDefault的，从而忽略检测
+        passive
     }, useCapture)
+    ```
+    ```js
+    // 是否支持passive
+    let passiveSupported = false;
+    if (process.env.BROWSER) {
+        try {
+            const options = Object.defineProperty({}, 'passive', {
+                // eslint-disable-next-line getter-return
+                get: function get() {
+                    passiveSupported = true;
+                }
+            });
+            // @ts-ignore
+            window.addEventListener('passivesupport', null, options);
+            // eslint-disable-next-line no-empty
+        } catch (err) {}
+    }
     ```
 2. 先进行事件捕获，再进行事件冒泡
 3. 同一目标，既有捕获事件，又有冒泡事件，按事件注册顺序执行

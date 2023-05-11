@@ -4580,3 +4580,54 @@ const handleChange = () => {
             : scheduleTimeout;
     ```
 4.
+## 40.keep alive组件
+```js
+// 激活状态，通过load方法更新
+const load = (currentNode) => {
+    parentNode.current.appendChild(currentNode)
+}
+
+/* 通过 parentNode 接收回传过来的 dom 状态。 */
+return <div ref={parentNode} style={style}/>
+```
+```js
+const keepChange = (pre, next) => pre.status === next.status && pre.updater === next.updater
+const beforeScopeDestroy = {}
+
+const ScopeItem = memo(function ({ cacheId, updater, children, status, dispatch, load = () => { } }) {
+    const currentDOM = useRef()
+    const renderChildren = status === ACTION_ACTIVE || status === ACTION_ACTIVED || status === ACITON_UNACTIVE || status === ACTION_UNACTIVED ? children : () => null
+    /* 通过 ReactDOM.createPortal 渲染组件，产生 dom 树结构 */
+    const element = ReactDOM.createPortal(
+        <div ref={currentDOM} style={{ display: status === ACTION_UNACTIVED ? 'none' : 'block' }} >
+            {/* 当 updater 对象变化的时候，重新执行函数，更新组件。 */}
+            {   useMemo(() => renderChildren(), [updater])  }
+        </div>,
+        document.body
+    )
+    /* 防止 Scope 销毁，找不到对应的 dom 而引发的报错 */
+    useEffect(() => {
+        beforeScopeDestroy[cacheId] = function () {
+            if (currentDOM.current) document.body.appendChild(currentDOM.current)
+        }
+        return function () {
+            delete beforeScopeDestroy[cacheId]
+        }
+    }, [])
+    useEffect(() => {
+        if (status === ACTION_ACTIVE) {
+            /* 如果已经激活了，那么回传 dom  */
+            load && load(currentDOM.current)
+        } else if (status === ACITON_UNACTIVE) {
+            /* 如果处于休眠状态，那么把 dom 元素重新挂载到 body 上 */
+            document.body.appendChild(currentDOM.current)
+            /* 然后下发指令，把状态变成休眠完成 */
+            dispatch({
+                type: ACTION_UNACTIVED,
+                payload: cacheId
+            })
+        }
+    }, [status])
+    return element
+}, keepChange)
+```
