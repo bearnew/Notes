@@ -173,6 +173,7 @@ exports.default = 1;
 const puppeteer = require("puppeteer");
 
 (async () => {
+  // __dirname当前脚本所在目录的绝对路径
   const testPath = `file: //${__dirname}/index.html`;
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
