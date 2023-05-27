@@ -1,58 +1,22 @@
-var s = "ADOBECODEBANC";
-var t = "ABC";
-
-console.log(minWindow(s, t));
-
-function minWindow(s, t) {
-    var winFreq = {};
-    var tFreq = {};
-    var left = 0;
-    var right = 0;
-    var begin = 0;
-    var minLen = s.length + 1;
-    var distance = 0;
-
-    for (var str of t) {
-        if (!tFreq[str]) {
-            tFreq[str] = 1;
-        } else {
-            tFreq[str] += 1;
-        }
-        winFreq[str] = 0;
+const removeDuplicates = function (nums) {
+    const len = nums.length;
+    const maxDuplicateLen = 2; // 最多允许的重复次数
+    if (len <= maxDuplicateLen) {
+        return len;
     }
 
-    while (right < s.length) {
-        if (tFreq[s[right]] === 0) {
-            right++;
+    let slow = maxDuplicateLen - 1; // 慢指针
+    let fast = maxDuplicateLen; // 快指针
+
+    while (fast < len) {
+        if (nums[slow - (maxDuplicateLen - 1)] !== nums[fast]) {
+            nums[slow + 1] = nums[fast];
+            slow++;
+            fast++;
         } else {
-            if (winFreq[s[right]] < tFreq[s[right]]) {
-                distance++;
-            }
-            winFreq[s[right]]++;
-            right++;
-            while (distance === t.length) {
-                if (right === t.length) {
-                    if (right - left < minLen) {
-                        minLen = right - left;
-                        begin = left;
-                    }
-                    if (winFreq[s[left]] === 0) {
-                        left++;
-                    } else {
-                        if (winFreq[s[left]] === tFreq[s[left]]) {
-                            distance--;
-                        }
-                        winFreq[s[left]]--;
-                        left++;
-                    }
-                }
-            }
+            fast++;
         }
     }
 
-    if (minLen > s.length) {
-        return "";
-    } else {
-        return s.slice(begin, begin + minLen);
-    }
-}
+    return slow + 1;
+};
