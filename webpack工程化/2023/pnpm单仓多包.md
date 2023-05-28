@@ -53,14 +53,16 @@ npx changeset version
 1. 软链接`soft link`文件存放的是路径名的指向
 - 硬盘存储有1个inode号，唯一标识，软链的inode号不同
 - `ls -i`查看`inode`号，软链的`inode`号是不同
+- 解决幽灵依赖问题，项目中引用幽灵依赖，如果package.json中的主包移除，会报错
 - 本地包调试开发
 - `npm link`也是软链
 ```js
 ll node_modules/@myPackage
 ```
 2. 硬链`symbolic link`
-- 硬盘存储有1个inode号，唯一标识，硬链的inode号相同，修改内容影响全局
+- 硬盘存储有1个inode号，唯一标识，存储文件在磁盘中的信息，硬链的inode号相同，修改内容影响全局
 - 性能比软链更好，软链需要解析路径，硬链直接指向物理地址
+- 直接依赖使用软链，子依赖使用硬链，子依赖是变化的，硬链避免相互之间影响
 - 稳定性比软链更好，源文件被删除，软链失效，硬链删除了其中1个文件，其他文件依然有效
 - 
 - `stat -s node_modules/.pnpm/react@16.14.0`查看`st_nlink=3`
