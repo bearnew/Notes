@@ -61,3 +61,8 @@
     |-PackageA
     |-PackageB
 ```
+```js
+"peerDependencies": {
+    "react": ">=16.0.0"
+}
+```
