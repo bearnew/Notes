@@ -39,6 +39,7 @@
 4. `npm7.0+`版本的才会自动安装`peerDependencies`
 5. `npm7`之前的版本自动安装`peerDependencies`
     1. `npx npm-install-peers`，会自动安装项目`my-project`中的`peerDependencies`
+        - 在`npm`包的根目录执行，会将`npm`包的`peerDependencies`全部重新装到`npm`包的`node_modules`下
     2. `npx install-peerdeps <packageA>`，会安装`packageA`中的所有`peerDependencies`
 6. 将自动安装得`peerDependencies`的命令放到`npm install`的生命周期中即可
     - `preinstall`：在安装依赖项之前执行的脚本。
