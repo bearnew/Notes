@@ -8,7 +8,7 @@ brew install ntfs-3g-mac
 
 sudo diskutil unmount /dev/disk2s1
 
-sudo /usr/local/Cellar/ntfs-3g-mac/2022.5.17/bin/ntfs-3g /dev/disk2s1 /Volumes/TOSHIBA -olocal -oallow_other -o auto_xattr
+    sudo /usr/local/Cellar/ntfs-3g-mac/2022.10.3/bin/ntfs-3g /dev/disk2s1 /Volumes/TOSHIBA -olocal -oallow_other -o auto_xattr
 ```
 # mac 移动硬盘
 
