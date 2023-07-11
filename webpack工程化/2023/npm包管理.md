@@ -1,4 +1,9 @@
 # npm 包实战总结
+## 0.总结
+- 最佳实践：将项目必须依赖放入peerDependencies，非必要依赖使用尽可能小的版本放入dependencies中
+- `peerDependencies` 主要解决的问题
+    - 安装的npm包版本不一致，让开发者自己决定版本
+    - 通过`externals`排除在打包库文件之外的依赖，`peerDependencies`告诉用户，你使用我的库，还需要具备 `vue、react、angular` 等环境
 
 ## 1.包版本号
 
