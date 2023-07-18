@@ -18,3 +18,11 @@ process.cwd()： C:\Users\Dylanliu\Desktop
 - __filename：    被执行js的绝对路径
 - process.cwd()： 执行node命令的绝对文件夹绝对路径
 - ./:             和 process.cwd() 一样
+
+# 示例2
+```js
+  
+process.cwd(); // /build/repository
+__dirname; // /data/faas/runtime/node16/build/repository
+__filenam; // /data/faas/runtime/node16/build/repository/bundle.js
+```
