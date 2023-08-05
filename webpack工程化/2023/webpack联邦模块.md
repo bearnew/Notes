@@ -50,3 +50,16 @@ module.exports = [
 
 1. 使用 版本号完全相同 的依赖才能被复用
 2. `lodash`添加`shared`后，并且版本号相同，则只会使用宿主页面的`lodash`，版本号不同则对加载多份
+3. 版本号不同，但是如果设置了单例模式，也只会加载 1 份
+
+```js
+shared: {
+  lodash: {
+    requiredVersion: "^4.17.0",
+    // version: "4.17.20",
+    singleton: true,
+    // shareKey: "single",
+    strictVersion: false,
+  },
+},
+```
