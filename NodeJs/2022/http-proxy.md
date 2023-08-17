@@ -1,5 +1,31 @@
 # http-proxy
 
+## 代理概念
+
+###### 1.正向代理
+
+1. 案例：用户 A 通过代理服务器 Z 去访问服务器 B
+2. 场景：
+   - 绕开问题链路: 用户 A 到服务 B 的路由链路出现问题
+   - 加速访问: 用户 A 到代理 Z，代理 Z 到服务 B，都是高宽带链路，访问更快
+   - Cache: 在代理服务 Z 中做 Cache
+   - 隐藏用户 A 的行踪：服务 B 并不知道是用户 A 在访问
+
+###### 2.反向代理
+
+1. 案例：用户 A 不知道经过了代理服务器 Z，用户 A 认为是直接访问的服务 B，反向代理是一种部署方式
+2. 场景：
+   - 负载均衡：代理服务器去分发流量，如 NGINX 服务器
+   - Cache：CDN 核心技术就是反向代理
+   - 绕过跨域
+
+###### 3.透明代理
+
+1. 案例：用户 A 访问服务器，透明代理设备会拦截修改用户 A 的报文
+2. 场景：公司行为管理透明代理
+
+## 代理代码
+
 1. 正向代理
 
 ```js
@@ -18,21 +44,21 @@ var httpProxy = require("http-proxy");
 let proxy = httpProxy.createProxyServer();
 
 let server = http.createServer((req, res) => {
-    proxy.web(req, res, {
-        target: "http://localhost:8000",
-    });
+  proxy.web(req, res, {
+    target: "http://localhost:8000",
+  });
 });
 
 server.listen(3000);
 // server启动成功
 server.on("listening", () => {
-    console.log("http启动完成");
+  console.log("http启动完成");
 });
 
 // 关闭HTTP服务器
 
 server.on("close", () => {
-    console.log("服务器关闭");
+  console.log("服务器关闭");
 });
 ```
 
@@ -41,20 +67,20 @@ server.on("close", () => {
 let http = require("http");
 
 let server = http.createServer((req, res) => {
-    res.write("this is port 8000");
-    res.end();
+  res.write("this is port 8000");
+  res.end();
 });
 
 server.listen(8000);
 
 // server启动成功
 server.on("listening", () => {
-    console.log("http启动完成");
+  console.log("http启动完成");
 });
 
 // 关闭HTTP服务器
 server.on("close", () => {
-    console.log("服务器关闭");
+  console.log("服务器关闭");
 });
 
 // 配置host文件 把www.test.com www.demo.com配置为本地
@@ -76,30 +102,30 @@ let httpProxy = require("http-proxy");
 let http = require("http");
 // 这是我们配置的域名，我们可以访问这些域名，拿到对应的结果
 let hosts = {
-    "m.hutaojie.com": "http://localhost:5000",
+  "m.hutaojie.com": "http://localhost:5000",
 };
 
 // 创建代理服务器
 let proxy = httpProxy.createProxyServer();
 
 let server = http.createServer((req, res) => {
-    // 拿到host 访问对应的服务器
-    let host = req.headers["host"].split(":")[0];
-    proxy.web(req, res, {
-        target: hosts[host],
-        changeOrigin: true,
-    });
+  // 拿到host 访问对应的服务器
+  let host = req.headers["host"].split(":")[0];
+  proxy.web(req, res, {
+    target: hosts[host],
+    changeOrigin: true,
+  });
 });
 
 server.listen(3000);
 // server启动成功
 server.on("listening", () => {
-    console.log("http启动完成");
+  console.log("http启动完成");
 });
 
 // 关闭HTTP服务器
 server.on("close", () => {
-    console.log("服务器关闭");
+  console.log("服务器关闭");
 });
 ```
 
@@ -110,21 +136,21 @@ server.on("close", () => {
 let http = require("http");
 
 let server = http.createServer((req, res) => {
-    console.log(req.url);
-    res.write("this is port 5000");
-    res.end();
+  console.log(req.url);
+  res.write("this is port 5000");
+  res.end();
 });
 
 server.listen(5000);
 
 // server启动成功
 server.on("listening", () => {
-    console.log("http启动完成");
+  console.log("http启动完成");
 });
 
 // 关闭HTTP服务
 server.on("close", () => {
-    console.log("服务器关闭");
+  console.log("服务器关闭");
 });
 
 // 启动8000.js的服务
