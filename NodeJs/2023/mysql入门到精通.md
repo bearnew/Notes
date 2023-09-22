@@ -1,5 +1,7 @@
 # mysql 入门到精通
 
+> https://www.sjkjc.com/mysql/int/
+
 ## 一、数据库概念
 
 1. sql 语句为所有的关系型数据库提供统一的标准
