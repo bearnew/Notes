@@ -51,7 +51,7 @@
 
 9. 绑定变量就是在 SQL 语句中使用变量，通过不同的变量取值来改变 SQL 的执行结果。这样做的好处是能提升软解析的可能性，不足之处在于可能会导致生成的执行计划不够优化
 
-```sql
+```sql{.line-numbers}
 -- 普通用法
 select * from player where player_id = 10001;
 ```
