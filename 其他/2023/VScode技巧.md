@@ -55,3 +55,72 @@ function Graph() {
   ];
 }
 ```
+
+8. 标记
+
+- ==marked==
+
+9. 上标
+
+- 30^th^
+
+10. 下标
+
+- H~2~O
+
+11. 脚注
+
+- Content [^1]
+- [^1]: Hi! This is a footnote
+
+12. 缩略（去掉\）
+
+- \*[HTML]: Hyper Text Markup Language
+- \*[W3C]: World Wide Web Consortium
+- The HTML specification
+- is maintained by the W3C.
+
+13. 表格合并
+
+- 在`settings.json`中设置`"markdown-preview-enhanced.enableExtendedTableSyntax": true`
+
+  | 1   | 2   |
+  | --- | --- |
+  | >   | 1   |
+  | 2   | 5   |
+  | 3   | ^   |
+
+14. 打开``渲染数学表达式
+
+- $...$ 或者 \(...\) 中的数学表达式将会在行内显示。
+- $$...$$ 或者 \[...\] 或者 ```math 中的数学表达式将会在块内显示。
+- $f(x) = sin(x) + 12$
+- $$\sum_{n=1}^{100} n$$
+
+15. 图像
+
+- https://shd101wyy.github.io/markdown-preview-enhanced/#/zh-cn/diagrams
+- @import "你得文件"
+
+16. Code Chunk(支持代码的运行结果)
+
+- ` "markdown-preview-enhanced.enableScriptExecution"`开启执行
+
+```bash {cmd=true}
+ls .
+```
+
+```javascript {cmd="node"}
+const date = Date.now();
+console.log(date.toString());
+```
+
+```gnuplot {cmd=true output="html"}
+set terminal svg
+set title "Simple Plots" font ",20"
+set key left box
+set samples 50
+set style data points
+
+plot [-10:10] sin(x),atan(x),cos(atan(x))
+```
