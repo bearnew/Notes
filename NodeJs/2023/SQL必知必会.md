@@ -77,3 +77,84 @@ select * from player where player_id = :player_id;
     5. Archive 存储引擎：它有很好的压缩机制，用于文件归档，在请求写入时会进行压缩，所以也经常用来做仓库。
 
 ## 2.DDL 语法
+
+1. 增删改分别对应`CREATE DROP ALTER`
+
+```sql
+CREATE DATABASE nba; // 创建一个名为 nba 的数据库
+DROP DATABASE nba; // 删除一个名为 nba 的数据库
+```
+
+2. 数据类型中 int(11) 代表整数类型，显示长度为 11 位，括号中的参数 11 代表的是最大有效显示长度，与类型包含的数值范围大小无关
+3. varchar(255)代表的是最大长度为 255 的可变字符串类型。NOT NULL 表明整个字段不能是空值，是一种数据约束。AUTO_INCREMENT 代表主键自动增长。
+
+```sql
+CREATE TABLE player (
+ player_id int(11) NOT NULL AUTO_INCREMENT,
+ player_name varchar(255) NOT NULL
+);
+
+```
+
+```sql
+DROP TABLE IF EXISTS `player`;
+CREATE TABLE `player` (
+ `player_id` int(11) NOT NULL AUTO_INCREMENT,
+ `team_id` int(11) NOT NULL,
+ `player_name` varchar(255) CHARACTER SET utf8 COLLATE
+ `height` float(3, 2) NULL DEFAULT 0.00,
+ PRIMARY KEY (`player_id`) USING BTREE,
+ UNIQUE INDEX `player_name`(`player_name`) USING BTREE
+-- 其中 player_name 字段的字符集是 utf8，排序规则是utf8_general_ci，代表对大小写不敏感，如果设置为utf8_bin，代表对大小写敏感
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_g
+```
+
+4. 修改表结构-添加字段
+
+```sql
+ALTER TABLE player ADD (age int(11));
+```
+
+5. 修改字段名
+
+```sql
+ALTER TABLE player RENAME COLUMN age to player_age
+```
+
+```sql
+ALTER TABLE player MODIFY (player_age float(3,1));
+```
+
+6. 删除字段
+
+```sql
+ALTER TABLE player DROP COLUMN player_age;
+```
+
+7. 主键约束
+   - 主键起的作用是唯一标识一条记录，不能重复，不能为空，即 UNIQUE+NOT NULL
+   - 一个数据表的主键只能有一个，主键可以是一个字段，也可以由多个字段复合组成
+8. 外键约束
+   - 外键确保了表与表之间引用的完整性
+   - 一个表中的外键对应另一张表的主键
+   - 外键可以是重复的，也可以为空。比如 player_id 在 player 表中是主键，如果你想设置一个球员比分表即 player_score，就可以在 player_score 中设置 player_id 为外键，关联到 player 表中。
+9. 唯一性约束。
+   - 已经有了主键，还可以对其他字段进行唯一性约束
+   - 在 player 表中给 player_name 设置唯一性约束，就表明任何两个球员的姓名不能相同
+   - 唯一性约束相当于创建了一个约束和普通索引，目的是保证字段的正确性，而普通索引只是提升数据检索的速度，并不对字段的唯一性进行约束。
+10. NOT NULL 约束。
+
+    - 对字段定义了 NOT NULL，即表明该字段不应为空，必须有取值。
+
+11. DEFAULT，表明了字段的默认值
+12. CHECK 约束，用来检查特定字段取值范围的有效性，
+
+```sql
+CHECK(height>=0 AND height<3)。
+```
+
+13. 表的设计原则
+    1. 数据表的个数越少越好
+    2. 数据表中字段个数越少越好
+    3. 联合主键字段个数越少越好
+    4. 使用主键和外键越多越好
