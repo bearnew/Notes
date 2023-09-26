@@ -1,0 +1,160 @@
+# SQL 必知必会
+
+[TOC]
+
+## 1.了解 SQL
+
+1. `SQL`语言分为 4 部分
+
+   - `DDL`，英文叫做 `Data Definition Language`，也就是数据定义语言，它用来定义我们的数据库对象，包括数据库、数据表和列。通过使用 `DDL`，我们可以创建，删除和修改数据库和表结构。
+   - `DML`，英文叫做 `Data Manipulation Language`，数据操作语言，我们用它操作和数据
+     库相关的记录，比如增加、删除、修改数据表中的记录。
+   - `DCL`，英文叫做 `Data Control Language`，数据控制语言，我们用它来定义访问权限和
+     安全级别。
+   - `DQL`，英文叫做 `Data Query Language`，数据查询语言，我们用它查询想要的记录，它
+     是 SQL 语言的重中之重。在实际的业务中，我们绝大多数情况下都是在和查询打交道，
+     因此学会编写正确且高效的查询语句，是学习的重点。
+
+2. 常用的`DBMS`
+   - Mysql: 关系型(Relational)
+   - Microsoft SQL Server: 关系型
+   - MongoDB: 文档型(Document)
+   - Elasticsearch: 搜索引擎(Search Engine)
+   - Redis: 键值型(Key-Value)
+   - SQLite: 关系型(Relational)
+   - Hive: 关系型
+   - HBase: 列存储(Wide Column)
+3. 键值型数据库
+   - 查找速度快
+   - 无法根据条件过滤
+4. 文档型数据库
+
+   - 管理文档，一个文档相当于一条记录<!-- pagebreak -->
+
+5. 搜索引擎
+   - 全文搜索的技术，核心原理是“倒排索引”
+6. 列式数据库
+   - Oracle、MySQL、SQL Server 等数据库都是采用的行式存储（Row-based）
+   - 列式数据库是将数据按照列存储到数据库中，可以大量降低系统的 I/O，适合于分布式文件系统
+   - 功能相对有限。
+7. 图形数据库
+   - 利用了图这种数据结构存储了实体（对象）之间的关系。最典型的例子就是社交网络中人与人的关系，数据模型主要是以节点和边（关系）来实现，特点在于能高效地解决复杂的关系问题。
+8. SQL 执行过程
+
+   - ![20230923012539-2023-09-23](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230923012539-2023-09-23.png)
+   - 语法检查：检查 SQL 拼写是否正确，如果不正确，`Oracle` 会报语法错误。
+   - 语义检查：检查 SQL 中的访问对象是否存在。比如我们在写 `SELECT` 语句的时候，列名写错了，系统就会提示错误。语法检查和语义检查的作用是保证 `SQL` 语句没有错误。
+   - 权限检查：看用户是否具备访问该数据的权限。
+   - 共享池检查：共享池（Shared Pool）是一块内存池，最主要的作用是缓存 SQL 语句和该语句的执行计划。Oracle 通过检查共享池是否存在 SQL 语句的执行计划，来判断进行软解析，还是硬解析。那软解析和硬解析又该怎么理解呢？在共享池中，Oracle 首先对 SQL 语句进行 Hash 运算，然后根据 Hash 值在库缓存（Library Cache）中查找，如果存在 SQL 语句的执行计划，就直接拿来执行，直接进入“执行器”的环节，这就是软解析。如果没有找到 SQL 语句和执行计划，Oracle 就需要创建解析树进行解析，生成执行计划，进入“优化器”这个步骤，这就是硬解析。
+   - 优化器：优化器中就是要进行硬解析，也就是决定怎么做，比如创建解析树，生成执行计划。
+   - 执行器：当有了解析树和执行计划之后，就知道了 SQL 该怎么被执行，这样就可以在执行器中执行语句了。
+
+9. 绑定变量就是在 SQL 语句中使用变量，通过不同的变量取值来改变 SQL 的执行结果。这样做的好处是能提升软解析的可能性，不足之处在于可能会导致生成的执行计划不够优化
+
+```sql{.line-numbers}
+-- 普通用法
+select * from player where player_id = 10001;
+```
+
+```sql
+-- 绑定变量的用法
+-- 如果你在查询 player_id = 10001 之后，还会查询 10002、10003 之类的数据，那么每一次查询都会创建一个新的查询解析。而第二种方式使用了绑定变量，那么在第一次查询之后，在共享池中就会存在这类查询的执行计划，也就是软解析。
+
+select * from player where player_id = :player_id;
+```
+
+10. MySQL 流程
+    - ![20230923013729-2023-09-23](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20230923013729-2023-09-23.png)
+    - 连接层：客户端和服务器端建立连接，客户端发送 SQL 至服务器端；
+    - SQL 层：对 SQL 语句进行查询处理；
+    - 存储引擎层：与数据库文件打交道，负责数据的存储和读取。
+11. 与 Oracle 不同的是，MySQL 的存储引擎采用了插件的形式
+
+    1. InnoDB 存储引擎：它是 MySQL 5.5 版本之后默认的存储引擎，最大的特点是支持事务、行级锁定、外键约束等。
+    2. MyISAM 存储引擎：在 MySQL 5.5 版本之前是默认的存储引擎，不支持事务，也不支持外键，最大的特点是速度快，占用资源少。
+    3. Memory 存储引擎：使用系统内存作为存储介质，以便得到更快的响应速度。不过如果 mysqld 进程崩溃，则会导致所有的数据丢失，因此我们只有当数据是临时的情况下才使用 Memory 存储引擎。
+    4. NDB 存储引擎：也叫做 NDB Cluster 存储引擎，主要用于 MySQL Cluster 分布式集群环境，类似于 Oracle 的 RAC 集群
+    5. Archive 存储引擎：它有很好的压缩机制，用于文件归档，在请求写入时会进行压缩，所以也经常用来做仓库。
+
+## 2.DDL 语法
+
+1. 增删改分别对应`CREATE DROP ALTER`
+
+```sql
+CREATE DATABASE nba; // 创建一个名为 nba 的数据库
+DROP DATABASE nba; // 删除一个名为 nba 的数据库
+```
+
+2. 数据类型中 int(11) 代表整数类型，显示长度为 11 位，括号中的参数 11 代表的是最大有效显示长度，与类型包含的数值范围大小无关
+3. varchar(255)代表的是最大长度为 255 的可变字符串类型。NOT NULL 表明整个字段不能是空值，是一种数据约束。AUTO_INCREMENT 代表主键自动增长。
+
+```sql
+CREATE TABLE player (
+ player_id int(11) NOT NULL AUTO_INCREMENT,
+ player_name varchar(255) NOT NULL
+);
+
+```
+
+```sql
+DROP TABLE IF EXISTS `player`;
+CREATE TABLE `player` (
+ `player_id` int(11) NOT NULL AUTO_INCREMENT,
+ `team_id` int(11) NOT NULL,
+ `player_name` varchar(255) CHARACTER SET utf8 COLLATE
+ `height` float(3, 2) NULL DEFAULT 0.00,
+ PRIMARY KEY (`player_id`) USING BTREE,
+ UNIQUE INDEX `player_name`(`player_name`) USING BTREE
+-- 其中 player_name 字段的字符集是 utf8，排序规则是utf8_general_ci，代表对大小写不敏感，如果设置为utf8_bin，代表对大小写敏感
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_g
+```
+
+4. 修改表结构-添加字段
+
+```sql
+ALTER TABLE player ADD (age int(11));
+```
+
+5. 修改字段名
+
+```sql
+ALTER TABLE player RENAME COLUMN age to player_age
+```
+
+```sql
+ALTER TABLE player MODIFY (player_age float(3,1));
+```
+
+6. 删除字段
+
+```sql
+ALTER TABLE player DROP COLUMN player_age;
+```
+
+7. 主键约束
+   - 主键起的作用是唯一标识一条记录，不能重复，不能为空，即 UNIQUE+NOT NULL
+   - 一个数据表的主键只能有一个，主键可以是一个字段，也可以由多个字段复合组成
+8. 外键约束
+   - 外键确保了表与表之间引用的完整性
+   - 一个表中的外键对应另一张表的主键
+   - 外键可以是重复的，也可以为空。比如 player_id 在 player 表中是主键，如果你想设置一个球员比分表即 player_score，就可以在 player_score 中设置 player_id 为外键，关联到 player 表中。
+9. 唯一性约束。
+   - 已经有了主键，还可以对其他字段进行唯一性约束
+   - 在 player 表中给 player_name 设置唯一性约束，就表明任何两个球员的姓名不能相同
+   - 唯一性约束相当于创建了一个约束和普通索引，目的是保证字段的正确性，而普通索引只是提升数据检索的速度，并不对字段的唯一性进行约束。
+10. NOT NULL 约束。
+
+    - 对字段定义了 NOT NULL，即表明该字段不应为空，必须有取值。
+
+11. DEFAULT，表明了字段的默认值
+12. CHECK 约束，用来检查特定字段取值范围的有效性，
+
+```sql
+CHECK(height>=0 AND height<3)。
+```
+
+13. 表的设计原则
+    1. 数据表的个数越少越好
+    2. 数据表中字段个数越少越好
+    3. 联合主键字段个数越少越好
+    4. 使用主键和外键越多越好
