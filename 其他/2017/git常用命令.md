@@ -89,22 +89,22 @@ git config --global http.postBuffer 1048576000
 
 #### git subtree 用法
 
--   在项目中添加 web library 到 src/lib 目录：
+- 在项目中添加 web library 到 src/lib 目录：
 
 `git subtree add --prefix src/lib git@code.aliyun.com:yunduo/winged-library-web.git develop --squash`
 
--   在项目中拉取 web library 的更新到 src/lib 目录:
+- 在项目中拉取 web library 的更新到 src/lib 目录:
 
 `git subtree pull --prefix src/lib git@code.aliyun.com:yunduo/winged-library-web.git develop --squash`
 
--   在项目中将 web library 的更新推送到中央仓库:
+- 在项目中将 web library 的更新推送到中央仓库:
 
 `git subtree push --prefix src/lib git@code.aliyun.com:yunduo/winged-library-web.git develop --squash`
 
 #### git 本地识别大小写
 
--   `git config core.ignorecase false`
--   `git rm --cached src/components/book_b/Coupon/couponList -r`
+- `git config core.ignorecase false`
+- `git rm --cached src/components/book_b/Coupon/couponList -r`
 
 #### git 缓存
 
@@ -147,4 +147,36 @@ git reflog
 ```js
 // 修改commit message
 git commit --amend --only -m 'xxxxxxxx'
+```
+
+#### git stash 高阶
+
+```shell
+# 保存当前未commit的代码
+git stash
+
+# 保存当前未commit的代码并添加备注
+git stash save "备注的内容"
+
+# 列出stash的所有记录
+git stash list
+
+# 删除stash的所有记录
+git stash clear
+
+# 应用最近一次的stash
+git stash apply
+
+# 应用最近一次的stash，随后删除该记录
+git stash pop
+
+# 删除最近的一次stash
+git stash drop
+
+$ git stash list
+stash@{0}: WIP on ...
+stash@{1}: WIP on ...
+stash@{2}: On ...
+
+$ git stash apply stash@{1}
 ```
