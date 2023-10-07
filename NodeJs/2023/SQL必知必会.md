@@ -158,3 +158,98 @@ CHECK(height>=0 AND height<3)。
     2. 数据表中字段个数越少越好
     3. 联合主键字段个数越少越好
     4. 使用主键和外键越多越好
+
+## 3.select
+
+1. 查询
+
+```sql
+SELECT name FROM heros;
+SELECT name, hp_max, ma_max FROM heros;
+SELECT * FROM heros;
+SELECT name as n, hp_max AS hm FROM heros;
+-- 查询的列再增加1个Platfrom字段
+SELECT "王者荣耀" as platform, name FROM heros;
+```
+
+2. 去除重复行
+
+- `DISTINCT`需要放在所有列名的前面
+- `DISTINCT`对后面所有列名的组合去重
+
+```sql
+SELECT DISTINCT attack_range FROM heros;
+-- 会找出所有attack_range+name不重复的列
+SELECT DISTINCT attack_range, name FROM heros;
+```
+
+3. 排序检索
+
+- `ORDER BY`后面跟多个列名，会先按第一列排序，第一列值相同，再按第二列排序
+- `ASC`(默认)代表递增排序，`DESC`代表递减排序
+- 非选择的列同样可以放在`ORDER BY`后排序
+- `ORDER BY`需要放在`SELECT`的最后 1 条语句
+
+```sql
+SELECT name, hp_max FROM heros ORDER BY mp_max DESC;
+
+SELECT name, hp_max FROM (SELECT name, hp_max FROM heros ORDER BY hp_max) WHERE ROWNUM <= 5;
+```
+
+4. 关键字的执行顺序
+
+- `FROM` -> `WHERE` -> `GROUP BY` -> `HAVING` -> `SELECT的字段` -> `DISTINCT`
+
+5. `SELECT`语句执行时，每个步骤都会产生虚拟表，将虚拟表作为下一个步骤输入
+6. 比较运算符
+
+|         含义         | 运算符  |
+| :------------------: | :-----: |
+|         等于         |    =    |
+|        不等于        | <>或!=  |
+|         小于         |    <    |
+|   小于等于(大不于)   | <=或!>  |
+|         大于         |    >    |
+|   大于等于(不小于)   | >=或!<  |
+|        不小于        |   !<    |
+| 在指定的两个数值之间 | BETWEEN |
+|        为空值        | IS NULL |
+
+```sql
+SELECT name, hp_max FROM heros WHERE hp_max BETWEEN 5399 AND 6811;
+SELECT name, hp_max FROM heros WHERE hp_max IS NULL;
+```
+
+7. 逻辑运算符
+
+|       含义       | 逻辑运算符 |
+| :--------------: | :--------: |
+|       并且       |    AND     |
+|       或者       |     OR     |
+| 在指定条件范围内 |     IN     |
+|     非(否定)     |    NOT     |
+
+```sql
+SELECT name, role_main, role_assist, hp_max, mp_max
+FROM heros
+WHERE (role_main IN ('法师', '射手') OR role_assist IN ('法师', '射手'))
+AND DATE(birthdate) NOT BETWEEN '2016-01-01' AND '2017-01-01'
+ORDER BY (hp_max + mp_max) DESC
+```
+
+8. 使用通配符
+
+- 使用`%`通配符匹配任意字符串出现的任意次数
+- `_`通配符值代表 1 个字符
+- 通配符会消耗数据库更长的时间，如果 LIKE 检索的字段进行了索引，则`LIKE`后面就不能以`%`开头，不如不能使用`LIKE '%太%'` 或`LIKE '%太'`会对全表扫描，使用`LIKE '太%'`同时检索的字段进行了索引，不会对全表扫描
+
+```sql
+SELECT name FROM heros WHERE name LIKE '% 太 %';
+
+-- 查找英雄名除第一个字以外，包含`太`的英雄
+SELECT name FROM heros WHERE name LIKE '_% 太 %';
+```
+
+-
+
+9.
