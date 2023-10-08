@@ -252,4 +252,126 @@ SELECT name FROM heros WHERE name LIKE '_% 太 %';
 
 -
 
-9.
+## 4.sql 函数
+
+1. 算术函数
+
+| 函数名  |                                定义                                |
+| :-----: | :----------------------------------------------------------------: |
+|  ABS()  |                              取绝对值                              |
+|  MOD()  |                                取余                                |
+| ROUND() | 四舍五入为指定的小数位数，需要有两个参数，分别为字段名称、小数位数 |
+
+```sql
+-- 2
+SELECT ABS(-2);
+-- 2
+SELECT MOD(101, 3);
+-- 37.3
+SELECT ROUND(37.25, 1);
+```
+
+2. 字符串函数
+
+|    函数名     |                                              定义                                               |
+| :-----------: | :---------------------------------------------------------------------------------------------: |
+|   CONCAT()    |                                       将多个字符拼接起来                                        |
+|   LENGTH()    |                  计算字段的长度，一个汉字算三个字符，一个数字或字母算一个字符                   |
+| CHAR_LENGTH() |                          计算字段的长度，汉字、数字、字母都算一个字符                           |
+|    LOWER()    |                                   将字符串中的字符转化为小写                                    |
+|    UPPER()    |                                   将字符串中的字符转化为大写                                    |
+|   REPLACE()   | 替换函数，有 3 个参数，分别为：要替换的表达式或字段名、想要查找的被替换字符串、替换成哪个字符串 |
+|  SUBSTRING()  |  截取字符串，有 3 个参数，分别为：待截取的表达式或字段名、开始截取的位置、想要截取的字符串长度  |
+
+```sql
+-- abc123
+SELECT CONCAT('abc', 123);
+-- 6
+SELECT LENGTH('你好');
+-- 2
+SELECT CHAR_LENGTH('你好');
+-- abc
+SELECT LOWER('ABC');
+-- ABC
+SELECT UPPER('abc');
+-- f123d
+SELECT REPLACE('fabcd', 'abc', 123);
+-- fab
+SELECT SUBSTRING('fabcd', 1,3);
+```
+
+3.日期函数
+
+|       函数名        |               定义                |
+| :-----------------: | :-------------------------------: |
+|   CURRENT_DATE()    |           系统当前日期            |
+|   CURRENT_TIME()    |   系统当前时间，没有具体的日期    |
+| CURRENT_TIMESTAMP() | 系统当前时间，包括具体的日期+时间 |
+|      EXTRACT()      |       抽取具体的年、月、日        |
+|       DATE()        |        返回时间的日期部分         |
+|       YEAR()        |        返回时间的年份部分         |
+|       MONTH()       |        返回时间的月份部分         |
+|        DAY()        |        返回时间的天数部分         |
+|       HOUR()        |        返回时间的小时部分         |
+|      MINUTE()       |        返回时间的分钟部分         |
+|      SECOND()       |         返回时间的秒部分          |
+
+```sql
+-- 运行结果为 2019-04-03。
+SELECT CURRENT_DATE()
+-- 运行结果为 21:26:34
+SELECT CURRENT_TIME()
+-- 运行结果为 2019-04-03 21:26:34
+SELECT CURRENT_TIMESTAMP()
+-- 运行结果为 2019
+SELECT EXTRACT(YEAR FROM '2019-04-03')
+-- 运行结果为 2019-04-01
+SELECT DATE('2019-04-01 12:00:05')
+```
+
+4. 转换函数
+
+|   函数名   |                                               定义                                                |
+| :--------: | :-----------------------------------------------------------------------------------------------: |
+|   CAST()   | 数据类型转换，参数是一个表达式，表达式通过 AS 关键词分割了 2 个参数，分别是原始数据和目标数据类型 |
+| COALESCE() |                                        返回第一个非空数值                                         |
+
+```sql
+-- 运行结果为 123.12。
+SELECT CAST(123.123 AS DECIMAL(8,2))
+-- 运行结果为 1
+SELECT COALESCE(null,1,2)
+```
+
+5. sql 函数实际应用
+
+```sql
+-- ROUND(attack_growth,1)中的attack_growth代表想要处理的数据，
+-- “1”代表四舍五入的位数，也就是我们这里需要精确到的位数。
+SELECT name, ROUND(attack_growth, 1) FROM heros;
+
+-- “最大生命值”对应的列数为hp_max
+-- 运行结果为 9328
+SELECT MAX(hp_max) FROM heros;
+
+-- 筛选最大生命值的英雄列
+SELECT CHAR_LENGTH(name), name, hp_max FROM heros WHERE hp_max=(SELECT MAX(hp_max) FROM heros);
+
+-- 英雄的上线日期
+SELECT name, EXTRACT(YEAR FROM birthdate) AS birthdate FROM heros WHERE birthdate is NOT NULL;
+
+SELECT name, YEAR(birthdate) AS birthdate FROM heros WHERE birthdate is NOT NULL;
+
+SELECT * FROM heros WHERE DATE(birthdate) > '2016-10-01';
+
+-- 平均值
+SELECT AVG(hp_max), AVG(mp_max), MAX(attack_max) FROM heros WHERE DATE(birthdate) > '2016-10-01';
+```
+
+6. 大小写问题
+   1. MYSQL 在`Linux`下，数据库名、表名、变量名是严格区分大小写的，字段名是忽略大小写的
+   2. MYSQL 在`Windows`下全部不区分大小写
+7. 大小写规范
+   1. 关键字和函数名称全部大写
+   2. 数据库名、表名、字段名全部小写
+   3. SQL 语句必须以分号结尾
