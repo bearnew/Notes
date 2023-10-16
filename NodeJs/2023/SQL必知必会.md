@@ -375,3 +375,46 @@ SELECT AVG(hp_max), AVG(mp_max), MAX(attack_max) FROM heros WHERE DATE(birthdate
    1. 关键字和函数名称全部大写
    2. 数据库名、表名、字段名全部小写
    3. SQL 语句必须以分号结尾
+
+## 5.子查询
+
+1. 最大身高
+
+```sql
+SELECT max(height) FROM player;
+```
+
+2.球队平均身高
+
+```sql
+SELECT avg(height) FROM player AS b WHERE a.team_id = b.team_id;
+```
+
+3. `EXISTS`子查询
+
+```sql
+EXISTS (SELECT player_id FROM player_score WHERE player.player_id = player_score.player_id)
+```
+
+```sql
+NOT EXISTS (SELECT player_id FROM player_score WHERE player.player_id = player_score.player_id)
+```
+
+4. 集合比较子查询
+
+- IN：判断是否在集合中
+- ANY：需要与比较操作符一起使用，与子查询返回的任何值做比较
+- ALL：需要与比较操作符一起使用，与子查询返回的所有值做比较
+- SOME：实际上是 ANY 的别名，作用相同，一般常使用 ANY
+
+```sql
+SELECT * FROM A WHERE cc IN (SELECT cc FROM B);
+```
+
+5. 子查询作为字段
+
+```sql
+SELECT team_name, (SELECT count(*) FROM player WHERE player-team_id=team.team_id) as player_num FROM player;
+```
+
+6.
