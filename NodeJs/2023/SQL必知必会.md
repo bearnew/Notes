@@ -417,4 +417,55 @@ SELECT * FROM A WHERE cc IN (SELECT cc FROM B);
 SELECT team_name, (SELECT count(*) FROM player WHERE player-team_id=team.team_id) as player_num FROM player;
 ```
 
-6.
+## 6.视图
+
+1. 视图
+   - 对`SELECT`的语句进行了封装
+   - 视图作为一张虚拟表，帮我们封装了底层与数据表的接口。它相当于是一张表或多张表的数据结果集。
+   - 小型项目的数据库可以不使用视图，但是在大型项目中，以及数据表比较复杂的情况下，视图的价值就凸显出来了，它可以帮助我们把经常查询的结果集放到虚拟表中，提升使用效率。理解和使用起来都非常方便。
+2. 创建视图
+
+```sql
+CREATE VIEW player_above_avg_height AS SELECT player_id, height FROM player WHERE height > (SELECT AVG(height) from player)
+```
+
+```sql
+-- 直接使用视图进行查询
+SELECT * FROM player_above_avg_height
+```
+
+3. 删除视图
+
+```sql
+DROP VIEW player_above_avg_height;
+```
+
+4. 利用视图完成复杂的连接
+
+```sql
+-- 在身高等级表中的最低身高和最高身高的球员
+CREATE VIEW player_height_grades AS SELECT p.player_name, p.height, h.height_level FROM player as p JOIN height_grades as h ON height BETWEEN h.height_lowest AND h.height_highest
+```
+
+5. 利用视图对数据格式化
+
+```sql
+CREATE VIEW player_team AS SELECT CONCAT(player_name, '(' , team.team_name , ')')
+```
+
+```sql
+SELECT * FROM player_team
+```
+
+```sql
+CREATE VIEW game_player_score AS SELECT game_id, player_id, (shoot_hits-shoot_3_hits)*2
+```
+
+```sql
+SELECT * FROM game_player_score
+```
+
+6. 视图的好处
+   1. 安全性：针对不同用户开放不同数据查询权限
+   2. 简单清晰：精简复杂的 SQL 语句，格式化数据
+7.
