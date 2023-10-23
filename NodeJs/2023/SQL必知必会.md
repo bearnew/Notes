@@ -468,4 +468,86 @@ SELECT * FROM game_player_score
 6. 视图的好处
    1. 安全性：针对不同用户开放不同数据查询权限
    2. 简单清晰：精简复杂的 SQL 语句，格式化数据
-7.
+
+## 7.存储过程
+
+1. 一旦存储过程被创建出来，使用它就像使用函数一样简单，我们直接通过调用存储过程名即可。
+2. 创建 1 个存储过程
+
+```sql
+CREATE PROCEDURE `add_num`(IN nINT)
+BEGIN
+   DECLARE i INT;
+   DECLARE sum INT;
+   SET i = 1;
+   SET sum = 0;
+   WHILE i <= n DO
+      SET sum = sum + i;
+      SET i = i + 1;
+   END WHILE;
+   SELECT sum;
+DELIMITER;
+```
+
+```sql
+CALL add_sum(50);
+```
+
+```sql
+CREATE PROCEDURE `get_hero_scores` (
+   OUT max_max_hp FLOAT,
+   OUT min_max_mp FLOAT,
+   OUT avg_max_attack FLOAT,
+   s VARCHAR(255)
+)
+BEGIN
+   SELECT MAX(hp_max), MIN(mp_max), AVG(attack_max) FROM heros WHERE role_main = s;
+END
+```
+
+```sql
+CALL get_hero_scores(@max_max_hp, @min_max_mp, @avg_max_attack, '战士');
+SELECT @max_max_hp, @min_max_mp, @avg_max_attack;
+```
+
+3. 存储过程流程图
+   - ![20231024015345-2023-10-24](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231024015345-2023-10-24.png)
+4.
+
+## 8.事务处理
+
+1. 事务的特性: `ACID`
+   1. A: 原子性`Atomicity`。不可分割的进行数据处理的最小基本单位，
+   2. C: 一致性`Consistency`。事务操作后，变成另一种一致状态
+   3. I: 隔离性`Isolation`。事务隔离，对其他事务不可见，不受其他事务影响
+   4. D: 持久性`Durability`。事务提交之后，对数据的修改是持久性的
+2. 一致性
+   - 事务中某个操作失败，系统自动撤销正在执行的事务，返回事务之前的状态
+3. 持久性
+   - 通过事务日志保证，日志包括回滚日志和重做日志
+   - 对数据库修改时，首先将数据库变化信息记录到重做日志，再对数据库进行修改，即使数据库崩溃，数据库重启后找到重做日志，重新执行。
+4. 事务的控制语句
+   1. `START TRANSACTION` 或者 `BEGIN`，作用是显式开启一个事务。
+   2. `COMMIT`：提交事务。当提交事务后，对数据库的修改是永久性的。
+   3. `ROLLBACK` 或者 `ROLLBACK TO [SAVEPOINT]`，意为回滚事务。意思是撤销正在进行的所有没有提交的修改，或者将事务回滚到某个保存点。
+   4. `SAVEPOINT`：在事务中创建保存点，方便后续针对保存点进行回滚。一个事务中可以存在多个保存点。
+   5. `RELEASE SAVEPOINT`：删除某个保存点。
+   6. `SET TRANSACTION`，设置事务的隔离级别。
+5. mysql 是隐式事务，自动提交
+6. Oracle 是显示事务，不自动提交，需要手写 COMMIT 命令
+7. completion_type
+   - completion=0，需要使用 START TRANSACTION 或者 BEGIN 来开启下一次事务
+   - completion=1，会开启一个相同隔离级别的事务
+   - completion=2，提交后自动与服务器断开
+   ```sql
+   CREATE TABLE test(name varchar(255), PRIMARY KEY (name)) ENGINE=InnoDB;
+   SET @@completion_type = 1;
+   BEGIN;
+   INSERT INTO test SELECT '关羽';
+   COMMIT;
+   INSERT INTO test SELECT '张飞';
+   INSERT INTO test SELECT '张飞';
+   ROLLBACK;
+   SELECT * FROM test;
+   ```
+8. ![20231024021126-2023-10-24](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231024021126-2023-10-24.png)
