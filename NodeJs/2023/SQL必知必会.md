@@ -580,3 +580,42 @@ SELECT @max_max_hp, @min_max_mp, @avg_max_attack;
 
 12. 实现-MVCC：生成数据快照，并用这个快照提供一致性读取，也成为了多版本的数据控制
 13. 参考：https://juejin.cn/post/7152765784299667487?searchId=2023102502393545400F3CE1AB327AB227
+
+## 9.游标
+
+1. 游标
+   - 从数据结果集中每次提取一条数据记录进行操作
+   - 临时数据库对象，指向存储在数据库表中的数据行指针
+
+```sql
+SELECT id, name, hp_max FROM heros WHERE hp_max > 8500;
+```
+
+```sql
+-- 定义游标
+DECLARE cursor_name CURSOR FOR SELECT hp_max FROM heros;
+```
+
+```sql
+-- 打开游标
+OPEN cursor_name;
+```
+
+```sql
+-- 从游标中获取数据
+FETCH cursor_name INTO var_name...
+```
+
+```sql
+-- 关闭游标
+CLOSE cursor_name;
+```
+
+```sql
+-- 释放游标
+DEALLOCATE PREPARE;
+```
+
+2. 流程图
+
+- ![20231105011335-2023-11-05](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231105011335-2023-11-05.png)
