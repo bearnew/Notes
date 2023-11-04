@@ -619,3 +619,21 @@ DEALLOCATE PREPARE;
 2. 流程图
 
 - ![20231105011335-2023-11-05](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231105011335-2023-11-05.png)
+
+## 10.查询优化、通配符、存储过程
+
+1. 插叙效率
+   - SELECT COUNT(\*) = SELECT COUNT(1) > SELECT COUNT(具体字段)
+2. 加上`LIMIT 1`，查找后，就不会继续扫描全表
+3. 通配符
+   - (\_)匹配任意一个字符
+   - (%)匹配大于等于 0 个任意字符
+
+```sql
+-- 无法匹配 太乙真人
+-- 可以匹配东皇太一
+-- 可以匹配 太乙真人太太
+SELECT name FROM heros WHERE name LIKE '_% 太 %';
+```
+
+4. FileSort 排序一般在内存中，占用 CPU 多，Index 排序更快
