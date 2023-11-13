@@ -703,7 +703,7 @@ SELECT name FROM heros WHERE name LIKE '_% 太 %';
     2. 联合索引：最左匹配原则，如刚才举例的 (x, y, z)，如果查询条件是 WHERE x=1 AND y=2 AND z=3，就可以匹配上联合索引；如果查询条件是 WHERE y=2，就无法匹配上联合索引。
 11. ![20231113012803-2023-11-13](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231113012803-2023-11-13.png)
 
-## 14.索引的原理
+## 14.B+树索引
 
 1. 使用二叉树作为索引的实现结构，会让树很高，增加硬盘的 I/O 次数，影响数据查询时间
 2. 把 1 个节点的 2 个子节点，改成 M 个子节点，就变成了 B 树(Balance Tree)，平衡的多路搜索树
@@ -728,3 +728,19 @@ SELECT name FROM heros WHERE name LIKE '_% 太 %';
    2. 找到磁盘块 2，关键字为（1，8，14），因为 16 大于 14，所以得到指针 P3（指向磁盘块 7）
    3. 找到磁盘块 7，关键字为（14，16，17），然后我们找到了关键字 16，所以可以找到关键字 16 所对应的数据。
 10. ![20231113015241-2023-11-13](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231113015241-2023-11-13.png)
+
+## 15.Hash 索引
+
+1. Hash 是 1 个散列函数
+2. Hash 算法: MD5、SHA1、SHA2、SHA3
+3. hash 算法：相同的输入永远可以得到相同的输出
+4. Hash 值的字节数可以是 4 8 16 20 位
+5. Hash 索引与 B+树的区别
+   1. Hash 索引是无序的，无法进行范围查找，B+树是有序链表，可以范围查找
+   2. Hash 索引不支持联合索引的最左原则，是将索引值合并后再一起计算 Hash 值
+   3. Hash 索引不支持 ORDER BY 排序
+   4. Hash 索引无法进行 LIKE 模糊查询
+6. Hash 索引应用场景
+   1. Redis
+   2. `Mysql`的`Memory`存储引擎
+   3. Mysql 的 InnoDB 的自适应 Hash 索引，当某个索引值使用非常频繁，会再创建一个 Hash 索引
