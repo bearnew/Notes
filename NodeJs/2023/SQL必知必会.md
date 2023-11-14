@@ -744,3 +744,45 @@ SELECT name FROM heros WHERE name LIKE '_% 太 %';
    1. Redis
    2. `Mysql`的`Memory`存储引擎
    3. Mysql 的 InnoDB 的自适应 Hash 索引，当某个索引值使用非常频繁，会再创建一个 Hash 索引
+
+## 16.索引的使用原则
+
+1. 创建索引的场景
+   1. 字段的数值有唯一性限制，如用户名，可以直接创建唯一性索引或者主键索引
+   2. 频繁作为 WHERE 查询条件的字段，尤其在数据表大的情况
+   3. 需要经常 GROUP BY 分组查询 和 ORDER BY 数据排序
+      ```sql
+      SELECT user_id, count(*) as num FROM product_comment GROUP BY user_id ORDER BY comment_text LIMIT 100;
+      ```
+   4. UPDATE DELETE 的 WHERE 条件列，一般也需要创建索引
+      ```sql
+      UPDATE product_comment SET product_id = 10002 WHERE comment_text = '462ee7ac6e791292';
+      ```
+      ```sql
+      DELETE FROM product_comment WHERE comment_text = '462eed7ac6e791292a79';
+      ```
+   5. `DISTINCT`字段需要创建索引
+      ```sql
+      SELECT DISTINCT(user_id) FROM `product_comment`
+      ```
+   6. 多表 JOIN 连接操作时，创建索引
+      1. 连接表的数量不超过 3 张，每增加一张表就增加了一次嵌套循环
+      2. 对 `WHERE` 条件创建索引
+      3. 对用于连接的字段创建索引
+2. 多个单列索引在多条件查询时只会生效一个索引
+3. 不需要创建索引的场景
+   1. `WHERE`条件中用不到的字段
+   2. 表记录太少
+   3. 字段中有大量重复数据，如性别
+   4. 频繁更新的字段
+4. 索引失效
+   1. 索引进行了表达式计算
+   2. 对索引使用了函数
+   3. 在`WHERE`子句中，在 `OR` 前的条件列进行了索引，在 `OR` 后的条件列没有进行索引，那么索引会失效
+      - 有条件列没有进行索引，就会全表扫描
+   4. 使用`LIKE`进行模糊查询，后面不能是%
+      - 使用`LIKE '%太%'` 或`LIKE '%太'`会对全表扫描，使用`LIKE '太%'`同时检索的字段进行了索引，不会对全表扫描
+   5. 索引列与 NULL 或者 NOT NULL 进行判断的时候也会失效
+      - 索引不存储空值，字段设置为 NOT NULL 约束，将 INT 类型默认值设为 0，字符类型的默认值设为空字符串''
+   6. 联合索引最左原则，否则失效
+5. ![20231115015856-2023-11-15](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231115015856-2023-11-15.png)
