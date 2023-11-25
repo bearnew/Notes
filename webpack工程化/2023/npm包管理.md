@@ -87,7 +87,18 @@
 "dependencies": {
     "qs": "^6.11.2",
 },
+"devdependencies": {
+    "force-resolutions": "^1.0.11",
+},
 "resolutions": {
     "qs": "^6.11.2"
 },
+```
+
+- 强制修改 package-lock.json 中的子依赖版本
+
+```js
+"scripts": {
+    "preinstall": "npx force-resolutions"
+}
 ```
