@@ -84,6 +84,9 @@
 - 在 package.json 文件里添加 resolutions 字段，用于覆盖版本定义：
 
 ```js
+"dependencies": {
+    "qs": "^6.11.2",
+},
 "resolutions": {
     "qs": "^6.11.2"
 },
