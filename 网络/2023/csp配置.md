@@ -27,12 +27,13 @@
    1. 通过 <meta> 标签来开启 CSP 的配置; <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src https://*;">
    2. 通过返回 `Content-Security-Policy` 这个 `HTTP Header` 即可，这个 `Header` 对应的值就是我们 `web` 内容来源的规则;
 
-## 2.Nginx配置
+## 2.Nginx 配置
+
 ```js
 add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' aimg.kwcdn.com  data:; font-src 'self'; connect-src 'self'";
 server {
     listen 27852;
-    server_name disney.testdev.ltd disney.temu.team;
+    server_name component.xxtest.ltd component.xx.com;
     root  /var/www/html;
     add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' aimg.kwcdn.com  data:; font-src 'self'; connect-src 'self'";
 }

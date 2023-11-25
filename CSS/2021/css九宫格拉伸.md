@@ -33,7 +33,7 @@
 ```css
 .test {
   border: 0.08rem solid transparent;
-  border-image-source: url("https://funimg.pddpic.com/leisure/hp_line.png.slim.png");
+  border-image-source: url("https://funimg.xxpic.com/leisure/hp_line.png.slim.png");
   border-image-slice: 16 fill;
 }
 ```
