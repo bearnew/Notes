@@ -95,10 +95,20 @@
 },
 ```
 
-- 强制修改 package-lock.json 中的子依赖版本
+- 强制修改 package-lock.json 中的子依赖版本，但是依赖树还是不会变化
 
 ```js
 "scripts": {
     "preinstall": "npx force-resolutions"
 }
+```
+
+## 8.overrides
+
+- 安装包的时候强制覆盖包版本，并且会修改`npm ls`依赖树
+
+```js
+"overrides": {
+    "qs": "6.11.2"
+},
 ```
