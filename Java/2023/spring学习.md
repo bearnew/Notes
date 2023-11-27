@@ -41,3 +41,61 @@
 2. DI(Dependency Injection 依赖注入)
    1. 在容器中建立 bean 与 bean 之间依赖关系的整个过程，称为依赖注入
    2. 从程序中去除 DAO 对象时，已经绑定好了依赖关系
+
+## 4.IOC 入门案例
+
+1. 流程
+   1. 管理 Service Dao
+   2. 通过配置将被管理的对象告知 IOC 容器
+   3. 通过接口获取 IOC 容器
+   4. 通过接口方法获取 bean
+   5. 使用 spring 导入 pom.xml 坐标
+2. 案例
+
+   1. pom.xml
+
+   ```xml
+   <!-- 导入spring的坐标spring-context，对应的版本是5.2.10.RELEASE -->
+   <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>5.2.10.RELEASE </verion>
+   </dependency>
+   ```
+
+   2. 定义 Spring 管理的类
+
+   ```java
+   public interface BookService {
+      public void save();
+   }
+
+   public class BookServiceImpl implements BookService {
+      private BookDao bookDao = new BookDaoImpl();
+
+      public void save() {
+         bookDao.save();
+      }
+   }
+   ```
+
+   3. resource -> applicationContext.xml
+
+   ```xml
+   <!-- 配置bean，id为bean的名字，class为bean的类型 -->
+   <bean id="bookService" class="com.itheima.dao.impl.BookServiceImpl">
+   ```
+
+   3. App2.java
+
+   ```js
+   public class App {
+      public static void main(String[] args) {
+         // 初始化，加载配置文件得到上下文对象，获取IOC容器
+         ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml")
+         // 获取bean
+         BookService bookService = ctx.getBean('bookService');
+         bookService.save();
+      }
+   }
+   ```
