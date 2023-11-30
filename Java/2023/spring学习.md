@@ -99,3 +99,42 @@
       }
    }
    ```
+
+## 5.DI 入门案例
+
+1. 删除使用 new 的形式创建对象的代码
+
+```java
+public class BookServiceImpl implements BookService {
+   // private BookDao bookDao = new BookDaoImpl();
+
+   public void save() {
+      bookDao.save()
+   }
+}
+```
+
+2. 提供依赖对象对应的 setter 方法
+
+```java
+public class BookServiceImpl implements BookService {
+   private BookDao bookDao;
+
+   public void save() {
+      bookDao.save()
+   }
+
+   public void setBookDao(BookDao bookDao) {
+      this.bookDao = bookDao;
+   }
+}
+```
+
+3. 配置 service 与 dao 之间的关系
+
+```xml
+<bean id="bookService" class="com.itheima.dao.impl.BookServiceImpl">
+   <property name="bookDao" ref="bookDao" />
+</bean>
+<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl" />
+```
