@@ -183,6 +183,16 @@ $ git stash apply stash@{1}
 
 #### 移除中间 commit
 
+1. git rebase
+
+```shell
+git rebase -i <commit_SHA>
+# 打开的交互式(rebase)编辑器中，将要移除的提交(commit)的行前面的 pick 改为 drop 或者删除该行。
+git push -f
+```
+
+2. git revert
+
 ```shell
 git revert <commit_SHA>
 ```
