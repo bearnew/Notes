@@ -180,3 +180,9 @@ stash@{2}: On ...
 
 $ git stash apply stash@{1}
 ```
+
+#### 移除中间 commit
+
+```shell
+git revert <commit_SHA>
+```
