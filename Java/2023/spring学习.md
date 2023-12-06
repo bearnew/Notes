@@ -238,6 +238,9 @@ public class UserDaoFactoryBean implements FactoryBean<UserDao> {
       1. 执行业务操作
    3. 关闭/销毁容器
       1. 执行 bean 销毁方法
+   4. 关闭容器的 2 种方式
+      1. ConfigurableApplicationContext.close()
+      2. ConfigurableApplicationContext.registerShutdownHook()
 
 ```xml
 <!-- 使用配置控制生命周期 -->
