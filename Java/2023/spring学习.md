@@ -138,3 +138,141 @@ public class BookServiceImpl implements BookService {
 </bean>
 <bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl" />
 ```
+
+## 6.Bean 基础配置
+
+1. bean 的别名
+
+```js
+// 定义bean的别名，可定义多个，使用逗号(,)分号(;)空格()分隔
+<bean
+  id="bookDao"
+  name="dao bookDaoImpl"
+  class="com.itheima.dao.impl.BookDaoImpl"
+/>
+```
+
+2. bean 的作用范围
+   1. singleton: 单例(默认)
+   2. prototype: 非单例
+
+```js
+// 非单例，每次调用都会生成1个实例
+<bean
+  id="bookDao"
+  name="dao bookDaoImpl"
+  class="com.itheima.dao.impl.BookDaoImpl"
+  scope="prototype"
+/>
+```
+
+3. 适合交给容器进行管理的 bean
+   - 表现层对象
+   - 业务层对象
+   - 数据层对象
+   - 工具对象
+4. 使用构造方法创建 bean 对象
+   - spring 创建 bean 使用的时无参构造方法
+
+```java
+public class App {
+   public static void main(String[] args) {
+      // 初始化，加载配置文件得到上下文对象，获取IOC容器
+      ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml")
+      // 获取bean
+      BookService bookService = ctx.getBean('bookService');
+      bookService.save();
+   }
+}
+```
+
+5. 静态工厂创建 bean 对象
+
+```xml
+<bean id="orderDao" class="com.itheima.factory.OrderDaoFactory" factory-method="getOrderDao " />
+```
+
+```js
+package com.itheima.factory;
+
+public class OrderDaoFactory {
+   public static OrderDao getOrderDao() {
+      System.out.println("factory setup...")
+      return new OrderDaoImpl();
+   }
+}
+```
+
+6. 实例工厂创建 bean 实例对象
+
+```xml
+<bean id="userFactory" class="com.itheima.factory.UserDaoFactory" />
+<bean id="userDao" factory-method="getUserDao" factory-bean="userFactory" />
+```
+
+- 优化后
+
+```java
+public class UserDaoFactoryBean implements FactoryBean<UserDao> {
+   public UserDao getObject() throws Exception {
+      return new UserDaoImpl();
+   }
+
+   public Class<?> getObjectType() {
+      return UserDao.class;
+   }
+}
+```
+
+```xml
+<bean id="userDao" class="com.itheima.factory.UserDaoFacotryBean" />
+```
+
+7. bean 的生命周期
+   1. 初始化容器
+      1. 创建对象(内存分配)
+      2. 执行构造方法
+      3. 执行属性注入(set 操作)
+      4. 执行 bean 初始化方法
+   2. 使用 bean
+      1. 执行业务操作
+   3. 关闭/销毁容器
+      1. 执行 bean 销毁方法
+
+```xml
+<!-- 使用配置控制生命周期 -->
+<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl" init-method="init" destroy-method="destroy" />
+```
+
+```java
+package com.itheima.dao.impl;
+
+import com.itheima.dao.BookDao;
+
+public class BookDaoImpl implements BookDao {
+   public void save() {
+      System.out.println("book dao save...");
+   }
+   public void init() {
+      System.out.println("init...");
+   }
+   public void destroy() {
+      System.out.println("destroy...");
+   }
+}
+```
+
+```java
+// 使用接口的形式控制生命周期
+public class BookServiceImpl implements BookService, InitializingBean, DisposableBean {
+   public void save() {
+      System.out.println("book service save...")
+   }
+   public void afterPropertiesSet() throws Exception {
+      System.out.println("afterPropertiesSet")
+   }
+   public void destroy() throws Exception {
+      System.out.println("destroy")
+   }
+}
+```
