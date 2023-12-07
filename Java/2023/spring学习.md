@@ -279,3 +279,105 @@ public class BookServiceImpl implements BookService, InitializingBean, Disposabl
    }
 }
 ```
+
+## 7.setter 注入
+
+1. 引用类型
+
+   - 在 bean 中定义引用类型属性并提供可访问的`set`方法
+
+   ```java
+   public class BookServiceImpl implements BookService {
+      private BookDao bookDao;
+
+      public void setBookDao(BookDao bookDao) {
+         this.bookDao = bookDao;
+      }
+   }
+   ```
+
+   - 配置种使用`property`标签`ref`属性注入引用类型对象
+
+   ```xml
+   <bean id="bookService" class="com.itheima.service.impl.BookServiceImpl">
+      <property name="bookDao" ref="bookDao" />
+   </bean>
+   ```
+
+2. 简单类型
+   - 在 bean 中定义简单类型属性并提供可访问的`set`方法
+   ```java
+   public class BookDaoImpl implements BookDao {
+      private int connectionNumber;
+      public void setConnectionNumber(int connectionNumber) {
+         this.connectionNumber = connectionNumber;
+      }
+   }
+   ```
+   - 配置中使用`property`标签`value`属性注入简单类型数据
+   ```xml
+   <bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl">
+      <property name="connectionNumber" value="10" />
+   </bean>
+   ```
+
+## 8.构造器注入
+
+1. 引用类型
+   - 在 bean 中定义引用类型属性并提供可访问的构造方法
+   ```java
+   public class BookServiceImpl implements BookService {
+      private BookDao bookDao;
+      public BookServiceImpl(BookDao bookDao) {
+         this.bookDao = bookDao;
+      }
+   }
+   ```
+   - 配置中使用`constructor-arg`标签`ref`属性注入引用类型对象
+   ```xml
+   <bean id="bookService" class="com.itheima.service.impl.BookServiceImpl">
+      <constructor-arg name="bookDao" ref="bookDao" />
+   </bean>
+   ```
+2. 简单类型
+   - 在 bean 中定义简单类型属性并提供可访问的`set`方法
+   ```java
+   public class BookDaoImpl implements BookDao {
+      private int connectionNumber;
+      public void setConnectionNumber(int connectionNumber) {
+         this.connectionNumber = connectionNumber;
+      }
+   }
+   ```
+   - 配置中使用`constructor-arg`标签`value`属性注入简单类型数据
+   ```xml
+   <bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl">
+      <constructor-arg name="connectionNumber" value="10" />
+   </bean>
+   ```
+3. 参数适配
+
+   - 配置中使用`constructor-arg`标签`type`属性设置按形参类型注入
+
+   ```xml
+   <bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl">
+      <constructor-arg type="int" value="10" />
+      <constructor-arg type="java.lang.String" value="mysql" />
+   </bean>
+   ```
+
+   - 配置中使用`constructor-arg`标签`index`属性设置按形参位置注入
+
+   ```xml
+   <bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl">
+      <constructor-arg index="0" value="10" />
+      <constructor-arg index="1" value="mysql" />
+   </bean>
+   ```
+
+## 9.依赖注入方式选择
+
+1. 强制依赖使用构造器进行，使用 setter 注入有概率不进行注入导致 null 对象出现
+2. 可选依赖使用 setter 注入，灵活性强
+3. Spring 推荐使用构造器进行数据初始化，相对严谨
+4. 自己开发的模板推荐使用 setter 注入
