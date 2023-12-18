@@ -381,3 +381,38 @@ public class BookServiceImpl implements BookService, InitializingBean, Disposabl
 2. 可选依赖使用 setter 注入，灵活性强
 3. Spring 推荐使用构造器进行数据初始化，相对严谨
 4. 自己开发的模板推荐使用 setter 注入
+
+## 10.依赖自动装配
+
+1. IOC 容器根据 bean 所依赖的资源在容器中自动查找并注入到 bean 中的过程称为自动装配
+2. 自动装配的方式
+   1. 按类型(常用)
+   2. 按名称
+   3. 按构造方法
+   4. 不启用自动装配
+3. 自动装配 example
+
+```xml
+<bean id="bookDao" class="com.itheima.service.impl.BookServiceImpl" autowire="byType" />
+```
+
+```java
+public class BookServiceImpl implements BookService {
+   private BookDao bookDao;
+
+   public void save() {
+      bookDao.save()
+   }
+
+  // 自动装配的入口
+   public void setBookDao(BookDao bookDao) {
+      this.bookDao = bookDao;
+   }
+}
+```
+
+4. 自动装配的特征
+   1. 自动装配用于引用类型依赖注入，不能对简单类型进行操作
+   2. 使用按类型装配时(byType)必须保障容器中相同类型的 bean 唯一，推荐使用
+   3. 使用按名称装配时(byName)必须保障容器中具有指定名称的 bean，因变量名与配置耦合，不推荐使用
+   4. 自动装配优先级低于 setter 注入与构造器注入，同时出现时自动装配配置失效
