@@ -1,5 +1,7 @@
 # Maven
 
+> https://mvnrepository.com/
+
 ## 1.Maven-依赖管理工具
 
 - 依赖的 jar 包自动下载
@@ -32,3 +34,71 @@
    - `jar`: 普通的 java 工程，打包以后时.jar 结尾的文件
    - `war`: java 的 web 工程，打包以后.war 结尾的文件
    - `pom`: 不会打包，用来继承父工程
+
+## 5.idea 创建 Maven 工程
+
+1. idea 创建 Maven 工程
+   - ![20231223123815-2023-12-23](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231223123815-2023-12-23.png)
+2. 创建 html
+   - ![20231223124248-2023-12-23](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231223124248-2023-12-23.png)
+3. 配置 tomcat
+   - ![20231223124456-2023-12-23](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231223124456-2023-12-23.png)
+   - ![20231223124519-2023-12-23](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231223124519-2023-12-23.png)
+   - ![20231223124656-2023-12-23](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231223124656-2023-12-23.png)
+   - ![20231223124718-2023-12-23](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231223124718-2023-12-23.png)
+   - ![20231223124834-2023-12-23](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231223124834-2023-12-23.png)
+   - ![20231223125010-2023-12-23](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231223125010-2023-12-23.png)
+   - ![20231223125051-2023-12-23](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231223125051-2023-12-23.png)
+
+## 6.maven 项目结构
+
+- ![20231224011000-2023-12-24](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231224011000-2023-12-24.png)
+
+## 7.lombok
+
+1. 提供注解，帮助生成`get` `set`方法和`toString`方法
+
+```java
+@Data
+@AllArgsConstructor // 有参构造
+@NoArgsConstructor // 无参构造
+public class User {
+   private Integer id;
+   private String username;
+   private String password;
+}
+```
+
+2. 通过 idea 左侧的`Structure`可以看到生成的`get` `set`方法
+
+## 8.在 pom.xml 所在目录中执行 mvn 命令
+
+- ![20231224012308-2023-12-24](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231224012308-2023-12-24.png)
+- `mvn compile`将`java`文件编译成`.class`结尾的字节码文件
+- `mvn package`将`java`工程打包成`jar`包
+- 添加打`war`包的`maven-war-plugin`插件到 pom.xml，执行`mvn package`将`web`工程打包成`war`包
+- 通过将`mvn install`将坐标中的包安装到本地仓库
+- `mvn clean`将编译出的`target`文件清理掉
+- 在 src 的 test 目录下创建文件测试，执行`mvn test`
+
+```java
+// 类以Test结尾
+public class MavenTest {
+   @Test
+   // 方法以test开头
+   public void testAssert() {
+      int a = 10;
+      int b = 20;
+      // 断言
+      Assertions.assertEquals(a + b, 20)
+   }
+}
+```
+
+## 9.在 idea 的可视化中执行 mvn 命令
+
+- ![image.png-2023-12-24](https://raw.githubusercontent.com/bearnew/picture/master/picGo/image.png-2023-12-24.png)
+
+## 10.mvn 命令的生命周期
+
+- clean -> compile -> test -> package -> install -> deploy
