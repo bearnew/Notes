@@ -102,3 +102,28 @@ public class MavenTest {
 ## 10.mvn 命令的生命周期
 
 - clean -> compile -> test -> package -> install -> deploy
+
+## 11.maven 依赖管理
+
+1. 通过定义 POM 文件，Maven 能够自动解析项目的依赖关系
+2. 通过 Maven 仓库自动下载和管理依赖
+3. pom 中的`dependencies`定义依赖
+4. pom 中的`properties`用于自定义属性
+5. ![20231225012115-2023-12-25](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231225012115-2023-12-25.png)
+
+## 12.maven 依赖范围
+
+- ![20231225012643-2023-12-25](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231225012643-2023-12-25.png)
+
+## 13.Maven 下载失败
+
+1. 下载失败
+   1. 网络问题
+   2. 依赖项的 GVNP 是否对应
+   3. 本地 Maven 仓库或缓存被污染损坏
+2. 删除本地 jar 包的缓存文件.lastUpdated 文件
+3. 脚本批量删除缓存文件
+
+```shell
+find ~/.m2/repository -name "*.lastUpdated" -type f -delete
+```
