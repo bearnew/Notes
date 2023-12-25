@@ -127,3 +127,35 @@ public class MavenTest {
 ```shell
 find ~/.m2/repository -name "*.lastUpdated" -type f -delete
 ```
+
+## 14.maven 的构建配置
+
+1. 指定打包命名
+
+```xml
+<!-- 默认的打包名称：artifactid+version.打包方式 -->
+<build>
+   <finalName>maven_web-1.0.war</finalName>
+</build>
+```
+
+2. 指定打包文件
+   - 在 java 文件夹中添加 java 类，会自动打包编译到 classes 文件夹下
+   - 在 java 文件中添加 xml 文件，默认不会打包
+   - 默认情况，按照 maven 工程结构放置的文件会默认被编译和打包
+   ```xml
+   <build>
+      <!-- 设置要打包的资源位置 -->
+      <resources>
+         <resource>
+            <!-- 设置资源所在目录 -->
+            <directory>src/main/java</directory>
+            <includes>
+               <!-- 设置包含的资源类型 -->
+               <include>**/*.xml</include>
+            </includes>
+         </resource>
+      </resources>
+   </build>
+   ```
+3.
