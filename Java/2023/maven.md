@@ -158,4 +158,17 @@ find ~/.m2/repository -name "*.lastUpdated" -type f -delete
       </resources>
    </build>
    ```
-3.
+3. 构建配置插件
+   - 在 build/plugins/plugin 标签中引入插件
+   - 常用的插件: 修改 jdk 版本、tomcat 插件、mybatis 分页插件、mybatis 逆向工程插件
+   - ![20231227013119-2023-12-27](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231227013119-2023-12-27.png)
+4. Maven 依赖传递特性
+   - C->B->A，执行 C 会自动下载 B 和 A，这就是依赖的传递性
+   - 依赖传递终止
+     - 非`compile`范围进行依赖传递
+     - 使用`optional`配置终止传递
+     - 依赖冲突(传递的依赖已经存在)
+   - 依赖冲突优先级
+     - 依赖路径更短的被依赖
+     - 依赖路径长度相同，在`depencies`中先声明的被依赖
+5.
