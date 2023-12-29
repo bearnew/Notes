@@ -171,4 +171,31 @@ find ~/.m2/repository -name "*.lastUpdated" -type f -delete
    - 依赖冲突优先级
      - 依赖路径更短的被依赖
      - 依赖路径长度相同，在`depencies`中先声明的被依赖
-5.
+   - 使用`exclusions`排除依赖
+     - ![20231227014506-2023-12-27](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231227014506-2023-12-27.png)
+
+## 15.maven 的继承
+
+1. 继承的概念
+   1. 一个项目继承另一个项目的配置信息，共享同一配置信息，简化项目的管理和维护
+2. 继承的作用
+   - 在父工程中统一管理项目的依赖信息
+   - 背景
+     - 对大型项目模块拆分
+     - 1 个 project 下，创建多个 module
+     - 每个 module 都需要配置自己的依赖信息
+   -
+3. 继承语法
+   - ![20231230014709-2023-12-30](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231230014709-2023-12-30.png)
+4. 父工程统一管理依赖
+   - ![20231230014816-2023-12-30](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231230014816-2023-12-30.png)
+   - ![20231230014912-2023-12-30](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231230014912-2023-12-30.png)
+   - ![20231230014955-2023-12-30](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231230014955-2023-12-30.png)
+5. 聚合
+   1. 聚合作用
+      - 管理多个子项目，通过聚合，将多个子项目组织在一起，方便管理和维护
+      - 聚合后，在一个命令中构建和发布多个相关项目，简化部署和维护工作
+      - 优化多个项目的构建顺序
+      - 统一管理依赖
+   2. 父项目中的聚合语法
+      - ![20231230015308-2023-12-30](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231230015308-2023-12-30.png)
