@@ -199,3 +199,13 @@ find ~/.m2/repository -name "*.lastUpdated" -type f -delete
       - 统一管理依赖
    2. 父项目中的聚合语法
       - ![20231230015308-2023-12-30](https://raw.githubusercontent.com/bearnew/picture/master/picGo/20231230015308-2023-12-30.png)
+
+## 16.maven 的私服
+
+1. 私服优势
+   - 节省外网带宽
+   - 下载速度更快
+   - 便于部署公司内部私有构件
+   - Nexus 提供的权限管理、RELEASE/SHAPSHOT 版本控制， 提高项目稳定性
+2. 使用 Nexus 搭建 Maven 私服
+   - https://www.hangge.com/blog/cache/detail_2844.html
